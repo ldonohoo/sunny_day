@@ -4,17 +4,19 @@
 -- drop tables if exist ---------------------------------------
 DROP TABLE IF EXISTS list_item;
 DROP TABLE IF EXISTS priority;
-DROP TABLE IF EXISTS prefered_weather_type;
+DROP TABLE IF EXISTS preferred_weather_type;
 DROP TABLE IF EXISTS time_of_day;
 
 
 DROP TABLE IF EXISTS forecast_precipitation_type;
 
 DROP TABLE IF EXISTS daily_forecast;
+
+
+DROP TABLE IF EXISTS list;
 DROP TABLE IF EXISTS hourly_forecast;
 DROP TABLE IF EXISTS location;
 DROP TABLE IF EXISTS weather_icon;
-DROP TABLE IF EXISTS list;
 DROP TABLE IF EXISTS "user";
 
 
@@ -45,7 +47,7 @@ CREATE TABLE list (
   description VARCHAR(200) NOT NULL,
   location_id INT REFERENCES location,
   show_on_open  BOOLEAN DEFAULT FALSE,
-  sort_order  INT UNIQUE NOT NULL,
+  sort_order  INT NOT NULL,
   user_id INT REFERENCES "user"
 );
 
@@ -73,7 +75,7 @@ CREATE TABLE preferred_weather_type (
   id SERIAL PRIMARY KEY,
   title VARCHAR(100) NOT NULL,
   description VARCHAR(100) NOT NULL,
-  icon_url  VARCHAR(200) NOT NULL
+  icon_url  VARCHAR(200)
 );
  
 CREATE TABLE time_of_day (
@@ -149,24 +151,34 @@ CREATE TABLE forecast_precipitation_type (
   forecast_id INT REFERENCES daily_forecast
 );
 
-INSERT INTO "user" 
-  (username, password)
-  VALUES ('lisa', 'cat'),
-        ('betty', 'pie');
+-- INSERT INTO "user" 
+--   (username, password)
+--   VALUES ('lisa', 'cat'),
+--         ('betty', 'pie');
 
 INSERT INTO location
   (name, zip, is_master_default_location)
   VALUES ('Mendota Hts, MN', 55118, TRUE),
          ('St. Paul, MN', 55032, FALSE);
 
-INSERT INTO list 
-  (description, location_id, sort_order, user_id)
-  VALUES ('my first list', 1, 1, 1),
-        ('to do list not done yet', 2, 2, 1);
+-- INSERT INTO list 
+--   (description, location_id, sort_order, user_id)
+--   VALUES ('my first list', 1, 1, 1),
+--         ('to do list not done yet', 2, 2, 1);
 
-INSERT INTO list_item
-  (description, year_to_complete, sort_order, list_id)
-  VALUES ('mow the lawn', 2024, 1, 1),
-        ('make a big cake', 2024, 3, 1),
-        ('trim the hedge', 2024, 2, 1);
+-- INSERT INTO list_item
+--   (description, year_to_complete, sort_order, list_id)
+--   VALUES ('mow the lawn', 2024, 1, 1),
+--         ('make a big cake', 2024, 3, 1),
+--         ('trim the hedge', 2024, 2, 1);
 
+ INSERT INTO preferred_weather_type
+  (title, description, icon_url)
+  VALUES ('sunny', 'More than 50% sun', NULL),
+  ('rain/snow', 'Chance of rain/snow', NULL),
+  ('partly cloudy', 'Less than 50% sun', NULL),
+  ('cloudy', 'More than 80% cloudy', NULL),
+  ('hot', 'More than n degrees', NULL),
+  ('cold', 'Less than n degrees', NULL),
+  ('cool', 'less than n degrees', NULL),
+  ('warm', 'More than n degrees', NULL);

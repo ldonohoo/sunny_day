@@ -6,20 +6,21 @@ const { rejectUnauthenticated } = require('../modules/authentication-middleware'
 /**
  * GET all list items for list
  */
-router.get('/',rejectUnauthenticated, (req, res) => {
-  const userId = req.user.id;
+router.get('/:list_id',rejectUnauthenticated, (req, res) => {
+  console.log('listid in GET route:', req.params.list_id)
+  const listId = req.params.list_id;
   const sqlText = `
     SELECT * FROM list_item
-      WHERE user_id = $1
+      WHERE list_id = $1
       ORDER BY sort_order;
     `;
-    pool.query(sqlText, [userId])
+    pool.query(sqlText, [listId])
     .then(dbResponse => {
-      console.log('GET route for /api/list_items sucessful!', dbResponse.rows);
+      console.log('GET route for /api/list_items/:list_id sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);
     })
     .catch(dbError => {
-      console.log('GET route for /api/list_items failed', dbError);
+      console.log('GET route for /api/list_items/:list_id failed', dbError);
       res.sendStatus(500);
     })
 });
@@ -28,9 +29,18 @@ router.get('/',rejectUnauthenticated, (req, res) => {
  * POST a new list for user
  */
 router.post('/', rejectUnauthenticated, (req, res) => {
-  const item = req.body;
-  console.log('item:', item)
-  const user = req.user;
+  console.log('req.body in POST of new item:', JSON.stringify(req.body));
+  const newItem = req.body.newItem;
+  // pre-process data to assign nulls if unassigned
+  if (newItem.dueDate === '') {
+    newItem.dueDate = null;
+  }
+  if (newItem.priority === 0) {
+    newItem.priority = null;
+  }
+  if (newItem.preferredWeatherType === 0) {
+    newItem.preferredWeatherType = null;
+  }
   const sqlText = `
   INSERT INTO list_item
     (description, 
@@ -43,21 +53,20 @@ router.post('/', rejectUnauthenticated, (req, res) => {
     VALUES ($1, $2, $3, $4, $5, $6, 
           COALESCE((SELECT MAX(sort_order) 
                     FROM list_item
-                    WHERE user_id = $3), 0) + 1);
-    `;f
-    pool.query(sqlText, [ newListItem.description, 
-                          newListItem.priority,
-                          newListItem.preferred_weather_type,
-                          newListItem.due_date,
-                          newListItem.year_to_complete,
-                          newListItem.list_id,
-                          newListItem.sort_order ])
+                    WHERE list_id = $6), 0) + 1);
+    `;
+    pool.query(sqlText, [ newItem.description, 
+                          newItem.priority,
+                          newItem.preferredWeatherType,
+                          newItem.dueDate,
+                          newItem.yearToComplete,
+                          newItem.listId ])
     .then(dbResponse => {
-      console.log('GET route for /api/lists sucessful!', dbResponse.rows);
+      console.log('POST route for /api/list_items sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);
     })
     .catch(dbError => {
-      console.log('GET route for /api/lists failed', dbError);
+      console.log('POST route for /api/list_items failed', dbError);
       res.sendStatus(500);
     })
 });

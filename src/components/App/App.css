@@ -110,3 +110,7 @@ input {
   margin: 5px;
   margin-bottom: 10px;
 }
+
+.form {
+  border: .1rem solid black;
+}

@@ -29,7 +29,7 @@ function App() {
   const user = useSelector(store => store.user);
 
   useEffect(() => {
-    dispatch({ type: 'FETCH_USER' });
+    dispatch({ type: 'GET_USER' });
   }, [dispatch]);
 
   return (
@@ -57,7 +57,7 @@ function App() {
             <Lists />
           </ProtectedRoute>
 
-          <ProtectedRoute exact path="/list_items/:list_id">
+          <ProtectedRoute exact path="/list_items/:list_id/:list_description">
             <ListItems />
           </ProtectedRoute>
 

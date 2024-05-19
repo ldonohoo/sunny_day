@@ -2,14 +2,14 @@ import { put, takeLatest } from 'redux-saga/effects';
 import axios from 'axios';
 
 
-function* fetchLists() {
+function* getLists() {
   try {
     const config = {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
     };
     const response = yield axios.get('/api/lists', config);
-    console.log('hey wallaby', response.data)
+    console.log('Lists GETed:', response.data)
     yield put({ type: 'SET_LISTS',
                 payload: response.data });
   } 
@@ -25,22 +25,22 @@ function* addList(action) {
       withCredentials: true,
     };
     yield axios.post('/api/lists',  action.payload, config);
-    yield put({ type: 'FETCH_LISTS' });
+    yield put({ type: 'GET_LISTS' });
   } 
   catch (error) {
     console.log('Error getting lists for user:', error);
   }
 }
 
-function* fetchListItems(action) {
+function* getListItems(action) {
   try {
     const config = {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
     };
-    const response = yield axios.get(`/api/lists_items/${action.payload}`, config);
-    console.log('Fetch of data from list_items', response.data)
-    yield put({ type: 'SET_LIST_items',
+    const response = yield axios.get(`/api/list_items/${action.payload.list_id}`, config);
+    console.log('GET of data from list_items', response.data)
+    yield put({ type: 'SET_LIST_ITEMS',
                 payload: response.data });
   } 
   catch (error) {
@@ -55,7 +55,9 @@ function* addListItem(action) {
       withCredentials: true,
     };
     yield axios.post('/api/list_items',  action.payload, config);
-    yield put({ type: 'FETCH_LIST_ITEMS' });
+    console.log('to choose from:', action.payload)
+    yield put({ type: 'GET_LIST_ITEMS',
+                payload: {list_id: action.payload.newItem.listId }});
   } 
   catch (error) {
     console.log('Error getting list items for user:', error);
@@ -63,9 +65,9 @@ function* addListItem(action) {
 }
 
 function* listSagas() {
-  yield takeLatest('FETCH_LISTS', fetchLists);
+  yield takeLatest('GET_LISTS', getLists);
   yield takeLatest('ADD_LIST', addList);
-  yield takeLatest('FETCH_LIST_ITEMS', fetchListItems);
+  yield takeLatest('GET_LIST_ITEMS', getListItems);
   yield takeLatest('ADD_LIST_ITEM', addListItem);
 }
 

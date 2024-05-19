@@ -1,0 +1,9 @@
+
+
+.list-item {
+    border: .1 solid rgb(199, 220, 158);
+    border-radius: .5rem;
+    background-color:  rgb(199, 220, 158);
+    padding: .5rem;
+    margin: .1rem;
+}

@@ -1,0 +1,12 @@
+.list button,
+.list div {
+    display: inline-block;
+}
+
+.list {
+    border: .1 solid rgb(181, 246, 248);
+    border-radius: .5rem;
+    background-color: rgb(181, 246, 248);
+    padding: .5rem;
+    margin: .1rem;
+}

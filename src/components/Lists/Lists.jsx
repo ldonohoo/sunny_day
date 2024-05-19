@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
+import './Lists.css';
+
 // import { Draggable, Droppable } from 'pragmatic-dnd';
 
 import LocationSelect from '../LocationSelect/LocationSelect';
@@ -14,8 +16,8 @@ function Lists() {
     const [inputDescription, setInputDescription] = useState('');
     const [selectedLocation, setSelectedLocaation] = useState('');
     const [selectedLists, setSelectedLists] = useState([]);
-    const lists = useSelector(store => store.listReducer.lists);
-    const locations = useSelector(store => store.locations);
+    const lists = useSelector(store => store.listsReducer.lists);
+    const locations = useSelector(store => store.locationsReducer.locations);
     
     const dispatch = useDispatch();
     const history = useHistory();
@@ -29,7 +31,7 @@ function Lists() {
 //   });
 
   useEffect(() => {
-    dispatch({ type: 'FETCH_LISTS',
+    dispatch({ type: 'GET_LISTS',
                payload: {id : 1}
     });
   }, []);
@@ -45,8 +47,8 @@ function Lists() {
     setInputDescription('');
   };
 
-  const handleLoadList = (listId) => {
-    history.push(`/list_items/${listId}`);
+  const handleLoadList = (listId, listDescription) => {
+    history.push(`/list_items/${listId}/${listDescription}`);
   }
 
   const handleDeleteSelectLists = () => {
@@ -91,9 +93,10 @@ function Lists() {
       <section className="lists">
         {lists.map(list => {
           return (
-            <div key={list.id}>
+            <div className="list"
+                 key={list.id}>
               <button onClick={(e) => {setSelectedLists([...selectedLists, list.id])}}>[]</button>
-              <div onClick={() => {handleLoadList(list.id)}}>
+              <div onClick={() => {handleLoadList(list.id, list.description)}}>
                   {list.description}
               </div>
               <button onClick={() => {handleToggleShowOnOpen(list.id)}}>show</button>

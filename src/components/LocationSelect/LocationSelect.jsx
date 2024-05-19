@@ -29,11 +29,11 @@ function LocationSelect({isMasterLocation}) {
     }
 
   useEffect(() => {
-    dispatch({ type: 'FETCH_LOCATIONS' });
+    dispatch({ type: 'GET_LOCATIONS' });
     // if (isMasterLocation) {
-    //     dispatch({ type: 'FETCH_MASTER_LOCATION' });
+    //     dispatch({ type: 'GET_MASTER_LOCATION' });
     // } else {
-    //     dispatch({ type: 'FETCH_CURRENT_LIST_LOCATION' });
+    //     dispatch({ type: 'GET_CURRENT_LIST_LOCATION' });
     // }
   }, []);
 

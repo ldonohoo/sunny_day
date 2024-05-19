@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 
 // loginMessage holds the string that will display
 // on the login screen if there's an error
-const setLocations = (state = [], action) => {
+const locations = (state = [], action) => {
     switch (action.type) {}
     if (action.type === 'SET_LOCATIONS') {
         return action.payload;
@@ -10,14 +10,14 @@ const setLocations = (state = [], action) => {
     return state; 
 };
 
-const setMasterLocation = (state=0, action) => {
+const masterLocation = (state=0, action) => {
   if (action.type === 'SET_MASTER_LOCATION') {
     return action.payload;
   }
   return state;
 }
 
-const setCurrentListLocation= (state=0, action) => {
+const currentLocation= (state=0, action) => {
   if (action.type === 'SET_CURRENT_LIST_LOCATION') {
     return action.payload;
   }
@@ -29,7 +29,7 @@ const setCurrentListLocation= (state=0, action) => {
 // these will be on the redux state at:
 // state.errors.loginMessage and state.errors.registrationMessage
 export default combineReducers({
-  setLocations,
-  setMasterLocation,
-  setCurrentListLocation
+  locations,
+  masterLocation,
+  currentLocation
 });
