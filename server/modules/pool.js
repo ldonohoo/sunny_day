@@ -1,10 +1,4 @@
-/* the only line you likely need to change is
-
- database: 'prime_app',
-
- change `prime_app` to the name of your database, and you should be all set!
-*/
-
+// pull in postgres library
 const pg = require('pg');
 let pool;
 
@@ -28,7 +22,7 @@ else {
     pool = new pg.Pool({
         host: 'localhost',
         port: 5432,
-        database: 'prime_app',   // 	💥 Change this to the name of your database!
+        database: 'sunny_day',   // 	
     });
 }
 

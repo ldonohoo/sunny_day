@@ -19,7 +19,8 @@ import InfoPage from '../InfoPage/InfoPage';
 import LandingPage from '../LandingPage/LandingPage';
 import LoginPage from '../LoginPage/LoginPage';
 import RegisterPage from '../RegisterPage/RegisterPage';
-
+import Lists from '../Lists/Lists';
+import ListItems from '../ListItems/ListItems';
 import './App.css';
 
 function App() {
@@ -52,12 +53,12 @@ function App() {
             Visiting localhost:5173/user will show the UserPage if the user is logged in.
             If the user is not logged in, the ProtectedRoute will show the LoginPage (component).
             Even though it seems like they are different pages, the user is always on localhost:5173/user */}
-          <ProtectedRoute
-            // logged in shows UserPage else shows LoginPage
-            exact
-            path="/user"
-          >
-            <UserPage />
+          <ProtectedRoute exact path="/lists">
+            <Lists />
+          </ProtectedRoute>
+
+          <ProtectedRoute exact path="/list_items/:list_id">
+            <ListItems />
           </ProtectedRoute>
 
           <ProtectedRoute
@@ -89,7 +90,7 @@ function App() {
             {user.id ?
               // If the user is already logged in, 
               // redirect them to the /user page
-              <Redirect to="/user" />
+              <Redirect to="/lists" />
               :
               // Otherwise, show the registration page
               <RegisterPage />
@@ -103,7 +104,7 @@ function App() {
             {user.id ?
               // If the user is already logged in, 
               // redirect them to the /user page
-              <Redirect to="/user" />
+              <Redirect to="/lists" />
               :
               // Otherwise, show the Landing page
               <LandingPage />
