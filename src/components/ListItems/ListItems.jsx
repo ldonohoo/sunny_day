@@ -35,12 +35,9 @@ function ListItems() {
 //   });
 
   useEffect(() => {
-    dispatch({ type: 'GET_LIST_ITEMS',
-               payload: { list_id }
-    });
+    dispatch({ type: 'GET_LIST_ITEMS', payload: { list_id }});
+    dispatch({ type: 'GET_WEATHER_TYPES' });
   }, []);
-
-  
 
   const handleAddListItem = (event) => {
     event.preventDefault();
@@ -77,6 +74,10 @@ function ListItems() {
     {/* <LocationSelect isMasterLocation={true}/> */}
     <main>
       <h1>{list_description}:</h1>
+      <section>
+        <LocationSelect isMasterLocation={false}
+                        listId={list_id} />
+      </section>
       <section className="form list-items-form">
         <form onSubmit={handleAddListItem}>
             <input name="description"
@@ -89,9 +90,14 @@ function ListItems() {
                    onChange={handleChangeForm}/>
             <select name="weatherType"
                     value={inputFormData.weatherType}
-                    onChange={handleChangeForm}>{weatherTypes.map(type => {
-                      <option name={type.title} value={type.id}>{type.title}</option>
-                    })}
+                    onChange={handleChangeForm}>
+                      <option value="0">none
+                      </option>{weatherTypes.map(type => (
+                      <option key={type.id}
+                              name={type.title} 
+                              value={type.id}>{type.title}
+                      </option>
+                    ))}
             </select>
             <input name="dueDate"
                    type="date" 

@@ -3,7 +3,6 @@ import { combineReducers } from 'redux';
 // loginMessage holds the string that will display
 // on the login screen if there's an error
 const locations = (state = [], action) => {
-    switch (action.type) {}
     if (action.type === 'SET_LOCATIONS') {
         return action.payload;
     }

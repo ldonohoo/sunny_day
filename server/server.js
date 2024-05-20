@@ -9,9 +9,10 @@ const passport = require('./strategies/user.strategy');
 
 // Route Includes
 const userRouter = require('./routes/user.router');
-const listRouter = require('./routes/list.router');
-const listItemsRouter = require('./routes/list-item.router');
-const locationRouter = require('./routes/location.router');
+const listsRouter = require('./routes/lists.router');
+const listItemsRouter = require('./routes/list-items.router');
+const locationsRouter = require('./routes/locations.router');
+const weatherRouter = require('./routes/weather.router');
 
 // Express Middleware
 app.use(express.json());
@@ -27,9 +28,10 @@ app.use(passport.session());
 
 // Routes
 app.use('/api/user', userRouter);
-app.use('/api/lists', listRouter);
+app.use('/api/lists', listsRouter);
 app.use('/api/list_items', listItemsRouter);
-app.use('/api/location', locationRouter);
+app.use('/api/locations', locationsRouter);
+app.use('/api/weather', weatherRouter);
 
 // Listen Server & Port
 app.listen(PORT, () => {

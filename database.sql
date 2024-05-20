@@ -45,7 +45,7 @@ CREATE TABLE location (
 CREATE TABLE list (
   id  SERIAL PRIMARY KEY,
   description VARCHAR(200) NOT NULL,
-  location_id INT REFERENCES location,
+  location_id INT REFERENCES location DEFAULT NULL,
   show_on_open  BOOLEAN DEFAULT FALSE,
   sort_order  INT NOT NULL,
   user_id INT REFERENCES "user"

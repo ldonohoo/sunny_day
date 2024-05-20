@@ -8,11 +8,11 @@ const { rejectUnauthenticated } = require('../modules/authentication-middleware'
  * GET all preferred weather types for selection dropdown 
  */
 router.get('/types',rejectUnauthenticated, (req, res) => {
-  const user = req.user;
   const sqlText = `
-    SELECT * FROM preferred_weather_type;
+    SELECT * FROM preferred_weather_type
+        ORDER BY id;
     `;
-    pool.query(sqlText, [user.id])
+    pool.query(sqlText)
     .then(dbResponse => {
       console.log('GET route for /api/weather/types sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);

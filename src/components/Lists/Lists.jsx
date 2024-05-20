@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import './Lists.css';
-
+import LocationSelect from '../LocationSelect/LocationSelect';
 // import { Draggable, Droppable } from 'pragmatic-dnd';
 
-import LocationSelect from '../LocationSelect/LocationSelect';
 
 
 function Lists() {
@@ -14,10 +13,10 @@ function Lists() {
     // const droppable = new Droppable(document.getElementById('droppable'));
     
     const [inputDescription, setInputDescription] = useState('');
-    const [selectedLocation, setSelectedLocaation] = useState('');
+    // const [selectedLocation, setSelectedLocation] = useState('');
     const [selectedLists, setSelectedLists] = useState([]);
     const lists = useSelector(store => store.listsReducer.lists);
-    const locations = useSelector(store => store.locationsReducer.locations);
+    // const locations = useSelector(store => store.locationsReducer.locations);
     
     const dispatch = useDispatch();
     const history = useHistory();
@@ -32,8 +31,8 @@ function Lists() {
 
   useEffect(() => {
     dispatch({ type: 'GET_LISTS',
-               payload: {id : 1}
-    });
+               payload: {id : 1} });
+    let isMasterLocation = true;
   }, []);
 
 
@@ -81,7 +80,9 @@ function Lists() {
     {/* <LocationSelect isMasterLocation={true}/> */}
     <main>
       <h1>Your lists</h1>
-
+      <section>
+        <LocationSelect isMasterLocation={true} />
+      </section>
       <section>
         <form onSubmit={handleAddList}>
             <input type="text" 
@@ -95,7 +96,8 @@ function Lists() {
           return (
             <div className="list"
                  key={list.id}>
-              <button onClick={(e) => {setSelectedLists([...selectedLists, list.id])}}>[]</button>
+              <button onClick={(e) => {setSelectedLists([...selectedLists, list.id])}}
+              >[]</button>
               <div onClick={() => {handleLoadList(list.id, list.description)}}>
                   {list.description}
               </div>
