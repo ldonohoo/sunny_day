@@ -34,22 +34,12 @@ function LocationSelect({isMasterLocation, listId }) {
     dispatch({ type: 'GET_LOCATIONS' });
   }, []);  
 
-  if (isMasterLocation) {
-    useEffect(() => {
-      if (locations && 
-          locations.length > 0 && 
-          locations[0].is_master_default_location === true) {
-            setSelectedLocation(locations[0].id);
-      }
-    }, [locations]);
-  }
-
   if (!isMasterLocation) {
     useEffect(() => {
+      console.log('not a master loc!')
       dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
-                 payload: {locationId: selectedLocation,
-                           listId: listId }});
-    }, [selectedLocation])
+                 payload: { listId: listId }});
+    }, [])
   }
 
   const handleLocationSelect = (event) => {
@@ -70,10 +60,12 @@ function LocationSelect({isMasterLocation, listId }) {
   };
 
   return (
-    <div>
+    <div>{JSON.stringify(currentListLocation)}
         <label>{isMasterLocation ? 'default location': 'list location'}</label>
         <select name="selectedLocation"
-                value={selectedLocation}
+                value={ isMasterLocation && 
+                        locations[0]?.is_master_default_location === true ?
+                        locations[0]?.id : ( !isMasterLocation ? currentListLocation?.id : 0 ) }
                 onChange={handleLocationSelect}
             ><option value="0">none selected</option>{locations.map(location =>(
             <option key={location.id}

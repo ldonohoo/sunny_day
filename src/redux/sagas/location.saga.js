@@ -37,8 +37,9 @@ function* getCurrentListLocation(action) {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true,
       };
+      console.log('getcurrenloc', JSON.stringify(action.payload))
       const response = 
-        yield axios.get(`/api/locations/current_list/${action.payload.listId}`, config);
+        yield axios.get(`/api/locations/current_list/?list_id=${action.payload.listId}`, config);
       yield put({ type: 'SET_CURRENT_LIST_LOCATION', payload: response.data });
     } 
     catch (error) {

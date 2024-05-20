@@ -32,7 +32,6 @@ function Lists() {
   useEffect(() => {
     dispatch({ type: 'GET_LISTS',
                payload: {id : 1} });
-    let isMasterLocation = true;
   }, []);
 
 
@@ -40,8 +39,7 @@ function Lists() {
     event.preventDefault();
     dispatch({
         type: 'ADD_LIST',
-        payload: { description: inputDescription,
-                   location: 1 }
+        payload: { description: inputDescription }
     })
     setInputDescription('');
   };

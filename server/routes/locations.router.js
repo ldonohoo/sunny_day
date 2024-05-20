@@ -48,9 +48,9 @@ router.get('/master', rejectUnauthenticated, (req, res) => {
       })
   });
 
-  router.get('/current_list/:list_id', rejectUnauthenticated, (req, res) => {
+  router.get('/current_list', rejectUnauthenticated, (req, res) => {
     const user = req.user;
-    const listId = req.params.list_id;
+    const listId = req.query.list_id;
     const sqlText = `
       SELECT *
         FROM location
@@ -73,10 +73,10 @@ router.get('/master', rejectUnauthenticated, (req, res) => {
 router.put('/current_list/:list_id', rejectUnauthenticated, (req, res) => {
   console.log('in current list put, req.body, req.params', req.body, req.params);
   const user = req.user;
-  const locationId = req.body.locationId;
+  let locationId = req.body.locationId;
   const listId = req.params.list_id;
   // preprocessing for no location selected
-  if (locationId === 0) {
+  if (locationId === "0") {
     locationId = null;
   }
   const sqlText = `
