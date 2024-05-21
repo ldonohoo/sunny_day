@@ -4,30 +4,25 @@ import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import './Lists.css';
 import LocationSelect from '../LocationSelect/LocationSelect';
 // import { Draggable, Droppable } from 'pragmatic-dnd';
-
-
+import {
+  DndContext,
+  closestCenter
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+import ListsSortable from '../ListsSortable/ListsSortable';
 
 function Lists() {
 
-    // const draggable = new Draggable(document.getElementById('draggable'));
-    // const droppable = new Droppable(document.getElementById('droppable'));
-    
     const [inputDescription, setInputDescription] = useState('');
-    // const [selectedLocation, setSelectedLocation] = useState('');
     const [selectedLists, setSelectedLists] = useState([]);
     const lists = useSelector(store => store.listsReducer.lists);
-    // const locations = useSelector(store => store.locationsReducer.locations);
     
     const dispatch = useDispatch();
     const history = useHistory();
-
-//   draggable.on('drag:start', () => {
-//     console.log('Drag started');
-//   });
-  
-//   droppable.on('drop', () => {
-//     console.log('Dropped');
-//   });
 
   useEffect(() => {
     dispatch({ type: 'GET_LISTS',
@@ -73,6 +68,37 @@ function Lists() {
     console.log('toggling!');
   }
 
+  const handleDragEnd = (event) => {
+    console.log("Drag end called");
+    const {active, over} = event;
+    console.log("ACTIVE: " + active.id);
+    console.log("OVER :" + over.id);
+
+    if(active.id !== over.id) {
+      // re-order sortorder in database
+      // ***** NOTE: indicies are specified by list id!!
+      // active is index to move
+      console.log('Active is:', active.id);
+      // over is index to move to
+      console.log('Over is:', over.id);
+      dispatch({ type: 'UPDATE_LIST_ORDER',
+                 payload: { indexToMove: active.id,
+                            indexToReplace: over.id } });
+
+      // so, do an update with item to change index, index 
+
+      // setLanguages((items) => {
+      //   const activeIndex = items.indexOf(active.id);
+      //   const overIndex = items.indexOf(over.id);
+      //   console.log(arrayMove(items, activeIndex, overIndex));
+      //   return arrayMove(items, activeIndex, overIndex);
+        // items: [2, 3, 1]   0  -> 2
+        // [1, 2, 3] oldIndex: 0 newIndex: 2  -> [2, 3, 1] 
+      // });
+    }
+  } 
+
+
   return (
     <>
     {/* <LocationSelect isMasterLocation={true}/> */}
@@ -89,21 +115,20 @@ function Lists() {
             <button type="submit">+</button>
         </form>
       </section>
-      <section className="lists">
-        {lists.map(list => {
-          return (
-            <div className="list"
-                 key={list.id}>
-              <button onClick={(e) => {setSelectedLists([...selectedLists, list.id])}}
-              >[]</button>
-              <div onClick={() => {handleLoadList(list.id, list.description)}}>
-                  {list.description}
-              </div>
-              <button onClick={() => {handleToggleShowOnOpen(list.id)}}>show</button>
-            </div>
-          );
-        })}
-      </section>
+      <DndContext collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}>           
+        <section className="lists">
+          <SortableContext
+              items={lists}
+              strategy={verticalListSortingStrategy}>
+            {lists.map(list => {
+                return (
+                  <ListsSortable key={list.id} list={list}/> 
+                )
+              })}
+          </SortableContext>
+        </section>
+      </DndContext>
     </main>
     </>
   );

@@ -32,6 +32,22 @@ function* addList(action) {
   }
 }
 
+function* updateListOrder(action) {
+  try {
+    yield axios({
+      method: 'PUT',
+      url: '/api/lists/sort',
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+      data: action.payload
+    })
+    yield put({ type: 'GET_LISTS' })
+  }
+  catch(error) {
+    console.log('Error updating sort order for lists:', error);
+  }
+}
+
 function* getListItems(action) {
   try {
     const config = {
@@ -69,6 +85,7 @@ function* listSagas() {
   yield takeLatest('ADD_LIST', addList);
   yield takeLatest('GET_LIST_ITEMS', getListItems);
   yield takeLatest('ADD_LIST_ITEM', addListItem);
+  yield takeLatest('UPDATE_LIST_ORDER', updateListOrder);
 }
 
 export default listSagas;

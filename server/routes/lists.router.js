@@ -52,29 +52,6 @@ router.post('/', rejectUnauthenticated, (req, res) => {
                     FROM list 
                     WHERE user_id = $2), 0) + 1);
     `;
-//   const sqlText = `
-//   WITH location_subquery AS (
-//     SELECT id, is_master_default_location
-//     FROM location
-//     WHERE user_id = $3
-//     LIMIT 1
-//   ), sort_order_subquery AS (
-//     SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_sort_order
-//     FROM list
-//     WHERE user_id = $3
-//   )
-//   INSERT INTO list (description, user_id, location_id, sort_order)
-//   VALUES (
-//     $1, 
-//     $2, 
-//     (SELECT CASE 
-//               WHEN is_master_default_location = true THEN id 
-//               ELSE null 
-//             END 
-//      FROM location_subquery),
-//     (SELECT next_sort_order FROM sort_order_subquery)
-//   );
-// `;
     pool.query(sqlText, [ item.description, 
                           user.id ])
     .then(dbResponse => {
@@ -86,5 +63,47 @@ router.post('/', rejectUnauthenticated, (req, res) => {
       res.sendStatus(500);
     })
 });
+
+router.put('/sort', rejectUnauthenticated, (req, res) => {
+  console.log('in sort put');
+  const user = req.user;
+  const sortChange = req.body;
+
+  // update list
+  //  reset the sort_order! 
+  //   sort the list by sort_order
+  //   only select the records from 
+  //          - indexToMove's sort_order THROUGH indexToReplace's sort_order
+
+  //   if MOVING DOWN: indexToMove's sort_order is > indexToReplace's sort_order
+  //          - if the list id = indexToMove,
+  //                 then change list id's sort_order to indexToReplace's sort_order
+  //          - if the list id != indexToMove, update the 
+  //   if MOVING UP: indexToMove's sort_order is < indexToReplace's sort_order
+  //            
+
+  //      when the list id is equal to the index of the item to replace
+  //          replace, replace the sort order of the list id with the sort order on 
+  //          the replace list id
+  //      when the list id is not equal to the index of the item to replace
+  //          if the index  
+  sqlText = `
+    UPDATE list
+      SET sort_order = 
+        CASE ( WHEN id = $3 THEN $2's sort order  
+               WHEN id != $3 AND id >= $2
+      WHERE user_id = $1;
+  `;
+  pool.query(sqlText, [ user.id, Number(indexToMove), Number(indexToReplace) ])
+  .then(dbResponse => {
+    console.log('PUT of sort order data successful in /api/lists/sort');
+    res.sendStatus(200);
+  })
+  .catch(dbError => {
+    console.log('PUT of sort order data failed in /api/lists/sort');
+    res.sendStatus(500);
+  })
+})
+
 
 module.exports = router;
