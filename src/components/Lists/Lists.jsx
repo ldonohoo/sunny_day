@@ -81,20 +81,15 @@ function Lists() {
       console.log('Active is:', active.id);
       // over is index to move to
       console.log('Over is:', over.id);
-      dispatch({ type: 'UPDATE_LIST_ORDER',
-                 payload: { indexToMove: active.id,
-                            indexToReplace: over.id } });
-
-      // so, do an update with item to change index, index 
-
-      // setLanguages((items) => {
-      //   const activeIndex = items.indexOf(active.id);
-      //   const overIndex = items.indexOf(over.id);
-      //   console.log(arrayMove(items, activeIndex, overIndex));
-      //   return arrayMove(items, activeIndex, overIndex);
-        // items: [2, 3, 1]   0  -> 2
-        // [1, 2, 3] oldIndex: 0 newIndex: 2  -> [2, 3, 1] 
-      // });
+      // get list of id's only 
+      let listsIdOnly = lists.map(list => list.id);
+        const activeIndex = listsIdOnly.indexOf(active.id);
+        const overIndex = listsIdOnly.indexOf(over.id);
+        console.log(arrayMove(listsIdOnly, activeIndex, overIndex));
+        arrayMove(listsIdOnly, activeIndex, overIndex);
+        dispatch({ type: 'UPDATE_LIST_ORDER',
+        payload: { indexToMove: active.id,
+                   indexToReplace: over.id } });
     }
   } 
 
