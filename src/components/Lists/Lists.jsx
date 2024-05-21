@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import './Lists.css';
 import LocationSelect from '../LocationSelect/LocationSelect';
-// import { Draggable, Droppable } from 'pragmatic-dnd';
 import {
   DndContext,
   closestCenter
@@ -39,34 +38,8 @@ function Lists() {
     setInputDescription('');
   };
 
-  const handleLoadList = (listId, listDescription) => {
-    history.push(`/list_items/${listId}/${listDescription}`);
-  }
 
-  const handleDeleteSelectLists = () => {
-    dispatch({
-      type: 'DELETE_LISTS',
-      payload: selectedLists
-    })
-    setSelectedLists([]);
-  }
 
-  const handleCopyList = () => {
-    if (selectedLists.length > 1) {
-      alert('Please select only one list at a time to copy!');
-    } else {
-      // popup new list name box, then dispatch:
-      dispatch({
-        type: 'COPY_LIST',
-        payload: selectedLists[0]
-      })
-      setSelectedLists([]);
-    }
-  }
-
-  const handleToggleShowOnOpen = () => {
-    console.log('toggling!');
-  }
 
   const handleDragEnd = (event) => {
     console.log("Drag end called");
@@ -117,9 +90,7 @@ function Lists() {
               items={lists}
               strategy={verticalListSortingStrategy}>
             {lists.map(list => {
-                return (
-                  <ListsSortable key={list.id} list={list}/> 
-                )
+                return ( <ListsSortable key={list.id} list={list}/> )
               })}
           </SortableContext>
         </section>

@@ -2,17 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import './ListItems.css'
+import {
+  DndContext,
+  closestCenter
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+import ListsSortable from '../ListsSortable/ListsSortable';
 
-// import { Draggable, Droppable } from 'pragmatic-dnd';
+
 import LocationSelect from '../LocationSelect/LocationSelect';
 
 
 function ListItems() {
 
     const dispatch = useDispatch();
-    // const draggable = new Draggable(document.getElementById('draggable'));
-    // const droppable = new Droppable(document.getElementById('droppable'));
-    
     const [inputFormData, setInputFormData] = useState({
               description: '',
               priority: 0,
@@ -26,13 +33,7 @@ function ListItems() {
     const locations = useSelector(store => store.locationsReducer.locations);
     const weatherTypes = useSelector(store => store.weatherReducer.weatherTypes);
     const { list_id, list_description } = useParams();
-//   draggable.on('drag:start', () => {
-//     console.log('Drag started');
-//   });
-  
-//   droppable.on('drop', () => {
-//     console.log('Dropped');
-//   });
+
 
   useEffect(() => {
     dispatch({ type: 'GET_LIST_ITEMS', payload: { list_id }});
@@ -63,6 +64,31 @@ function ListItems() {
     });
   }
 
+  const handleDragEnd = (event) => {
+    console.log("Drag end called");
+    const {active, over} = event;
+    console.log("ACTIVE: " + active.id);
+    console.log("OVER :" + over.id);
+
+    if(active.id !== over.id) {
+      // re-order sortorder in database
+      // ***** NOTE: indicies are specified by list id!!
+      // active is index to move
+      console.log('Active is:', active.id);
+      // over is index to move to
+      console.log('Over is:', over.id);
+      // get list of id's only 
+      let listsItemsIdOnly = listsItems.map(item => item.id);
+        const activeIndex = listsItemsIdOnly.indexOf(active.id);
+        const overIndex = listsItemsIdOnly.indexOf(over.id);
+        console.log(arrayMove(listsItemsIdOnly, activeIndex, overIndex));
+        arrayMove(listsIdOnly, activeIndex, overIndex);
+        dispatch({ type: 'UPDATE_LIST_ORDER',
+        payload: { indexToMove: active.id,
+                   indexToReplace: over.id } });
+    }
+  } 
+
   // Handle input change and update state
   const handleChangeForm = (event) => {
     setInputFormData({...inputFormData, [event.target.name]: event.target.value});
@@ -71,7 +97,6 @@ function ListItems() {
 
   return (
     <>
-    {/* <LocationSelect isMasterLocation={true}/> */}
     <main>
       <h1>{list_description}:</h1>
       <section>
@@ -106,21 +131,18 @@ function ListItems() {
             <button type="submit">+</button>
         </form>
       </section>
-      <section className="list-items">
-        {listItems.map(item => {
-          return (
-            <div id="list-item"
-                 className="list-item"
-                 key={item.id}>
-              {item.description}
-              |priority: {item.priority}
-              |due date: {item.due_date}
-              |time of day to do: {item.time_of_day_to_complete}
-              |preferred weather: {item.preferred_weather_type}
-            </div>
-          );
-        })}
-      </section>
+      <DndContext collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}> 
+        <section className="list-items">
+          <SortableContext
+                items={lists}
+                strategy={verticalListSortingStrategy}>
+            {listItems.map(item => {
+              return ( <ListItemsSortable key={listItems.id} item={item}/> )
+          })}
+          </SortableContext>
+        </section>
+      </DndContext>
     </main>
     </>
   );
