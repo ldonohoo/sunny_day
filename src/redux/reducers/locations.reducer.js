@@ -29,6 +29,5 @@ const currentLocation= (state=0, action) => {
 // state.errors.loginMessage and state.errors.registrationMessage
 export default combineReducers({
   locations,
-  masterLocation,
   currentLocation
 });

@@ -1,4 +1,4 @@
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, take, takeLatest } from 'redux-saga/effects';
 import axios from 'axios';
 
 
@@ -32,6 +32,40 @@ function* addList(action) {
   }
 }
 
+function* updateList(action) {
+  try {
+    yield axios({
+      method: 'PUT',
+      url: `/api/lists/${action.payload.listId}`,
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+      data: { description: action.payload.description,
+              changeshowOnOpen: action.payload.changeshowOnOpen }    
+    })
+    yield put({ type: 'GET_LISTS' });
+  }
+  catch(error) {
+    console.log('Error in update list', error);
+  }
+}
+
+function* deleteList(action) {
+  try {
+    console.log('actionpayload:', action.payload)
+    yield axios({
+      method: 'DELETE',
+      url: `/api/lists/${action.payload.listId}`,
+      header: {'Content-Type': 'application/json' },
+      withCredentials: true
+    })
+    yield put({ type: 'GET_LISTS' });
+  }
+  catch(error) {
+    console.log('Error in delete list', error);
+  }
+}
+
+
 function* updateListOrder(action) {
   try {
     yield axios({
@@ -49,12 +83,14 @@ function* updateListOrder(action) {
 }
 
 function* getListItems(action) {
+  let listItemId = action.payload
+  console.log('in getlistitems', action.payload)
   try {
     const config = {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
     };
-    const response = yield axios.get(`/api/list_items/${action.payload.list_id}`, config);
+    const response = yield axios.get(`/api/list_items/${action.payload.listId}`, config);
     console.log('GET of data from list_items', response.data)
     yield put({ type: 'SET_LIST_ITEMS',
                 payload: response.data });
@@ -73,19 +109,62 @@ function* addListItem(action) {
     yield axios.post('/api/list_items',  action.payload, config);
     console.log('to choose from:', action.payload)
     yield put({ type: 'GET_LIST_ITEMS',
-                payload: {list_id: action.payload.newItem.listId }});
+                payload: {listId: action.payload.newItem.listId }});
   } 
   catch (error) {
     console.log('Error getting list items for user:', error);
   }
 }
 
+function* toggleCompleteListItem(action) {
+  console.log('in toggle, listId: ', action.payload.listId)
+  try {
+    yield axios({
+      method: 'PUT',
+      url: `/api/list_items/${action.payload.listItemId}`,
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    })
+    yield put({ type: 'GET_LIST_ITEMS',
+                payload: { listId: action.payload.listId }
+     });
+  }
+  catch(error) {
+    console.log('Error in toggle complete of list item', error);
+  }
+}
+function* deleteListItem(action) {
+  try {
+    console.log('actionpayload:', action.payload)
+    yield axios({
+      method: 'DELETE',
+      url: `/api/list_items/${action.payload.listItemId}`,
+      header: {'Content-Type': 'application/json' },
+      withCredentials: true
+    })
+    console.log('here!');
+    yield put({ type: 'GET_LIST_ITEMS',
+                listId: action.payload.listItemId });
+  }
+  catch(error) {
+    console.log('Error in delete list item', error);
+  }
+}
+
+
+
+
 function* listSagas() {
   yield takeLatest('GET_LISTS', getLists);
   yield takeLatest('ADD_LIST', addList);
+  yield takeLatest('UPDATE_LIST', updateList);
+  yield takeLatest('DELETE_LIST', deleteList);
+  yield takeLatest('UPDATE_LIST_ORDER', updateListOrder);
   yield takeLatest('GET_LIST_ITEMS', getListItems);
   yield takeLatest('ADD_LIST_ITEM', addListItem);
-  yield takeLatest('UPDATE_LIST_ORDER', updateListOrder);
+  yield takeLatest('TOGGLE_COMPLETE_LIST_ITEM', toggleCompleteListItem);
+  yield takeLatest('DELETE_LIST_ITEM', deleteListItem);
+
 }
 
 export default listSagas;

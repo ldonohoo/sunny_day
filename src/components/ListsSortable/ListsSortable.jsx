@@ -1,17 +1,28 @@
 import { useSortable } from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { useHistory} from "react-router-dom/cjs/react-router-dom.min";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
-function ListsSortable({list}) {
+function ListsSortable({list, 
+                        handleDeleteList,
+                        handleToggleShowOnOpen
+
+                        }) {
 
     const dispatch = useDispatch();
     const history = useHistory();
+    
+    // const lists = useSelector(state => state.lists);
+    // if (lists) {
+    //     let list = lists.find(item => item.id === list.id);
+    // }
 
     useEffect(() => {
-        console.log('in listsSortable')
-    })
+       dispatch({ type: 'GET_LISTS' });
+      
+    }, [])
+
     const {
         attributes,
         listeners,
@@ -25,50 +36,50 @@ function ListsSortable({list}) {
         transition
     }
 
-    const handleLoadList = (listId, listDescription) => {
-        history.push(`/list_items/${listId}/${listDescription}`);
+    const handleLoadList = () => {
+        history.push(`/list_items/${list.id}/${list.description}`);
       }
     
-    const handleDeleteList = (listId) => {
-        dispatch({
-          type: 'DELETE_LIST',
-          payload: listId
-        })
-      }
+
     
-      const handleCopyList = (listId) => { 
+      const handleCopyList = () => { 
+        // let/make user edit description, if the description
+        //   changes/is different, then add the list with dispatch:
           dispatch({
-            type: 'COPY_LIST',
-            payload: listId
+            type: 'ADD_LIST',
+            payload: { listId: list.id }
           })
       }
-      const handleEditList = (listId) => {
+      const handleEditList = () => {
+        // let user edit description ,
+        //   if it changed, then dispatch:
+        // 
         dispatch({
-          type: 'EDIT_LIST',
-          payload: listId
+          type: 'UPDATE_LIST',
+          payload: { listId: list.id,
+                     description: list.description,
+                     changeshowOnOpen: false }
         })
     }
     
-      const handleToggleShowOnOpen = () => {
-        console.log('toggling!');
-      }
+
 
     return (
         <div className="lists-part"
             ref={setNodeRef} 
             style={style} 
             key={list.id}>
-
-          <button onClick={() => {handleEditList(list.id, list.description)}}
-            >edit</button>
-          <span onClick={() => {handleLoadList(list.id, list.description)}}>
+          <button onClick={handleCopyList}>copy</button>
+          <button onClick={handleEditList}>edit</button>
+          <span onClick={handleLoadList}>
               {list.description}
           </span>
-          <button onClick={() => {handleToggleShowOnOpen(list.id)}}>show on open</button>
           <button {...attributes} {...listeners}>drag me</button>
-          <button onClick={(e) => {handleDeleteList(list.id)}}>delete</button>
-
-        
+          <input type="radio" 
+                 checked={list.show_on_open} 
+                 onClick={() =>
+                  handleToggleShowOnOpen(list.id, list.description)}></input>
+          <button onClick={() => handleDeleteList(list.id)}>delete</button>   
         </div>
     )
 }

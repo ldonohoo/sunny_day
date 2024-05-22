@@ -11,7 +11,7 @@ import {
   SortableContext,
   verticalListSortingStrategy
 } from "@dnd-kit/sortable";
-import ListsSortable from '../ListsSortable/ListsSortable';
+import ListItemsSortable from '../ListItemsSortable/ListItemsSortable';
 
 
 import LocationSelect from '../LocationSelect/LocationSelect';
@@ -33,11 +33,14 @@ function ListItems() {
     const locations = useSelector(store => store.locationsReducer.locations);
     const weatherTypes = useSelector(store => store.weatherReducer.weatherTypes);
     const { list_id, list_description } = useParams();
-
+    const currentLocation = 
+      useSelector(store => store.locationsReducer.currentLocation);
 
   useEffect(() => {
-    dispatch({ type: 'GET_LIST_ITEMS', payload: { list_id }});
+    dispatch({ type: 'GET_LIST_ITEMS', payload: { listId : list_id }});
     dispatch({ type: 'GET_WEATHER_TYPES' });
+    dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
+               payload: { listId: list_id }});
   }, []);
 
   const handleAddListItem = (event) => {
@@ -78,11 +81,11 @@ function ListItems() {
       // over is index to move to
       console.log('Over is:', over.id);
       // get list of id's only 
-      let listsItemsIdOnly = listsItems.map(item => item.id);
-        const activeIndex = listsItemsIdOnly.indexOf(active.id);
-        const overIndex = listsItemsIdOnly.indexOf(over.id);
-        console.log(arrayMove(listsItemsIdOnly, activeIndex, overIndex));
-        arrayMove(listsIdOnly, activeIndex, overIndex);
+      let listItemsIdOnly = listItems.map(item => item.id);
+        const activeIndex = listItemsIdOnly.indexOf(active.id);
+        const overIndex = listItemsIdOnly.indexOf(over.id);
+        console.log(arrayMove(listItemsIdOnly, activeIndex, overIndex));
+        arrayMove(listItemsIdOnly, activeIndex, overIndex);
         dispatch({ type: 'UPDATE_LIST_ORDER',
         payload: { indexToMove: active.id,
                    indexToReplace: over.id } });
@@ -94,8 +97,23 @@ function ListItems() {
     setInputFormData({...inputFormData, [event.target.name]: event.target.value});
   }
 
+  const handleCompleteItemToggle = (listItemId, listId) => {
+    console.log('toggle!!')
+    dispatch({
+        type: 'TOGGLE_COMPLETE_LIST_ITEM',
+        payload: { listItemId : listItemId,
+                   listId: listId }   
+  });
+}
 
-  return (
+  const handleDeleteItem = (listItemId) => {
+    dispatch({
+        type: 'DELETE_LIST_ITEM',
+        payload: { listItemId: listItemId }
+      })
+  }
+
+  return (  
     <>
     <main>
       <h1>{list_description}:</h1>
@@ -135,10 +153,14 @@ function ListItems() {
                   onDragEnd={handleDragEnd}> 
         <section className="list-items">
           <SortableContext
-                items={lists}
+                items={listItems}
                 strategy={verticalListSortingStrategy}>
             {listItems.map(item => {
-              return ( <ListItemsSortable key={listItems.id} item={item}/> )
+              return ( <ListItemsSortable key={item.id}
+                                          item={item}
+                                          handleCompleteItemToggle=
+                                            {handleCompleteItemToggle}
+                                          handleDeleteItem={handleDeleteItem}/> )
           })}
           </SortableContext>
         </section>

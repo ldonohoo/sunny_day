@@ -38,9 +38,6 @@ function Lists() {
     setInputDescription('');
   };
 
-
-
-
   const handleDragEnd = (event) => {
     console.log("Drag end called");
     const {active, over} = event;
@@ -55,17 +52,31 @@ function Lists() {
       // over is index to move to
       console.log('Over is:', over.id);
       // get list of id's only 
-      let listsIdOnly = lists.map(list => list.id);
-        const activeIndex = listsIdOnly.indexOf(active.id);
-        const overIndex = listsIdOnly.indexOf(over.id);
-        console.log(arrayMove(listsIdOnly, activeIndex, overIndex));
-        arrayMove(listsIdOnly, activeIndex, overIndex);
+      // let listsIdOnly = lists.map(list => list.id);
+      //   const activeIndex = listsIdOnly.indexOf(active.id);
+      //   const overIndex = listsIdOnly.indexOf(over.id);
+      //   console.log(arrayMove(listsIdOnly, activeIndex, overIndex));
+      //   arrayMove(listsIdOnly, activeIndex, overIndex);
         dispatch({ type: 'UPDATE_LIST_ORDER',
         payload: { indexToMove: active.id,
                    indexToReplace: over.id } });
     }
   } 
 
+  const handleDeleteList = (listId) => {
+    dispatch({
+      type: 'DELETE_LIST',
+      payload: { listId: listId }
+    })
+  }
+
+  const handleToggleShowOnOpen = (listId, description) => {
+    dispatch({
+        type: 'UPDATE_LIST',
+        payload: { listId: listId,
+                   description: description,
+                   changeshowOnOpen: true } });
+}
 
   return (
     <>
@@ -90,7 +101,11 @@ function Lists() {
               items={lists}
               strategy={verticalListSortingStrategy}>
             {lists.map(list => {
-                return ( <ListsSortable key={list.id} list={list}/> )
+                return ( <ListsSortable key={list.id}
+                                        list={list} 
+                                        handleDeleteList={handleDeleteList}
+                                        handleToggleShowOnOpen=
+                                          {handleToggleShowOnOpen}/> )
               })}
           </SortableContext>
         </section>

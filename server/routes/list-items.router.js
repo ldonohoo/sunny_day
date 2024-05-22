@@ -71,4 +71,47 @@ router.post('/', rejectUnauthenticated, (req, res) => {
     })
 });
 
+router.delete('/:id', rejectUnauthenticated, (req, res) => {
+  const listItemId = req.params.id;
+  console.log('indelete:',listItemId)
+  sqlText = `
+    DELETE FROM list_item
+      WHERE id = $1
+    `;
+    pool.query(sqlText, [ listItemId ])
+    .then(dbResponse => {
+      console.log('DELETE of list in /api/list_itemss/:id successful:', dbResponse);
+      res.sendStatus(200);
+    })
+    .catch(dbError => {
+      console.log('DELETE of list in /api/list_items/:id failed:', dbError);
+      res.sendStatus(500);
+    })
+})
+
+/**
+ * Toggle the completed status on a list item
+ */
+router.put('/:id', rejectUnauthenticated, (req, res) => {
+  const listItemId = req.params.id;
+  console.log('input:',listItemId);
+  sqlText = `
+    UPDATE list_item
+      SET completed_date = 
+        CASE WHEN completed_date IS NOT NULL THEN NULL
+             WHEN completed_date IS NULL THEN CURRENT_DATE
+      END
+    WHERE id = $1;
+  `;
+  pool.query(sqlText, [listItemId])
+  .then(dbResponse => {
+    console.log('PUT toggle of completed status a success in /api/list_items/:id', dbResponse);
+    res.sendStatus(200);
+  })
+  .catch(dbError => {
+    console.log('PUT toggle of completed status a success in /api/list_items/:id', dbError);
+  })
+
+})
+
 module.exports = router;
