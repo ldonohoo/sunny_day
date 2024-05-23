@@ -131,12 +131,31 @@ function* addListItem(action) {
   }
 }
 
+function* updateListItem(action) {
+  console.log('update list item, listId: ', action.payload.listId)
+  try {
+    yield axios({
+      method: 'PUT',
+      url: `/api/list_items/edit/${action.payload.listItemId}`,
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+      data: action.payload
+    })
+    yield put({ type: 'GET_LIST_ITEMS',
+                payload: { listId: action.payload.listId }
+     });
+  }
+  catch(error) {
+    console.log('Error in update list item', error);
+  }
+}
+
 function* toggleCompleteListItem(action) {
   console.log('in toggle, listId: ', action.payload.listId)
   try {
     yield axios({
       method: 'PUT',
-      url: `/api/list_items/${action.payload.listItemId}`,
+      url: `/api/list_items/toggle_complete/${action.payload.listItemId}`,
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
     })
@@ -148,6 +167,7 @@ function* toggleCompleteListItem(action) {
     console.log('Error in toggle complete of list item', error);
   }
 }
+
 function* deleteListItem(action) {
   try {
     console.log('actionpayload:', action.payload)
@@ -197,6 +217,7 @@ function* listSagas() {
   yield takeLatest('UPDATE_LIST_ORDER', updateListOrder);
   yield takeLatest('GET_LIST_ITEMS', getListItems);
   yield takeLatest('ADD_LIST_ITEM', addListItem);
+  yield takeLatest('UPDATE_LIST_ITEM', updateListItem);
   yield takeLatest('TOGGLE_COMPLETE_LIST_ITEM', toggleCompleteListItem);
   yield takeLatest('DELETE_LIST_ITEM', deleteListItem);
   yield takeLatest('UPDATE_LIST_ITEMS_ORDER', updateListItemsOrder);

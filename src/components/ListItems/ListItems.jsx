@@ -22,6 +22,7 @@ function ListItems() {
               description: '',
               priority: 0,
               weatherType : 0,
+              timeOfDay: 0,
               dueDate: ''
     });
     
@@ -30,6 +31,7 @@ function ListItems() {
     const listItems = useSelector(store => store.listsReducer.listItems);
     const locations = useSelector(store => store.locationsReducer.locations);
     const weatherTypes = useSelector(store => store.weatherReducer.weatherTypes);
+    const timeOfDays = useSelector(store => store.timeOfDayReducer.timeOfDays)
     const { list_id, list_description } = useParams();
     const currentLocation = 
       useSelector(store => store.locationsReducer.currentLocation);
@@ -37,6 +39,7 @@ function ListItems() {
   useEffect(() => {
     dispatch({ type: 'GET_LIST_ITEMS', payload: { listId : list_id }});
     dispatch({ type: 'GET_WEATHER_TYPES' });
+    dispatch({ type: 'GET_TIME_OF_DAYS' });
     dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
                payload: { listId: list_id }});
   }, []);
@@ -48,7 +51,8 @@ function ListItems() {
     const newItem = {
       description: inputFormData.description, 
       priority: inputFormData.priority,
-      preferredWeatherType: inputFormData.weatherType,
+      weatherType: inputFormData.weatherType,
+      timeOfDay: inputFormData.timeOfDay,
       dueDate: inputFormData.dueDate,
       yearToComplete: currentYear,
       listId: list_id
@@ -61,6 +65,7 @@ function ListItems() {
       description: '',
       priority: 0,
       weatherType : 0,
+      timeOfDay: 0,
       dueDate: ''
     });
   }
@@ -150,6 +155,23 @@ function ListItems() {
                       </option>
                     ))}
             </select>
+            <select name="timeOfDay"
+                    value={inputFormData.timeOfDay}
+                    onChange={handleChangeForm}>
+                      <option value="0">none</option>
+                      <option name="morning"
+                              value="morning">Morning
+                      </option>
+                      <option name="afternoon"
+                              value="afternoon">Afternoon
+                      </option>
+                      <option name="evening"
+                              value="evening">Evening
+                      </option>
+                      <option name="night"
+                              value="night">Night
+                      </option>
+          </select>
             <input name="dueDate"
                    type="date" 
                    value={inputFormData.dueDate}
@@ -170,7 +192,8 @@ function ListItems() {
                                             {handleCompleteItemToggle}
                                           handleDeleteItem={handleDeleteItem}
                                           handleUpdateDescription=
-                                            {handleUpdateDescription}/> )
+                                            {handleUpdateDescription}
+                                          weatherTypes={weatherTypes}/> )
           })}
           </SortableContext>
         </section>
@@ -178,6 +201,6 @@ function ListItems() {
     </main>
     </>
   );
-}
+} 
 
 export default ListItems;

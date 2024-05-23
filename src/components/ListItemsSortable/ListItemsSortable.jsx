@@ -8,17 +8,18 @@ import { useHistory} from "react-router-dom/cjs/react-router-dom.min";
 function ListItemsSortable({ item, 
                              handleCompleteItemToggle,
                              handleUpdateDescription,
-                             handleDeleteItem }) {
+                             handleDeleteItem,
+                             weatherTypes }) {
 
     const dispatch = useDispatch();
     const [inputDescription, setInputDescription] = useState(item.description);
     const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
+    console.log(JSON.stringify(item))
     const [inputFormData, setInputFormData] = useState({
-        description: '',
-        priority: 0,
-        weatherType : 0,
-        dueDate: ''
-});
+        priority: item.priority || 0,
+        weatherType : item.preferred_weather_type || 0,
+        timeOfDay: item.time_of_day_to_complete || 0,
+        dueDate: item.due_date || '' });
 
     const {
         attributes,
@@ -54,6 +55,32 @@ function ListItemsSortable({ item,
     event.target.classList.toggle('lists-desc-editable');
     };
 
+    // Handle input change and update state
+    const handleChangeForm = (event) => {
+    setInputFormData({...inputFormData, [event.target.name]: event.target.value});
+    const changeItem = {
+      description: inputFormData.description, 
+      priority: inputFormData.priority,
+      weatherType: inputFormData.weatherType,
+      timeOfDay: inputFormData.timeOfDay,
+      dueDate: inputFormData.dueDate,
+    //   yearToComplete: inputYearToComplete,
+    //   monthToComplete: inputMonthToComplete,
+    //   dayToComplete: inputDayToComplete,
+      listId: item.list_id
+    }
+    dispatch({
+        type: 'UPDATE_LIST_ITEM',
+        payload: { changeItem }
+    })
+    setInputFormData({
+      description: '',
+      priority: 0,
+      weatherType : 0,
+      timeOfDay: 0,
+      dueDate: ''
+    });
+  }
 
     return (
         <div id="list-item"
@@ -86,12 +113,28 @@ function ListItemsSortable({ item,
                       </option>
                     ))}
           </select>
+          <select name="timeOfDay"
+                    value={inputFormData.timeOfDay}
+                    onChange={handleChangeForm}>
+                      <option value="0">none</option>
+                      <option name="morning"
+                              value="morning">Morning
+                      </option>
+                      <option name="afternoon"
+                              value="afternoon">Afternoon
+                      </option>
+                      <option name="evening"
+                              value="evening">Evening
+                      </option>
+                      <option name="night"
+                              value="night">Night
+                      </option>
+          </select>
+          <span>duedate:{inputFormData.dueDate}</span>
           <input name="dueDate"
-  
-            |priority: {item.priority}
-            |due date: {item.due_date}
-            |time of day to do: {item.time_of_day_to_complete}
-            |preferred weather: {item.preferred_weather_type}
+                   type="date" 
+                   value={inputFormData.dueDate}
+                   onChange={handleChangeForm}/>
             <button {...attributes} {...listeners}>drag me</button>
             <button onClick={() => handleDeleteItem(item.id)}>delete</button>
         </div>

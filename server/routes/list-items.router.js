@@ -26,7 +26,7 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
 });
 
 /**
- * POST a new list for user
+ * POST a new list item for user
  */
 router.post('/', rejectUnauthenticated, (req, res) => {
   console.log('req.body in POST of new item:', JSON.stringify(req.body));
@@ -38,26 +38,31 @@ router.post('/', rejectUnauthenticated, (req, res) => {
   if (newItem.priority === 0) {
     newItem.priority = null;
   }
-  if (newItem.preferredWeatherType === 0) {
-    newItem.preferredWeatherType = null;
+  if (newItem.weatherType === 0) {
+    newItem.weatherType = null;
+  }
+  if (newItem.timeOfDay === 0) {
+    newItem.timeOfDay = null;
   }
   const sqlText = `
   INSERT INTO list_item
     (description, 
      priority,
      preferred_weather_type,
+     time_of_day_to_complete,
      due_date,
      year_to_complete,
      list_id,
      sort_order)
-    VALUES ($1, $2, $3, $4, $5, $6, 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, 
           COALESCE((SELECT MAX(sort_order) 
                     FROM list_item
                     WHERE list_id = $6), 0) + 1);
     `;
     pool.query(sqlText, [ newItem.description, 
                           newItem.priority,
-                          newItem.preferredWeatherType,
+                          newItem.weatherType,
+                          newItem.timeOfDay,
                           newItem.dueDate,
                           newItem.yearToComplete,
                           newItem.listId ])
@@ -88,11 +93,59 @@ router.delete('/:id', rejectUnauthenticated, (req, res) => {
       res.sendStatus(500);
     })
 })
+router.put('/edit/:id', rejectUnauthenticated, (req, res) => {
+  console.log('req.body in POST of new item:', JSON.stringify(req.body));
+  const listItemId = req.params.id;
+  const changeItem = req.body.changeItem;
+  // pre-process data to assign nulls if unassigned
+  if (changeItem.dueDate === '') {
+    changeItem.dueDate = null;
+  }
+  if (changeItem.priority === 0) {
+    changeItem.priority = null;
+  }
+  if (changeItem.weatherType === 0) {
+    changeItem.weatherType = null;
+  }
+  if (changeItem.timeOfDay === 0) {
+    changeItem.timeOfDay = null;
+  }
+  // future add yeartocomp, month, day to update when sort works
+  const sqlText = `
+  UPDATE list_item
+    (description, 
+     priority,
+     preferred_weather_type,
+     time_of_day_to_complete,
+     due_date,
+     list_id,
+     sort_order)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, 
+          COALESCE((SELECT MAX(sort_order) 
+                    FROM list_item
+                    WHERE list_id = $6), 0) + 1);
+    `;
+    pool.query(sqlText, [ changeItem.description, 
+                          changeItem.priority,
+                          changeItem.weatherType,
+                          changeItem.timeOfDay,
+                          changeItem.dueDate,
+                          changeItem.listId ])
+    .then(dbResponse => {
+      console.log('POST route for /api/list_items sucessful!', dbResponse.rows);
+      res.send(dbResponse.rows);
+    })
+    .catch(dbError => {
+      console.log('POST route for /api/list_items failed', dbError);
+      res.sendStatus(500);
+    })
+});
+
 
 /**
  * Toggle the completed status on a list item
  */
-router.put('/:id', rejectUnauthenticated, (req, res) => {
+router.put('/toggle_complete/:id', rejectUnauthenticated, (req, res) => {
   const listItemId = req.params.id;
   console.log('input:',listItemId);
   sqlText = `

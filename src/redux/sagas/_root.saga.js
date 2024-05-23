@@ -5,6 +5,7 @@ import userSaga from './user.saga';
 import locationSagas from './location.saga';
 import listSagas from './lists.saga';
 import weatherSagas from './weather.saga';
+import timeOfDaySagas from './timeofday.saga';
 
 // rootSaga is the primary saga.
 // It bundles up all of the other sagas so our project can use them.
@@ -20,6 +21,7 @@ export default function* rootSaga() {
     userSaga(),
     locationSagas(),
     listSagas(),
-    weatherSagas()
+    weatherSagas(),
+    timeOfDaySagas()
   ]);
 }

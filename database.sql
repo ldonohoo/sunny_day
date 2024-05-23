@@ -61,7 +61,7 @@ CREATE TABLE list_item (
   year_to_complete INT NOT NULL,
   month_to_complete INT DEFAULT NULL,
   day_to_complete INT DEFAULT NULL,
-  time_of_day_to_complete INT DEFAULT NULL,
+  time_of_day_to_complete VARCHAR(100) DEFAULT NULL,
   sort_order INT NOT NULL,
   list_id INT REFERENCES list(id) ON DELETE CASCADE
 );
