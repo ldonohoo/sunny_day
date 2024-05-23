@@ -114,4 +114,87 @@ router.put('/:id', rejectUnauthenticated, (req, res) => {
 
 })
 
+router.put('/sort/:id', rejectUnauthenticated, (req, res) => {
+  console.log('in list_items sort put');
+  console.log('req.body, req.params', req.body, req.params);
+  const listId = req.params.id;
+  const indexToMove = req.body.indexToMove;
+  const indexToReplace = req.body.indexToReplace;
+  // First, get the sort_order values for indexToMove and indexToReplace
+  const getSortOrdersQuery = `
+    SELECT id, sort_order
+    FROM list_item
+    WHERE id IN ($1, $2) AND list_id = $3;
+  `;
+  pool.query(getSortOrdersQuery, [indexToMove, indexToReplace, listId])
+    .then(result => {
+      console.log('result.rows here:', result.rows);
+      const rows = result.rows;
+      // send error if this doesn't select both items
+      if (rows.length !== 2) {
+        throw new Error('Could not find both items in the list.');
+      }
+      // grab the the corresponding sort orders from indexToMove and 
+      //    indexToReplace
+      const itemToMove = rows.find(row => row.id == indexToMove);
+      const itemToReplace = rows.find(row => row.id == indexToReplace);
+      const sortOrderToMove = itemToMove.sort_order;
+      const sortOrderToReplace = itemToReplace.sort_order;
+      console.log('itemToMove', itemToMove);
+      console.log('itemToReplace', itemToReplace);
+      console.log('sortOrderToMove', sortOrderToMove);
+      console.log('sortOrderToReplace', sortOrderToReplace);
+      let updateSortOrderQuery = '';
+      // For moving an item down on the list
+      if (sortOrderToMove < sortOrderToReplace) {
+        console.log('moving down');
+        updateSortOrderQuery = `
+          UPDATE list_item
+          SET sort_order = CASE 
+            WHEN id = $1 THEN $2
+            WHEN sort_order BETWEEN $3 AND $4 THEN sort_order - 1
+            ELSE sort_order
+          END
+          WHERE list_id = $5;
+        `;
+        pool.query(updateSortOrderQuery, [indexToMove, sortOrderToReplace, sortOrderToMove + 1, sortOrderToReplace, listId])
+          .then((dbResponse) => {
+            console.log('PUT of sort order (move down) data successful in /api/list_items/sort/:id', dbResponse);
+            res.sendStatus(200);
+          })
+          .catch(dbError => {
+            console.log('PUT of sort order data failed in /api/list_items/sort/:id', dbError);
+            res.sendStatus(500);
+          });
+      // For moving an item up on the list 
+      } else if (sortOrderToMove > sortOrderToReplace) {
+        console.log('moving up');
+        updateSortOrderQuery = `
+          UPDATE list_item
+          SET sort_order = CASE 
+            WHEN id = $1 THEN $2
+            WHEN sort_order BETWEEN $3 AND $4 THEN sort_order + 1
+            ELSE sort_order
+          END
+          WHERE list_id = $5;
+        `;
+        pool.query(updateSortOrderQuery, [indexToMove, sortOrderToReplace, sortOrderToReplace, sortOrderToMove - 1, listId])
+          .then((dbResponse) => {
+            console.log('PUT of sort order (move up) data successful in /api/list_items/sort/:id', dbResponse);
+            res.sendStatus(200);
+          })
+          .catch(dbError => {
+            console.log('PUT of sort order data failed in /api/list_items/sort/:id', dbError);
+            res.sendStatus(500);
+          });
+      } else {
+        res.sendStatus(400); // This shouldn't happen as we check if active != over
+      }
+    })
+    .catch(dbError => {
+      console.log('Error retrieving sort order data in /api/list_items/sort/:id', dbError);
+      res.sendStatus(500);
+    });
+});
+
 module.exports = router;

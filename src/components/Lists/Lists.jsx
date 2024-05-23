@@ -52,11 +52,13 @@ function Lists() {
       // over is index to move to
       console.log('Over is:', over.id);
       // get list of id's only 
-      // let listsIdOnly = lists.map(list => list.id);
-      //   const activeIndex = listsIdOnly.indexOf(active.id);
-      //   const overIndex = listsIdOnly.indexOf(over.id);
-      //   console.log(arrayMove(listsIdOnly, activeIndex, overIndex));
-      //   arrayMove(listsIdOnly, activeIndex, overIndex);
+      // let indexToMove = active.id;
+      // let indexToReplace = over.id;
+      // let newLists = [...lists];
+      // // let listsIdOnly = lists.map(list => list.id);
+      // console.log('BEFORE:',JSON.stringify(newLists));
+      //   // console.log(arrayMove(lists, active.id, over.id));
+      //   newLists = arrayMove(newLists, indexToMove, indexToReplace);
         dispatch({ type: 'UPDATE_LIST_ORDER',
         payload: { indexToMove: active.id,
                    indexToReplace: over.id } });
@@ -71,12 +73,33 @@ function Lists() {
   }
 
   const handleToggleShowOnOpen = (listId, description) => {
+    console.log('updating change show on open YES')
     dispatch({
         type: 'UPDATE_LIST',
         payload: { listId: listId,
                    description: description,
-                   changeshowOnOpen: true } });
-}
+                   changeShowOnOpen: true } });
+  }
+
+  const handleUpdateDescription = (listId, description) => {
+    console.log('updating NOO change show on oopen!')
+    dispatch({ type: 'UPDATE_LIST',
+               payload: {listId: listId,
+                         description: description,
+                         changeShowOnOpen: false }
+    });
+  }
+
+  const handleCopyList = (listId, description) => { 
+    // create the new list with same description + 'COPY' 
+    const newDescription = description + ' COPY'
+      dispatch({
+        type: 'COPY_LIST',
+        payload: { listId: listId,
+                   newDescription: newDescription }
+      })
+  }
+
 
   return (
     <>
@@ -105,7 +128,10 @@ function Lists() {
                                         list={list} 
                                         handleDeleteList={handleDeleteList}
                                         handleToggleShowOnOpen=
-                                          {handleToggleShowOnOpen}/> )
+                                          {handleToggleShowOnOpen}
+                                        handleUpdateDescription=
+                                          {handleUpdateDescription}
+                                        handleCopyList={handleCopyList}/> )
               })}
           </SortableContext>
         </section>

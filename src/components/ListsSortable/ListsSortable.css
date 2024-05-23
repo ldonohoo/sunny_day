@@ -1,0 +1,9 @@
+
+
+.lists-desc-input {
+    border: none;
+}
+
+.lists-desc-input.lists-desc-editable {
+    border: .1rem solid red;
+}

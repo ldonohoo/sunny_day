@@ -12,8 +12,6 @@ import {
   verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import ListItemsSortable from '../ListItemsSortable/ListItemsSortable';
-
-
 import LocationSelect from '../LocationSelect/LocationSelect';
 
 
@@ -81,14 +79,15 @@ function ListItems() {
       // over is index to move to
       console.log('Over is:', over.id);
       // get list of id's only 
-      let listItemsIdOnly = listItems.map(item => item.id);
-        const activeIndex = listItemsIdOnly.indexOf(active.id);
-        const overIndex = listItemsIdOnly.indexOf(over.id);
-        console.log(arrayMove(listItemsIdOnly, activeIndex, overIndex));
-        arrayMove(listItemsIdOnly, activeIndex, overIndex);
-        dispatch({ type: 'UPDATE_LIST_ORDER',
+      // let listItemsIdOnly = listItems.map(item => item.id);
+        // const activeIndex = listItemsIdOnly.indexOf(active.id);
+        // const overIndex = listItemsIdOnly.indexOf(over.id);
+        // console.log(arrayMove(listItemsIdOnly, activeIndex, overIndex));
+        // arrayMove(listItemsIdOnly, activeIndex, overIndex);
+        dispatch({ type: 'UPDATE_LIST_ITEMS_ORDER',
         payload: { indexToMove: active.id,
-                   indexToReplace: over.id } });
+                   indexToReplace: over.id,
+                   listId: list_id } });
     }
   } 
 
@@ -111,6 +110,15 @@ function ListItems() {
         type: 'DELETE_LIST_ITEM',
         payload: { listItemId: listItemId }
       })
+  }
+
+  const handleUpdateDescription = (listId, description) => {
+    console.log('updating NOO change show on oopen!')
+    dispatch({ type: 'UPDATE_LIST',
+               payload: {listId: listId,
+                         description: description,
+                         changeShowOnOpen: false }
+    });
   }
 
   return (  
@@ -160,7 +168,9 @@ function ListItems() {
                                           item={item}
                                           handleCompleteItemToggle=
                                             {handleCompleteItemToggle}
-                                          handleDeleteItem={handleDeleteItem}/> )
+                                          handleDeleteItem={handleDeleteItem}
+                                          handleUpdateDescription=
+                                            {handleUpdateDescription}/> )
           })}
           </SortableContext>
         </section>

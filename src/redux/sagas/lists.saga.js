@@ -33,14 +33,15 @@ function* addList(action) {
 }
 
 function* updateList(action) {
+  console.log('actionpayload in updateList:', action.payload.changeShowOnOpen);
   try {
     yield axios({
       method: 'PUT',
-      url: `/api/lists/${action.payload.listId}`,
+      url: `/api/lists/update/${action.payload.listId}`,
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
       data: { description: action.payload.description,
-              changeshowOnOpen: action.payload.changeshowOnOpen }    
+              changeShowOnOpen: action.payload.changeShowOnOpen }    
     })
     yield put({ type: 'GET_LISTS' });
   }
@@ -65,8 +66,23 @@ function* deleteList(action) {
   }
 }
 
+function* copyList(action) {
+  try {
+    const config = {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    };
+    yield axios.post('/api/lists/copy',  action.payload, config);
+    yield put({ type: 'GET_LISTS' });
+  } 
+  catch (error) {
+    console.log('Error getting lists for user:', error);
+  }
+}
+
 
 function* updateListOrder(action) {
+  console.log('in updateListOrder! action.payload:', action.payload)
   try {
     yield axios({
       method: 'PUT',
@@ -83,7 +99,6 @@ function* updateListOrder(action) {
 }
 
 function* getListItems(action) {
-  let listItemId = action.payload
   console.log('in getlistitems', action.payload)
   try {
     const config = {
@@ -151,6 +166,25 @@ function* deleteListItem(action) {
   }
 }
 
+function* updateListItemsOrder(action) {
+  console.log('in updateListItemsOrder! action.payload:', action.payload)
+  try {
+    yield axios({
+      method: 'PUT',
+      url: `/api/list_items/sort/${action.payload.listId}`,
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+      data: { indexToMove: action.payload.indexToMove,
+              indexToReplace: action.payload.indexToReplace }
+      });
+    yield put({ type: 'GET_LIST_ITEMS',
+                payload: { listId: action.payload.listId }
+     });
+  }
+  catch(error) {
+    console.log('Error updating sort order for lists:', error);
+  }
+}
 
 
 
@@ -159,11 +193,13 @@ function* listSagas() {
   yield takeLatest('ADD_LIST', addList);
   yield takeLatest('UPDATE_LIST', updateList);
   yield takeLatest('DELETE_LIST', deleteList);
+  yield takeLatest('COPY_LIST', copyList);
   yield takeLatest('UPDATE_LIST_ORDER', updateListOrder);
   yield takeLatest('GET_LIST_ITEMS', getListItems);
   yield takeLatest('ADD_LIST_ITEM', addListItem);
   yield takeLatest('TOGGLE_COMPLETE_LIST_ITEM', toggleCompleteListItem);
   yield takeLatest('DELETE_LIST_ITEM', deleteListItem);
+  yield takeLatest('UPDATE_LIST_ITEMS_ORDER', updateListItemsOrder);
 
 }
 
