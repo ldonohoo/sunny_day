@@ -9,6 +9,13 @@ const { rejectUnauthenticated } = require('../modules/authentication-middleware'
 router.get('/:list_id',rejectUnauthenticated, (req, res) => {
   console.log('listid in GET route:', req.params.list_id)
   const listId = req.params.list_id;
+  let sortBy = '';
+  if (req.query.sortBy) {
+    sortBy = req.query.sortBy;
+  } else {
+
+  }
+
   const sqlText = `
     SELECT * FROM list_item
       WHERE list_id = $1
