@@ -3,12 +3,18 @@ import { combineReducers } from 'redux';
 // loginMessage holds the string that will display
 // on the login screen if there's an error
 const weatherTypes = (state = [], action) => {
-    switch (action.type) {}
     if (action.type === 'SET_WEATHER_TYPES') {
         return action.payload;
     }
     return state; 
 };
+
+const weatherForecast = (state={}, action) => {
+  if (action.type === 'SET_WEATHER_FORECAST') {
+      return action.payload;
+  }
+  return state;
+}
 
 
 // make one object that has keys loginMessage, registrationMessage
@@ -16,4 +22,5 @@ const weatherTypes = (state = [], action) => {
 // state.errors.loginMessage and state.errors.registrationMessage
 export default combineReducers({
   weatherTypes,
+  weatherForecast
 });
