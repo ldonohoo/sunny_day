@@ -3,31 +3,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import './Lists.css';
 import LocationSelect from '../LocationSelect/LocationSelect';
-// import { Draggable, Droppable } from 'pragmatic-dnd';
-
-
+import {
+  DndContext,
+  closestCenter
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+import ListsSortable from '../ListsSortable/ListsSortable';
 
 function Lists() {
 
-    // const draggable = new Draggable(document.getElementById('draggable'));
-    // const droppable = new Droppable(document.getElementById('droppable'));
-    
     const [inputDescription, setInputDescription] = useState('');
-    // const [selectedLocation, setSelectedLocation] = useState('');
     const [selectedLists, setSelectedLists] = useState([]);
     const lists = useSelector(store => store.listsReducer.lists);
-    // const locations = useSelector(store => store.locationsReducer.locations);
     
     const dispatch = useDispatch();
     const history = useHistory();
-
-//   draggable.on('drag:start', () => {
-//     console.log('Drag started');
-//   });
-  
-//   droppable.on('drop', () => {
-//     console.log('Dropped');
-//   });
 
   useEffect(() => {
     dispatch({ type: 'GET_LISTS',
@@ -44,34 +38,68 @@ function Lists() {
     setInputDescription('');
   };
 
-  const handleLoadList = (listId, listDescription) => {
-    history.push(`/list_items/${listId}/${listDescription}`);
-  }
+  const handleDragEnd = (event) => {
+    console.log("Drag end called");
+    const {active, over} = event;
+    console.log("ACTIVE: " + active.id);
+    console.log("OVER :" + over.id);
 
-  const handleDeleteSelectLists = () => {
+    if(active.id !== over.id) {
+      // re-order sortorder in database
+      // ***** NOTE: indicies are specified by list id!!
+      // active is index to move
+      console.log('Active is:', active.id);
+      // over is index to move to
+      console.log('Over is:', over.id);
+      // get list of id's only 
+      // let indexToMove = active.id;
+      // let indexToReplace = over.id;
+      // let newLists = [...lists];
+      // // let listsIdOnly = lists.map(list => list.id);
+      // console.log('BEFORE:',JSON.stringify(newLists));
+      //   // console.log(arrayMove(lists, active.id, over.id));
+      //   newLists = arrayMove(newLists, indexToMove, indexToReplace);
+        dispatch({ type: 'UPDATE_LIST_ORDER',
+        payload: { indexToMove: active.id,
+                   indexToReplace: over.id } });
+    }
+  } 
+
+  const handleDeleteList = (listId) => {
     dispatch({
-      type: 'DELETE_LISTS',
-      payload: selectedLists
+      type: 'DELETE_LIST',
+      payload: { listId: listId }
     })
-    setSelectedLists([]);
   }
 
-  const handleCopyList = () => {
-    if (selectedLists.length > 1) {
-      alert('Please select only one list at a time to copy!');
-    } else {
-      // popup new list name box, then dispatch:
+  const handleToggleShowOnOpen = (listId, description) => {
+    console.log('updating change show on open YES')
+    dispatch({
+        type: 'UPDATE_LIST',
+        payload: { listId: listId,
+                   description: description,
+                   changeShowOnOpen: true } });
+  }
+
+  const handleUpdateDescription = (listId, description) => {
+    console.log('updating NOO change show on oopen!')
+    dispatch({ type: 'UPDATE_LIST',
+               payload: {listId: listId,
+                         description: description,
+                         changeShowOnOpen: false }
+    });
+  }
+
+  const handleCopyList = (listId, description) => { 
+    // create the new list with same description + 'COPY' 
+    const newDescription = description + ' COPY'
       dispatch({
         type: 'COPY_LIST',
-        payload: selectedLists[0]
+        payload: { listId: listId,
+                   newDescription: newDescription }
       })
-      setSelectedLists([]);
-    }
   }
 
-  const handleToggleShowOnOpen = () => {
-    console.log('toggling!');
-  }
 
   return (
     <>
@@ -89,21 +117,25 @@ function Lists() {
             <button type="submit">+</button>
         </form>
       </section>
-      <section className="lists">
-        {lists.map(list => {
-          return (
-            <div className="list"
-                 key={list.id}>
-              <button onClick={(e) => {setSelectedLists([...selectedLists, list.id])}}
-              >[]</button>
-              <div onClick={() => {handleLoadList(list.id, list.description)}}>
-                  {list.description}
-              </div>
-              <button onClick={() => {handleToggleShowOnOpen(list.id)}}>show</button>
-            </div>
-          );
-        })}
-      </section>
+      <DndContext collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}>           
+        <section className="lists">
+          <SortableContext
+              items={lists}
+              strategy={verticalListSortingStrategy}>
+            {lists.map(list => {
+                return ( <ListsSortable key={list.id}
+                                        list={list} 
+                                        handleDeleteList={handleDeleteList}
+                                        handleToggleShowOnOpen=
+                                          {handleToggleShowOnOpen}
+                                        handleUpdateDescription=
+                                          {handleUpdateDescription}
+                                        handleCopyList={handleCopyList}/> )
+              })}
+          </SortableContext>
+        </section>
+      </DndContext>
     </main>
     </>
   );

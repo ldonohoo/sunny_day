@@ -13,6 +13,7 @@ const listsRouter = require('./routes/lists.router');
 const listItemsRouter = require('./routes/list-items.router');
 const locationsRouter = require('./routes/locations.router');
 const weatherRouter = require('./routes/weather.router');
+const timeOfDayRouter = require('./routes/timeofday.router');
 
 // Express Middleware
 app.use(express.json());
@@ -32,6 +33,7 @@ app.use('/api/lists', listsRouter);
 app.use('/api/list_items', listItemsRouter);
 app.use('/api/locations', locationsRouter);
 app.use('/api/weather', weatherRouter);
+app.use('/api/time_of_days', timeOfDayRouter);
 
 // Listen Server & Port
 app.listen(PORT, () => {

@@ -17,16 +17,16 @@ DROP TABLE IF EXISTS list;
 DROP TABLE IF EXISTS hourly_forecast;
 DROP TABLE IF EXISTS location;
 DROP TABLE IF EXISTS weather_icon;
-DROP TABLE IF EXISTS "user";
+-- DROP TABLE IF EXISTS "user";
 
 
 
 -- create tables ----------------------------------------------
-CREATE TABLE "user" (
-  id  SERIAL PRIMARY KEY,
-  username  VARCHAR(80) UNIQUE NOT NULL,
-  password  VARCHAR(100) NOT NULL
-);
+-- CREATE TABLE "user" (
+--   id  SERIAL PRIMARY KEY,
+--   username  VARCHAR(80) UNIQUE NOT NULL,
+--   password  VARCHAR(100) NOT NULL
+-- );
 
 CREATE TABLE location (
   id SERIAL PRIMARY KEY,
@@ -54,15 +54,16 @@ CREATE TABLE list (
 CREATE TABLE list_item (
   id SERIAL PRIMARY KEY,
   description VARCHAR(200) NOT NULL,
+  completed_date DATE DEFAULT NULL,
   priority INT DEFAULT NULL,
   preferred_weather_type INT DEFAULT NULL,
   due_date DATE DEFAULT NULL,
   year_to_complete INT NOT NULL,
   month_to_complete INT DEFAULT NULL,
   day_to_complete INT DEFAULT NULL,
-  time_of_day_to_complete INT DEFAULT NULL,
+  time_of_day_to_complete VARCHAR(100) DEFAULT NULL,
   sort_order INT NOT NULL,
-  list_id INT REFERENCES list
+  list_id INT REFERENCES list(id) ON DELETE CASCADE
 );
 
   
@@ -182,3 +183,31 @@ INSERT INTO location
   ('cold', 'Less than n degrees', NULL),
   ('cool', 'less than n degrees', NULL),
   ('warm', 'More than n degrees', NULL);
+
+
+--  INSERT INTO list
+--    (description,  user_id, location_id, sort_order)
+--    VALUES ('treats', 1,
+--          CASE WHEN (SELECT is_master_default_location
+--                       FROM location
+--                       WHERE location.user_id = 1       
+--                        AND is_master_default_location = true)
+--               THEN (SELECT id 
+--                       FROM location
+--                       WHERE location.user_id = 1
+--                        AND is_master_default_location = true)
+--               ELSE null
+--          END,
+--          COALESCE((SELECT MAX(sort_order) 
+--                    FROM list 
+--                    WHERE user_id = 1), 0) + 1);
+--                    
+--                    
+--WITH new_order AS (
+--    SELECT unnest(ARRAY[1, 2, 9, 10]) AS id, generate_series(1, array_length(ARRAY[1, 2, 9, 10], 1)) AS new_sort_order
+--)
+--UPDATE list
+--SET sort_order = new_order.new_sort_order
+--FROM new_order
+--WHERE list.id = new_order.id  AND
+--	user_id = 1;
