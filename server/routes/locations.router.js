@@ -48,7 +48,13 @@ router.get('/master', rejectUnauthenticated, (req, res) => {
       })
   });
 
+  /**
+   * Get current location data for a list number
+   */
   router.get('/current_list', rejectUnauthenticated, (req, res) => {
+    console.log('in get of current location! ')
+    console.log('req.user', req.user);
+    console.log('req.query', req.query);
     const user = req.user;
     const listId = req.query.list_id;
     const sqlText = `

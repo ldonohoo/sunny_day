@@ -5,28 +5,24 @@ import { useDispatch, useSelector } from 'react-redux';
 function WeatherForecast({listId}) {
 
     const dispatch = useDispatch();
-    const currentListLocation = 
-      useSelector(store => store.locationsReducer.currentListLocation);
+    const currentLocation = 
+      useSelector(store => store.locationsReducer.currentLocation);
     const weatherForecast = 
       useSelector(store => store.weatherReducer.weatherForecast);
 
   useEffect(() => {
-    const getData = async () => {
-        await dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
-                         payload: {listId: listId}});
-        console.log('current list loc', JSON.stringify(currentListLocation));
-        await dispatch({ type: 'GET_WEATHER_FORECAST',
-                         payload: currentListLocation });
-    }
-    getData();
-
+    dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
+               payload: {listId: listId}});
   }, []);
 
-  return (
-    <div>{JSON.stringify(currentListLocation)}
-            :::{JSON.stringify(weatherForecast)}
-        <label>Current Forecast</label>
+  useEffect(() => {
+    dispatch({ type: 'GET_WEATHER_FORECAST',
+               payload: currentLocation[0] });
+  }, [currentLocation])
 
+  return (
+    <div>{JSON.stringify(currentLocation)}
+            ::::{JSON.stringify(weatherForecast)}::::
     </div>
   )
 }

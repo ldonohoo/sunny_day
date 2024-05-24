@@ -10,15 +10,14 @@ function ListItemsSortable({ item,
                              handleUpdateDescription,
                              handleDeleteItem,
                              weatherTypes }) {
-
+                             
     const dispatch = useDispatch();
     const [inputDescription, setInputDescription] = useState(item.description);
     const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
-    console.log(JSON.stringify(item))
     const [inputFormData, setInputFormData] = useState({
         priority: item.priority || 0,
         weatherType : item.preferred_weather_type || 0,
-        timeOfDay: item.time_of_day_to_complete || 0,
+        timeOfDay: item.time_of_day_to_complete || '0',
         dueDate: item.due_date || '' });
 
     const {
@@ -36,7 +35,8 @@ function ListItemsSortable({ item,
 
     const handleDescriptionKeyDown = (event) => {
         if (event.key === 'Enter') {
-          handleUpdateDescription(list.id, list.description);
+          handleUpdateDescription(item.id, inputDescription, item.list_id);
+          setInputDescription(inputDescription);
           setIsDescriptionEditable(false);
           event.target.classList.toggle('lists-desc-editable');
         }
@@ -45,7 +45,8 @@ function ListItemsSortable({ item,
     // blur is when item loses focus 
     //  (when lose input field focus, update the description)
     const handleDescriptionBlur = (event) => {
-    handleUpdateDescription(item.id, item.description);
+      console.log('item:', item)
+    handleUpdateDescription(item.id, item.description, item.list_id);
     setIsDescriptionEditable(false);
     event.target.classList.toggle('lists-desc-editable');
     };
@@ -57,30 +58,15 @@ function ListItemsSortable({ item,
 
     // Handle input change and update state
     const handleChangeForm = (event) => {
-    setInputFormData({...inputFormData, [event.target.name]: event.target.value});
-    const changeItem = {
-      description: inputFormData.description, 
-      priority: inputFormData.priority,
-      weatherType: inputFormData.weatherType,
-      timeOfDay: inputFormData.timeOfDay,
-      dueDate: inputFormData.dueDate,
-    //   yearToComplete: inputYearToComplete,
-    //   monthToComplete: inputMonthToComplete,
-    //   dayToComplete: inputDayToComplete,
-      listId: item.list_id
-    }
-    dispatch({
-        type: 'UPDATE_LIST_ITEM',
-        payload: { changeItem }
-    })
-    setInputFormData({
-      description: '',
-      priority: 0,
-      weatherType : 0,
-      timeOfDay: 0,
-      dueDate: ''
-    });
-  }
+      const { name, value } = event.target;
+      setInputFormData({ ...inputFormData, [name]: value });
+      dispatch({ type: 'UPDATE_LIST_ITEM',
+                 payload: { changeItem: { ...inputFormData,
+                                          [name]: value,
+                                          listId: item.list_id,
+                                          listItemId: item.id }}
+      });
+    };
 
     return (
         <div id="list-item"
@@ -130,10 +116,9 @@ function ListItemsSortable({ item,
                               value="night">Night
                       </option>
           </select>
-          <span>duedate:{inputFormData.dueDate}</span>
           <input name="dueDate"
                    type="date" 
-                   value={inputFormData.dueDate}
+                   value={inputFormData.dueDate ? inputFormData.dueDate.slice(0,10) : ''}
                    onChange={handleChangeForm}/>
             <button {...attributes} {...listeners}>drag me</button>
             <button onClick={() => handleDeleteItem(item.id)}>delete</button>

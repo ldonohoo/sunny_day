@@ -92,11 +92,39 @@ router.delete('/:id', rejectUnauthenticated, (req, res) => {
       console.log('DELETE of list in /api/list_items/:id failed:', dbError);
       res.sendStatus(500);
     })
-})
+});
+
+
+router.put('/update_desc/:id', rejectUnauthenticated, (req, res) => {
+  console.log('reqparams',req.params);
+ const listId = Number(req.params.id);
+ console.log('req.body', req.body);
+ const newDescription = req.body.description;
+ console.log(newDescription)
+   sqlUpdateDescription = `
+     UPDATE list_item
+       SET description = $2
+       WHERE id = $1;
+     `;
+   pool.query(sqlUpdateDescription, [listId, newDescription])
+   .then(dbResponse => {
+     console.log('PUT at /api/list_items/update_desc/:id successful updating description:', dbResponse);
+     res.sendStatus(200);
+   })
+   .catch(dbError => {  
+     console.log('Error in PUT at /api/list_items/update_desc/:id updating description', dbError);
+     res.sendStatus(500);
+   })
+});
+
+
+/**
+ * Edit a list item
+ */
 router.put('/edit/:id', rejectUnauthenticated, (req, res) => {
-  console.log('req.body in POST of new item:', JSON.stringify(req.body));
+  console.log('req.body in PUT for edit of list item:', JSON.stringify(req.body));
   const listItemId = req.params.id;
-  const changeItem = req.body.changeItem;
+  const changeItem = req.body;
   // pre-process data to assign nulls if unassigned
   if (changeItem.dueDate === '') {
     changeItem.dueDate = null;
@@ -113,24 +141,17 @@ router.put('/edit/:id', rejectUnauthenticated, (req, res) => {
   // future add yeartocomp, month, day to update when sort works
   const sqlText = `
   UPDATE list_item
-    (description, 
-     priority,
-     preferred_weather_type,
-     time_of_day_to_complete,
-     due_date,
-     list_id,
-     sort_order)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, 
-          COALESCE((SELECT MAX(sort_order) 
-                    FROM list_item
-                    WHERE list_id = $6), 0) + 1);
+     SET priority = $1,
+         preferred_weather_type = $2,
+         time_of_day_to_complete = $3,
+         due_date = $4
+    WHERE id = $5;
     `;
-    pool.query(sqlText, [ changeItem.description, 
-                          changeItem.priority,
+    pool.query(sqlText, [ changeItem.priority,
                           changeItem.weatherType,
                           changeItem.timeOfDay,
                           changeItem.dueDate,
-                          changeItem.listId ])
+                          listItemId ])
     .then(dbResponse => {
       console.log('POST route for /api/list_items sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);

@@ -13,6 +13,7 @@ import {
 } from "@dnd-kit/sortable";
 import ListItemsSortable from '../ListItemsSortable/ListItemsSortable';
 import LocationSelect from '../LocationSelect/LocationSelect';
+import WeatherForecast from '../WeatherForecast/WeatherForecast';
 
 
 function ListItems() {
@@ -28,6 +29,7 @@ function ListItems() {
     
     const [selectedWeatherType, setSelectedWeatherType] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
+    const [showCompleted, setShowCompleted] = useState(true);
     const listItems = useSelector(store => store.listsReducer.listItems);
     const locations = useSelector(store => store.locationsReducer.locations);
     const weatherTypes = useSelector(store => store.weatherReducer.weatherTypes);
@@ -83,12 +85,6 @@ function ListItems() {
       console.log('Active is:', active.id);
       // over is index to move to
       console.log('Over is:', over.id);
-      // get list of id's only 
-      // let listItemsIdOnly = listItems.map(item => item.id);
-        // const activeIndex = listItemsIdOnly.indexOf(active.id);
-        // const overIndex = listItemsIdOnly.indexOf(over.id);
-        // console.log(arrayMove(listItemsIdOnly, activeIndex, overIndex));
-        // arrayMove(listItemsIdOnly, activeIndex, overIndex);
         dispatch({ type: 'UPDATE_LIST_ITEMS_ORDER',
         payload: { indexToMove: active.id,
                    indexToReplace: over.id,
@@ -117,22 +113,37 @@ function ListItems() {
       })
   }
 
-  const handleUpdateDescription = (listId, description) => {
+  const handleUpdateDescription = (listItemId, description, listId) => {
     console.log('updating NOO change show on oopen!')
-    dispatch({ type: 'UPDATE_LIST',
-               payload: {listId: listId,
-                         description: description,
-                         changeShowOnOpen: false }
+    console.log('handleUpdateDescription', listItemId, ' ', description, 'df', listId)
+    dispatch({ type: 'UPDATE_LIST_ITEM_DESCRIPTION',
+               payload: { listItemId: listItemId,
+                          description: description,
+                          listId: listId }
     });
   }
+
 
   return (  
     <>
     <main>
-      <h1>{list_description}:</h1>
+      <section>
+        <h2>Weather Forecast</h2>
+        <WeatherForecast />
+      </section>
+      <h2>{list_description}:</h2>
       <section>
         <LocationSelect isMasterLocation={false}
                         listId={list_id} />
+      </section>
+      <section>
+        <h2>show completed</h2>
+        <button className="show-completed yes" 
+                type="button" 
+                onClick={() => setShowCompleted(true)}>yes</button>
+        <button className="show-completed no" 
+                type="button" 
+                onClick={() => setShowCompleted(false)}>no</button>
       </section>
       <section className="form list-items-form">
         <form onSubmit={handleAddListItem}>
@@ -186,18 +197,32 @@ function ListItems() {
                 items={listItems}
                 strategy={verticalListSortingStrategy}>
             {listItems.map(item => {
-              return ( <ListItemsSortable key={item.id}
+              return ( 
+                (showCompleted || (!showCompleted && ! item.completed_date)) ?
+                      <ListItemsSortable key={item.id}
                                           item={item}
                                           handleCompleteItemToggle=
                                             {handleCompleteItemToggle}
                                           handleDeleteItem={handleDeleteItem}
                                           handleUpdateDescription=
                                             {handleUpdateDescription}
-                                          weatherTypes={weatherTypes}/> )
+                                          weatherTypes={weatherTypes}/> 
+                : null )
           })}
           </SortableContext>
         </section>
       </DndContext>
+      <section>
+        <h3>{!showCompleted ? 'completed items:' : ''}</h3>
+        {listItems.map(item => {
+          return (
+            <span key={item.id}>
+              {!showCompleted && item.completed_date ? 
+                item.description + ' completed on: ' + item.completed_date : ''}
+            </span>
+          );
+        })}
+      </section>
     </main>
     </>
   );
