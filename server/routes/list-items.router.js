@@ -14,15 +14,15 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
   if (req.query.group) {
     groupByHeading = req.query.group;
   }
-  let groupByFieldName = 'to_do_' + groupByHeading;
+  let groupByFieldName = groupByHeading + '_to_work_on';
   // If show completed items is false, don't include completed items
   //    in the header calculations
   if (req.query.showCompleted && req.query.showCompleted === 'false') {
     const sqlTextNoShowCompleted = `
     SELECT filtered_list_item.*,
            CASE
-            WHEN ROW_NUMBER() OVER (PARTITION BY $3 ORDER BY $3) = 1
-              THEN $2
+          WHEN ROW_NUMBER() OVER (PARTITION BY ${groupByFieldName} ORDER BY ${groupByFieldName}) = 1
+              THEN $2 || ' ' || ROW_NUMBER() OVER (PARTITION BY ${groupByFieldName} ORDER BY ${groupByFieldName})
             ELSE ''
            END AS group_header
       FROM
@@ -36,8 +36,7 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
         sort_order;
     `;
     pool.query(sqlTextNoShowCompleted, [ listId,
-                                         groupByHeading,
-                                         groupByFieldName ])
+                                         groupByHeading])
     .then(dbResponse => {
       console.log('GET route for /api/list_items/:list_id without completed items sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);
@@ -52,22 +51,24 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
     const sqlTextShowCompleted = `
     SELECT filtered_list_item.*,
            CASE
-            WHEN ROW_NUMBER() OVER (PARTITION BY $3 ORDER BY $3) = 1
-              THEN $2
-            ELSE ''
+              WHEN ROW_NUMBER() OVER (PARTITION BY ${groupByFieldName} ORDER BY ${groupByFieldName}) = 1
+                  THEN $2 || ' ' || ROW_NUMBER() OVER (PARTITION BY ${groupByFieldName} ORDER BY ${groupByFieldName})
+              WHEN ${groupByFieldName} <> LAG(${groupByFieldName}, 1) OVER (ORDER BY ${groupByFieldName})
+                  THEN $2 || ' ' || ROW_NUMBER() OVER (PARTITION BY ${groupByFieldName} ORDER BY ${groupByFieldName})
+              ELSE ''
            END AS group_header
       FROM
         ( SELECT list_item.*, list.description AS list_description
             FROM list_item
             INNER JOIN list
               ON list.id = list_item.list_id
-              WHERE list.id = $1 ) AS filtered_list_item
+            WHERE list.id = $1 
+              AND completed_date IS NOT NULL ) AS filtered_list_item
       ORDER BY
         sort_order;
     `;
     pool.query(sqlTextShowCompleted, [ listId,
-                                       groupByHeading,
-                                       groupByFieldName ])
+                                       groupByHeading])
     .then(dbResponse => {
       console.log('GET route for /api/list_items/:list_id with completed items sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);
@@ -105,7 +106,7 @@ router.post('/', rejectUnauthenticated, (req, res) => {
      preferred_weather_type,
      preferred_time_of_day,
      due_date,
-     year_to_complete,
+     year_to_work_on,
      list_id,
      sort_order)
     VALUES ($1, $2, $3, $4, $5, $6, $7, 

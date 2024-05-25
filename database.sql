@@ -17,16 +17,16 @@ DROP TABLE IF EXISTS list;
 DROP TABLE IF EXISTS hourly_forecast;
 DROP TABLE IF EXISTS location;
 DROP TABLE IF EXISTS weather_icon;
--- DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS "user";
 
 
 
 -- create tables ----------------------------------------------
--- CREATE TABLE "user" (
---   id  SERIAL PRIMARY KEY,
---   username  VARCHAR(80) UNIQUE NOT NULL,
---   password  VARCHAR(100) NOT NULL
--- );
+CREATE TABLE "user" (
+  id  SERIAL PRIMARY KEY,
+  username  VARCHAR(80) UNIQUE NOT NULL,
+  password  VARCHAR(100) NOT NULL
+);
 
 CREATE TABLE location (
   id SERIAL PRIMARY KEY,
@@ -58,9 +58,9 @@ CREATE TABLE list_item (
   priority INT DEFAULT NULL,
   preferred_weather_type INT DEFAULT NULL,
   due_date DATE DEFAULT NULL,
-  year_to_complete INT NOT NULL,
-  month_to_complete INT DEFAULT NULL,
-  week_to_complete INT DEFAULT NULL,
+  year_to_work_on INT NOT NULL,
+  month_to_work_on INT DEFAULT NULL,
+  week_to_work_on INT DEFAULT NULL,
   preferred_time_of_day VARCHAR(100) DEFAULT NULL,
   sort_order INT NOT NULL,
   list_id INT REFERENCES list(id) ON DELETE CASCADE
@@ -152,26 +152,12 @@ CREATE TABLE forecast_precipitation_type (
   forecast_id INT REFERENCES daily_forecast
 );
 
--- INSERT INTO "user" 
---   (username, password)
---   VALUES ('lisa', 'cat'),
---         ('betty', 'pie');
 
 INSERT INTO location
   (name, zip, is_master_default_location)
   VALUES ('Mendota Hts, MN', 55118, TRUE),
          ('St. Paul, MN', 55032, FALSE);
 
--- INSERT INTO list 
---   (description, location_id, sort_order, user_id)
---   VALUES ('my first list', 1, 1, 1),
---         ('to do list not done yet', 2, 2, 1);
-
--- INSERT INTO list_item
---   (description, year_to_complete, sort_order, list_id)
---   VALUES ('mow the lawn', 2024, 1, 1),
---         ('make a big cake', 2024, 3, 1),
---         ('trim the hedge', 2024, 2, 1);
 
  INSERT INTO preferred_weather_type
   (title, description, icon_url)
@@ -184,6 +170,10 @@ INSERT INTO location
   ('cool', 'less than n degrees', NULL),
   ('warm', 'More than n degrees', NULL);
 
+INSERT INTO time_of_day 
+  (morning, afternoon, evening, night, user_id)
+  VALUES ( '06:00:00', '12:00:00', '17:00:00', '20:00:00', 1),
+         ( '06:00:00', '12:00:00', '17:00:00', '20:00:00', 2);
 
 --  INSERT INTO list
 --    (description,  user_id, location_id, sort_order)

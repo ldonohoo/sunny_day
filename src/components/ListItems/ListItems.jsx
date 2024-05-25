@@ -29,7 +29,7 @@ function ListItems() {
     const listItems = useSelector(store => store.listsReducer.listItems);
     const locations = useSelector(store => store.locationsReducer.locations);
     const weatherTypes = useSelector(store => store.weatherReducer.weatherTypes);
-    const timeOfDays = useSelector(store => store.timeOfDayReducer.timeOfDays)
+    // const timeOfDays = useSelector(store => store.timeOfDayReducer.timeOfDays);
     const { list_id } = useParams();
     const currentLocation = 
       useSelector(store => store.locationsReducer.currentLocation);
@@ -50,10 +50,10 @@ function ListItems() {
                  showCompleted: showCompleted,
                  group: selectedGroupBy
        }});
-    dispatch({ type: 'GET_WEATHER_TYPES' });
-    dispatch({ type: 'GET_TIME_OF_DAYS' });
     dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
                payload: { listId: list_id }});
+    dispatch({ type: 'GET_WEATHER_TYPES' });
+    dispatch({ type: 'GET_TIME_OF_DAYS' });
   }, []);
 
   const handleAddListItem = (event) => {

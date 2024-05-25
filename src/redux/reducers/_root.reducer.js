@@ -16,8 +16,8 @@ const rootReducer = combineReducers({
   user, // will have an id and username if someone is logged in
   locationsReducer,
   listsReducer,
-  weatherReducer,
-  timeOfDayReducer,
+  weatherReducer
+  // timeOfDayReducer
 });
 
 export default rootReducer;
