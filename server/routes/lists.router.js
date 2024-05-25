@@ -170,8 +170,8 @@ router.post('/copy/', rejectUnauthenticated, (req, res) => {
             due_date,
             year_to_complete,
             month_to_complete,
-            day_to_complete,
-            time_of_day_to_complete,
+            week_to_complete ,
+            preferred_time_of_day,
             list_id,
             sort_order )  
         SELECT 
@@ -181,8 +181,8 @@ router.post('/copy/', rejectUnauthenticated, (req, res) => {
             due_date,
             year_to_complete,
             month_to_complete,
-            day_to_complete,
-            time_of_day_to_complete,
+            week_to_complete,
+            preferred_time_of_day,
             $1,
             sort_order  
         FROM 

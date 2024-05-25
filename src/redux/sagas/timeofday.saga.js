@@ -10,11 +10,11 @@ function* getTimeOfDays() {
       withCredentials: true,
     };
     const response = yield axios.get('/api/time_of_days', config);
-    console.log('time of day get done, about to set', response.data);
+    console.log('WOWSER time of day get done, about to set', response.data);
     yield put({ type: 'SET_TIME_OF_DAYS', payload: response.data });
   } 
   catch (error) {
-    console.log('Error getting time of day types:', error);
+    console.log('WOWSER Error getting time of day types:', error);
   }
 }
 

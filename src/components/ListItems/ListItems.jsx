@@ -2,15 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 import './ListItems.css'
-import {
-  DndContext,
-  closestCenter
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy
-} from "@dnd-kit/sortable";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import ListItemsSortable from '../ListItemsSortable/ListItemsSortable';
 import LocationSelect from '../LocationSelect/LocationSelect';
 import WeatherForecast from '../WeatherForecast/WeatherForecast';
@@ -27,19 +20,36 @@ function ListItems() {
               dueDate: ''
     });
     
-    const [selectedWeatherType, setSelectedWeatherType] = useState('');
-    const [selectedLocation, setSelectedLocation] = useState('');
+    // const [selectedWeatherType, setSelectedWeatherType] = useState('');
+    // const [selectedLocation, setSelectedLocation] = useState('');
     const [showCompleted, setShowCompleted] = useState(true);
+    const [selectedGroupBy, setSelectedGroupBy] = useState('week');
+    const [headerCounter, setHeaderCounter] = useState(-1);
+    const [currentGroupValue, setCurrentGroupValue] = useState('');
     const listItems = useSelector(store => store.listsReducer.listItems);
     const locations = useSelector(store => store.locationsReducer.locations);
     const weatherTypes = useSelector(store => store.weatherReducer.weatherTypes);
     const timeOfDays = useSelector(store => store.timeOfDayReducer.timeOfDays)
-    const { list_id, list_description } = useParams();
+    const { list_id } = useParams();
     const currentLocation = 
       useSelector(store => store.locationsReducer.currentLocation);
+    //shouldDisplayHeader, currentHeader
+    let shouldDisplayHeader = true;
+    const groupBy = { 
+      shouldDisplayHeader,
+      selectedGroupBy,
+      setSelectedGroupBy,
+      headerCounter,
+      setHeaderCounter };
 
   useEffect(() => {
-    dispatch({ type: 'GET_LIST_ITEMS', payload: { listId : list_id }});
+    console.log('useeffectlistitems:', list_id, showCompleted, selectedGroupBy)
+    dispatch({ 
+      type: 'GET_LIST_ITEMS', 
+      payload: { listId : list_id,
+                 showCompleted: showCompleted,
+                 group: selectedGroupBy
+       }});
     dispatch({ type: 'GET_WEATHER_TYPES' });
     dispatch({ type: 'GET_TIME_OF_DAYS' });
     dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
@@ -103,8 +113,8 @@ function ListItems() {
         type: 'TOGGLE_COMPLETE_LIST_ITEM',
         payload: { listItemId : listItemId,
                    listId: listId }   
-  });
-}
+    });
+  } 
 
   const handleDeleteItem = (listItemId) => {
     dispatch({
@@ -131,7 +141,7 @@ function ListItems() {
         <h2>Weather Forecast</h2>
         <WeatherForecast />
       </section>
-      <h2>{list_description}:</h2>
+      <h2>{listItems[0]?.list_description}:</h2>
       <section>
         <LocationSelect isMasterLocation={false}
                         listId={list_id} />
@@ -144,6 +154,19 @@ function ListItems() {
         <button className="show-completed no" 
                 type="button" 
                 onClick={() => setShowCompleted(false)}>no</button>
+        <select name="group-by"
+              value={selectedGroupBy}
+              onChange={() => setSelectedGroupBy(true)}>
+                <option name="week"
+                        value="week">Week
+                </option>
+                <option name="month"
+                        value="month">Month
+                </option>
+                <option name="year"
+                        value="year">Year
+                </option>
+      </select>
       </section>
       <section className="form list-items-form">
         <form onSubmit={handleAddListItem}>
@@ -206,6 +229,7 @@ function ListItems() {
                                           handleDeleteItem={handleDeleteItem}
                                           handleUpdateDescription=
                                             {handleUpdateDescription}
+                                          groupBy={groupBy}
                                           weatherTypes={weatherTypes}/> 
                 : null )
           })}

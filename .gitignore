@@ -61,8 +61,8 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
+# # dotenv environment variables file
+# .env
 
 # ignore package-lock as it complicates merging
 package-lock.json

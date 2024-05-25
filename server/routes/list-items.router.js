@@ -8,29 +8,75 @@ const { rejectUnauthenticated } = require('../modules/authentication-middleware'
  */
 router.get('/:list_id',rejectUnauthenticated, (req, res) => {
   console.log('listid in GET route:', req.params.list_id)
-  const listId = req.params.list_id;
-  const groupHeading = req.params.group;
-  let sortBy = '';
-  if (req.query.sortBy) {
-    sortBy = req.query.sortBy;
-  } else {
-
+  console.log('query params', req.query)
+  const listId = Number(req.params.list_id);
+  let groupByHeading = 'year';
+  if (req.query.group) {
+    groupByHeading = req.query.group;
   }
-
-  const sqlText = `
-    SELECT * FROM list_item
-      WHERE list_id = $1
-      ORDER BY sort_order;
+  let groupByFieldName = 'to_do_' + groupByHeading;
+  // If show completed items is false, don't include completed items
+  //    in the header calculations
+  if (req.query.showCompleted && req.query.showCompleted === 'false') {
+    const sqlTextNoShowCompleted = `
+    SELECT filtered_list_item.*,
+           CASE
+            WHEN ROW_NUMBER() OVER (PARTITION BY $3 ORDER BY $3) = 1
+              THEN $2
+            ELSE ''
+           END AS group_header
+      FROM
+        ( SELECT list_item.*, list.description AS list_description
+            FROM list_item
+            INNER JOIN list
+              ON list.id = list_item.list_id
+            WHERE list.id = $1 
+              AND completed_date IS NOT NULL ) AS filtered_list_item
+      ORDER BY
+        sort_order;
     `;
-    pool.query(sqlText, [listId])
+    pool.query(sqlTextNoShowCompleted, [ listId,
+                                         groupByHeading,
+                                         groupByFieldName ])
     .then(dbResponse => {
-      console.log('GET route for /api/list_items/:list_id sucessful!', dbResponse.rows);
+      console.log('GET route for /api/list_items/:list_id without completed items sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);
     })
     .catch(dbError => {
-      console.log('GET route for /api/list_items/:list_id failed', dbError);
+      console.log('GET route for /api/list_items/:list_id without completed itemsfailed', dbError);
       res.sendStatus(500);
     })
+  // else if showCompletedItems is true, take completed items into account
+  //    when creating header fields
+  } else {
+    const sqlTextShowCompleted = `
+    SELECT filtered_list_item.*,
+           CASE
+            WHEN ROW_NUMBER() OVER (PARTITION BY $3 ORDER BY $3) = 1
+              THEN $2
+            ELSE ''
+           END AS group_header
+      FROM
+        ( SELECT list_item.*, list.description AS list_description
+            FROM list_item
+            INNER JOIN list
+              ON list.id = list_item.list_id
+              WHERE list.id = $1 ) AS filtered_list_item
+      ORDER BY
+        sort_order;
+    `;
+    pool.query(sqlTextShowCompleted, [ listId,
+                                       groupByHeading,
+                                       groupByFieldName ])
+    .then(dbResponse => {
+      console.log('GET route for /api/list_items/:list_id with completed items sucessful!', dbResponse.rows);
+      res.send(dbResponse.rows);
+    })
+    .catch(dbError => {
+      console.log('GET route for /api/list_items/:list_id with completed items failed', dbError);
+      res.sendStatus(500);
+    })
+  }
 });
 
 /**
@@ -57,7 +103,7 @@ router.post('/', rejectUnauthenticated, (req, res) => {
     (description, 
      priority,
      preferred_weather_type,
-     time_of_day_to_complete,
+     preferred_time_of_day,
      due_date,
      year_to_complete,
      list_id,
@@ -151,7 +197,7 @@ router.put('/edit/:id', rejectUnauthenticated, (req, res) => {
   UPDATE list_item
      SET priority = $1,
          preferred_weather_type = $2,
-         time_of_day_to_complete = $3,
+         preferred_time_of_day = $3,
          due_date = $4
     WHERE id = $5;
     `;
@@ -280,3 +326,41 @@ router.put('/sort/:id', rejectUnauthenticated, (req, res) => {
 });
 
 module.exports = router;
+
+
+  // if show completed is off, add where clause to only select non-complete items
+  // const sqlText = `
+  //   SELECT
+  //       CASE ( WHEN ROW_NUMBER() OVER (PARTITION BY sort_column ORDER BY sort_column ) = 1 )
+  //            THEN 'Heading Value'
+  //            ELSE ''
+  //       END  AS group_header,
+  //       other columns....
+  //   FROM
+  //       list_items
+  //   ORDER BY
+  //       sort_order
+  //   $whereclause;
+  //   `;
+
+  // If there is a group by heading request, set up query to get header data
+  //    added to the result table at the first line of each group type
+  //      Example:  groupByHeading = 'month'
+  //                    -ADDS heading label to the first record every time
+  //                        a month changes
+  //                groupByHeading = 'year'
+  //                    -ADDs a heading label to the first record every time    
+  //                  a year changes
+
+  // 
+
+    // old text:
+    // const sqlText = `
+    // SELECT list_item.*, list.description AS list_description
+    //   FROM list_item
+    //   INNER JOIN list
+    //     ON list.id = list_item.list_id
+    //   WHERE list_id = $1
+    //   ORDER BY sort_order;
+    // `;
+

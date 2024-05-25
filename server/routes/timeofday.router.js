@@ -15,11 +15,11 @@ router.get('/',rejectUnauthenticated, (req, res) => {
     `;
     pool.query(sqlText)
     .then(dbResponse => {
-      console.log('GET route for /api/time_of_day sucessful!', dbResponse.rows);
+      console.log('WOWSER GET route for /api/time_of_day sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);
     })
     .catch(dbError => {
-      console.log('GET route for /api/time_of_day failed', dbError);
+      console.log('WOWSER GET route for /api/time_of_day failed', dbError);
       res.sendStatus(500);
     })
 });

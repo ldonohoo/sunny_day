@@ -3,23 +3,31 @@ import {CSS} from "@dnd-kit/utilities";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory} from "react-router-dom/cjs/react-router-dom.min";
+// import { should } from "vitest";
 
 
 function ListItemsSortable({ item, 
                              handleCompleteItemToggle,
                              handleUpdateDescription,
                              handleDeleteItem,
+                
+                             groupBy,
                              weatherTypes }) {
-                             
+
+    // useEffect(() => {
+    //   if (currentGroupValue != )
+    // }, []);
+
+    console.log('shoulddisphead', groupBy.shouldDisplayHeader);                         
     const dispatch = useDispatch();
     const [inputDescription, setInputDescription] = useState(item.description);
     const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
     const [inputFormData, setInputFormData] = useState({
         priority: item.priority || 0,
         weatherType : item.preferred_weather_type || 0,
-        timeOfDay: item.time_of_day_to_complete || '0',
+        timeOfDay: item.preferred_time_of_day|| '0',
         dueDate: item.due_date || '' });
-
+      
     const {
         attributes,
         listeners,
@@ -69,10 +77,19 @@ function ListItemsSortable({ item,
     };
 
     return (
+        // conditionally return a header row whenever the selected group 
+        //    header type changes
+
+        <>
+        <div>{ groupBy.shouldDisplayHeader ? 
+          ( `${groupBy.selectedGroupBy} + ${groupBy.headerCounter}`
+          ) : null }
+        </div>
         <div id="list-item"
              className="list-item"
              ref={setNodeRef} 
              style={style} >
+          <span>{JSON.stringify(item)}</span>
           <button onClick={() => handleCompleteItemToggle(item.id, item.list_id)}
             >{item.completed_date === null ? '🔲' : '⬛️'}
           </button>
@@ -123,6 +140,7 @@ function ListItemsSortable({ item,
             <button {...attributes} {...listeners}>drag me</button>
             <button onClick={() => handleDeleteItem(item.id)}>delete</button>
         </div>
+      </>
     )
 
 }

@@ -35,7 +35,7 @@ function ListsSortable({list,
     }
 
     const handleLoadList = () => {
-        history.push(`/list_items/${list.id}/${list.description}`);
+        history.push(`/list_items/${list.id}`);
       }
     
       const handleDescriptionKeyDown = (event) => {

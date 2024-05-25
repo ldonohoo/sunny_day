@@ -97,15 +97,24 @@ function* updateListOrder(action) {
     console.log('Error updating sort order for lists:', error);
   }
 }
-
+/**
+ * Get List Items
+ *  path params: list id
+ *  query params: showCompleted (boolean)
+ *                group (week/day/month groupBy selection)
+ */
 function* getListItems(action) {
   console.log('in getlistitems', action.payload)
   try {
-    const config = {
+    const listId = action.payload.listId;
+    const showCompleted = action.payload.showCompleted;
+    const group = action.payload.group;
+    const response = yield axios({
+      method: 'GET',
+      url: `/api/list_items/${listId}?show_completed=${showCompleted}&group=${group}`,
       headers: { 'Content-Type': 'application/json' },
-      withCredentials: true,
-    };
-    const response = yield axios.get(`/api/list_items/${action.payload.listId}`, config);
+      withCredentials: true
+    })
     console.log('GET of data from list_items', response.data)
     yield put({ type: 'SET_LIST_ITEMS',
                 payload: response.data });

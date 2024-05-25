@@ -53,16 +53,17 @@ router.get('/forecast/', rejectUnauthenticated, (req, res) => {
     `;
     pool.query(sqlText, [locationId, userId])
     .then(dbResponse => {
-      console.log('Get of location lat/long in /api/weather/forecast/ worked!', dbResponse.rows);
+      console.log('Get of location lat/long in /api/weather/forecast/ worked!', JSON.stringify(dbResponse.rows));
       // then use that to query visualcrossing with axios get!!
       
-      const {utc_offset, name, country, latitude, longitude} = dbResponse.rows[0];
+      const { name, country, latitude, longitude } = dbResponse.rows[0];
+      let utcOffset = Number(dbResponse.rows[0].utc_offset);
       console.log('utc offset, name, country, lat, long', utc_offset, name, country, latitude, longitude);
       // sample format (visual crossing timeline weather api)
       //    https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/[location]/[date1]/[date2]?key=YOUR_API_KEY 
       axios({
         method: 'GET',
-        url: `${visualCrossRequest}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utc_offset}`
+        url: `${visualCrossRequest}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utcOffset}`
       })
       .then(apiResponse => {
         console.log('GET of data from visual crossing worked at /api/weather/forecast/!', apiResponse.data);

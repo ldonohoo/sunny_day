@@ -53,7 +53,7 @@ function App() {
             <Lists />
           </ProtectedRoute>
 
-          <ProtectedRoute exact path="/list_items/:list_id/:list_description">
+          <ProtectedRoute exact path="/list_items/:list_id">
             <ListItems />
           </ProtectedRoute>
 
