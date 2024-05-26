@@ -17,9 +17,9 @@ DROP TABLE IF EXISTS list;
 DROP TABLE IF EXISTS hourly_forecast;
 DROP TABLE IF EXISTS location;
 DROP TABLE IF EXISTS weather_icon;
-DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS "user" CASCADE;
 
-
+DROP TABLE IF EXISTS session;
 
 -- create tables ----------------------------------------------
 CREATE TABLE "user" (
@@ -158,6 +158,16 @@ INSERT INTO location
   VALUES ('Mendota Hts, MN', 55118, TRUE),
          ('St. Paul, MN', 55032, FALSE);
 
+-- INSERT INTO list 
+--   (description, location_id, sort_order, user_id)
+--   VALUES ('my first list', 1, 1, 1),
+--         ('to do list not done yet', 2, 2, 1);
+
+-- INSERT INTO list_item
+--   (description, year_to_complete, sort_order, list_id)
+--   VALUES ('mow the lawn', 2024, 1, 1),
+--         ('make a big cake', 2024, 3, 1),
+--         ('trim the hedge', 2024, 2, 1);
 
  INSERT INTO preferred_weather_type
   (title, description, icon_url)
@@ -169,12 +179,12 @@ INSERT INTO location
   ('cold', 'Less than n degrees', NULL),
   ('cool', 'less than n degrees', NULL),
   ('warm', 'More than n degrees', NULL);
-
+--
 INSERT INTO time_of_day 
-  (morning, afternoon, evening, night, user_id)
-  VALUES ( '06:00:00', '12:00:00', '17:00:00', '20:00:00', 1),
-         ( '06:00:00', '12:00:00', '17:00:00', '20:00:00', 2);
-
+  (morning, afternoon, evening, night)
+  VALUES ( '06:00:00', '12:00:00', '17:00:00', '20:00:00'),
+         ( '06:00:00', '12:00:00', '17:00:00', '20:00:00');
+         
 --  INSERT INTO list
 --    (description,  user_id, location_id, sort_order)
 --    VALUES ('treats', 1,

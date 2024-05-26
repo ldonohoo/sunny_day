@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": "18.x"
+    "node": ">=18.x"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
@@ -35,9 +35,9 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
-    "nodemon": "^2.0.4",
-    "vite": "^5.0.7",
-    "vitest": "^1.0.4"
+    "nodemon": "^3.1.0",
+    "vite": "^5.2.11",
+    "vitest": "^1.6.0"
   },
   "browserslist": {
     "production": [

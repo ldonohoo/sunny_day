@@ -19,11 +19,10 @@ function WeatherForecast({listId}) {
   }, []);
 
   useEffect(() => {
-    console.log('currentLoc:', currentLocation);
     if (currentLocation !== 0) {
       setNoLocation(false);
       dispatch({ type: 'GET_WEATHER_FORECAST',
-               payload: currentLocation[0] });
+               payload: currentLocation });
       // setForecastDays(weatherForecast.days);
     } else {
       setNoLocation(true);

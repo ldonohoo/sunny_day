@@ -107,11 +107,10 @@ function* getListItems(action) {
   console.log('in getlistitems', action.payload)
   try {
     const listId = action.payload.listId;
-    const showCompleted = action.payload.showCompleted;
     const group = action.payload.group;
     const response = yield axios({
       method: 'GET',
-      url: `/api/list_items/${listId}?show_completed=${showCompleted}&group=${group}`,
+      url: `/api/list_items/${listId}?group=${group}`,
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
     })
@@ -133,7 +132,8 @@ function* addListItem(action) {
     yield axios.post('/api/list_items',  action.payload, config);
     console.log('to choose from:', action.payload)
     yield put({ type: 'GET_LIST_ITEMS',
-                payload: {listId: action.payload.newItem.listId }});
+                payload: {listId: action.payload.newItem.listId,
+                          group: action.payload.newItem.group }});
   } 
   catch (error) {
     console.log('Error getting list items for user:', error);
@@ -151,7 +151,8 @@ function* updateListItem(action) {
       data: changeItem
     })
     yield put({ type: 'GET_LIST_ITEMS',
-                payload: { listId: changeItem.listId }
+                payload: { listId: changeItem.listId,
+                           group: changeItem.group }
      });
   }
   catch(error) {
@@ -170,7 +171,8 @@ function* updateListItemDescription(action) {
       data: {description: action.payload.description}
     })
     yield put({ type: 'GET_LIST_ITEMS',
-                payload: { listId: action.payload.listId }
+                payload: { listId: action.payload.listId,
+                           group: action.payload.group }
      });
   }
   catch(error) {
@@ -189,7 +191,8 @@ function* toggleCompleteListItem(action) {
       withCredentials: true
     })
     yield put({ type: 'GET_LIST_ITEMS',
-                payload: { listId: action.payload.listId }
+                payload: { listId: action.payload.listId,
+                           group: action.payload.group }
      });
   }
   catch(error) {
@@ -208,7 +211,8 @@ function* deleteListItem(action) {
     })
     console.log('here!');
     yield put({ type: 'GET_LIST_ITEMS',
-                listId: action.payload.listItemId });
+                listId: action.payload.listItemId,
+                group: action.payload.group });
   }
   catch(error) {
     console.log('Error in delete list item', error);
@@ -227,7 +231,8 @@ function* updateListItemsOrder(action) {
               indexToReplace: action.payload.indexToReplace }
       });
     yield put({ type: 'GET_LIST_ITEMS',
-                payload: { listId: action.payload.listId }
+                payload: { listId: action.payload.listId,
+                           group: action.payload.group }
      });
   }
   catch(error) {

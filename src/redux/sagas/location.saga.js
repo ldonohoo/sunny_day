@@ -41,7 +41,8 @@ function* getCurrentListLocation(action) {
       const response = 
         yield axios.get(`/api/locations/current_list/?list_id=${action.payload.listId}`, config);
         console.log('response.data from getcurrentlistloc', response.data)
-      yield put({ type: 'SET_CURRENT_LIST_LOCATION', payload: response.data });
+      const locationId = response.data[0].location_id;
+      yield put({ type: 'SET_CURRENT_LIST_LOCATION', payload: locationId });
     } 
     catch (error) {
       console.log('Error getting current list location:', error);
@@ -49,6 +50,8 @@ function* getCurrentListLocation(action) {
   }
 
   function* updateMasterLocation(action) {
+    console.log('Update master saga, payload is:', action.payload);
+    // needs user, location id to turn to master...
     try {
       const response = yield axios({
         method: 'PUT',

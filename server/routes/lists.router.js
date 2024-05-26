@@ -29,8 +29,9 @@ router.get('/',rejectUnauthenticated, (req, res) => {
  */
 router.post('/', rejectUnauthenticated, (req, res) => {
   const item = req.body;
-  console.log('item:', item)
+  console.log('IN POST new list, item:', item)
   const user = req.user;
+  console.log('user.id', user.id);
   // i need to insert the max sort order ( or elese 0) +1 
   // i need to insert the default location if it exists for 
   // this user (else null)
@@ -55,7 +56,7 @@ router.post('/', rejectUnauthenticated, (req, res) => {
     pool.query(sqlText, [ item.description, 
                           user.id ])
     .then(dbResponse => {
-      console.log('POST route for /api/lists sucessful!', dbResponse.rows);
+      console.log('POST route for /api/lists sucessful!', dbResponse);
       res.send(dbResponse.rows);
     })
     .catch(dbError => {

@@ -18,7 +18,12 @@ const masterLocation = (state=0, action) => {
 
 const currentLocation= (state=0, action) => {
   if (action.type === 'SET_CURRENT_LIST_LOCATION') {
-    return action.payload;
+    if (action.payload === null) {
+      console.log('resetting currentLoc to 0 from null');
+      return 0;
+    } else {
+      return action.payload;
+    }
   }
   return state;
 }

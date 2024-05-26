@@ -3,6 +3,7 @@ import { put, takeLatest } from 'redux-saga/effects';
 
 // worker Saga: will be fired on "GET_USER" actions
 function* getUser() {
+  console.log('get user now')
   try {
     const config = {
       headers: { 'Content-Type': 'application/json' },
@@ -14,7 +15,7 @@ function* getUser() {
     // If a user is logged in, this will return their information
     // from the server session (req.user)
     const response = yield axios.get('/api/user', config);
-
+    console.log('data from get of user:', response.data);
     // now that the session has given us a user object
     // with an id and username set the client-side user object to let
     // the client-side code know the user is logged in

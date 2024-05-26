@@ -7,7 +7,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import ListItemsSortable from '../ListItemsSortable/ListItemsSortable';
 import LocationSelect from '../LocationSelect/LocationSelect';
 import WeatherForecast from '../WeatherForecast/WeatherForecast';
-
+import getWeekNumber from '../../utilities/utilities';
 
 function ListItems() {
 
@@ -47,7 +47,6 @@ function ListItems() {
     dispatch({ 
       type: 'GET_LIST_ITEMS', 
       payload: { listId : list_id,
-                 showCompleted: showCompleted,
                  group: selectedGroupBy
        }});
     dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
@@ -60,14 +59,20 @@ function ListItems() {
     event.preventDefault();
     const d = new Date();
     const currentYear = d.getFullYear();
+    const currentMonth = d.getMonth();
+    const currentWeek = getWeekNumber(d);
+    console.log('year month week', currentYear, currentMonth, currentWeek)
     const newItem = {
       description: inputFormData.description, 
       priority: inputFormData.priority,
       weatherType: inputFormData.weatherType,
       timeOfDay: inputFormData.timeOfDay,
       dueDate: inputFormData.dueDate,
-      yearToComplete: currentYear,
-      listId: list_id
+      currentYear: currentYear,
+      currentMonth: currentMonth,
+      currentWeek: currentWeek,
+      listId: list_id,
+      group: selectedGroupBy
     }
     dispatch({
         type: 'ADD_LIST_ITEM',
@@ -98,7 +103,8 @@ function ListItems() {
         dispatch({ type: 'UPDATE_LIST_ITEMS_ORDER',
         payload: { indexToMove: active.id,
                    indexToReplace: over.id,
-                   listId: list_id } });
+                   listId: list_id,
+                   group: selectedGroupBy } });
     }
   } 
 
@@ -112,14 +118,16 @@ function ListItems() {
     dispatch({
         type: 'TOGGLE_COMPLETE_LIST_ITEM',
         payload: { listItemId : listItemId,
-                   listId: listId }   
+                   listId: listId,
+                   group: selectedGroupBy }   
     });
   } 
 
   const handleDeleteItem = (listItemId) => {
     dispatch({
         type: 'DELETE_LIST_ITEM',
-        payload: { listItemId: listItemId }
+        payload: { listItemId: listItemId,
+                   group: selectedGroupBy }
       })
   }
 
@@ -129,7 +137,8 @@ function ListItems() {
     dispatch({ type: 'UPDATE_LIST_ITEM_DESCRIPTION',
                payload: { listItemId: listItemId,
                           description: description,
-                          listId: listId }
+                          listId: listId,
+                          group: selectedGroupBy }
     });
   }
 
@@ -156,7 +165,7 @@ function ListItems() {
                 onClick={() => setShowCompleted(false)}>no</button>
         <select name="group-by"
               value={selectedGroupBy}
-              onChange={() => setSelectedGroupBy(true)}>
+              onChange={(e) => setSelectedGroupBy(e.target.value)}>
                 <option name="week"
                         value="week">Week
                 </option>
@@ -229,7 +238,7 @@ function ListItems() {
                                           handleDeleteItem={handleDeleteItem}
                                           handleUpdateDescription=
                                             {handleUpdateDescription}
-                                          groupBy={groupBy}
+                                          selectedGroupBy={selectedGroupBy}
                                           weatherTypes={weatherTypes}/> 
                 : null )
           })}

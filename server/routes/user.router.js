@@ -51,13 +51,11 @@ router.post('/login', userStrategy.authenticate('local'), (req, res) => {
 //   res.sendStatus(200);
 // });
 
-router.post("/logout", (req, res) => {
+router.post("/logout", (req, res, next) => {
   // Use passport's built-in method to log out the user
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-    res.redirect("/");
+  req.logout((err) => {
+    if (err) { return next(err); }
+    res.sendStatus(200);
   });
 });
 
