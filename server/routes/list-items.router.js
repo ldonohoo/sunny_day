@@ -22,340 +22,696 @@ function getWeekNumber(date) {
 
 
 
-/**
- * GET all list items for list
- */
+
+
+
+// and try again again:
+
 router.get('/:list_id',rejectUnauthenticated, (req, res) => {
-  console.log('Listid in GET route:')
-  console.log('query params', req.query)
+  console.log('IN GET ROUTE FOR LIST_ITEMS:::::::::::::::::::::::::::::::::::')
+  console.log('Listid in GET route:', req.params.list_id)
+  console.log('query params:', req.query)
+  // get list id from path parameter
   const listId = Number(req.params.list_id);
-  let groupByHeading = 'week';
+  // get groupBy from query parameter, default to week if not sent
+  let groupBy = 'week';
   if (req.query.group) {
-    groupByHeading = req.query.group;
+    groupBy = req.query.group;
   }
-  console.log('listId', listId);
-  let groupByFieldName = groupByHeading + '_to_work_on';
+  // get current date info: 
+  //    year, month, week number
   const d = new Date();
   const currentYear = d.getFullYear();
   const currentMonth = d.getMonth();
   const currentWeek = getWeekNumber(d);
-  if (groupByHeading === 'week') {
-    console.log('gropubyHeading', groupByHeading)
-    itemToCompare = 'week_to_work_on';
-    currentNumber = currentWeek;
-    weekCompareString = '';
-    monthCompareString = 'NULL::int AS ';
-    yearCompareString = 'NULL::int AS ';
-  } else if (groupByHeading === 'month') {
-    itemToCompare = 'month_to_work_on';
-    currentNumber = currentMonth;
-  } else {
-    itemToCompare = 'year_to_work_on';
-    currentNumber = currentYear;
+  // set variables for dynamic query based on:
+  //    - grouping by week (default, set above)
+  //    - grouping by month
+  //    - grouping by year
+  switch (groupBy) {
+    case 'week':
+      fieldToCompare = 'week_to_work_on';
+      groupColumnName = 'group_current_week';
+      currentNumber = currentWeek;
+      break;
+    case 'month':
+      fieldToCompare = 'month_to_work_on';
+      groupColumnName = 'group_current_month';
+      currentNumber = currentMonth;
+      break;
+    case 'year':
+      fieldToCompare = 'year_to_work_on';
+      groupColumnName = 'group_current_year';
+      currentNumber = currentYear;
+      break;
   }
-    console.log('currentNumber:', currentNumber);
-    console.log('itemtocompare', itemToCompare)
-    const sqlText = `
-    SELECT * FROM (
-      WITH group_headers AS (
-        SELECT 
-          NULL::int AS id,
-          NULL::text AS description,
-          NULL::date AS completed_date,
-          NULL::int AS priority,
-          NULL::int AS preferred_weather_type,
-          NULL::date AS due_date,
-          ${yearCompareString} year_to_work_on,
-          ${monthCompareString} month_to_work_on,
-          ${weekCompareString} week_to_work_on,
-          NULL::text AS preferred_time_of_day,
-          MIN(list_id) AS list_id, 
-          MIN(sort_order) AS sort_order,
-          (${itemToCompare} - $2) AS group_header, 
-          MIN(ctid) AS ctid
-        FROM list_item
-        WHERE list_id = $1
-        GROUP BY ${itemToCompare}
-    ),
-    original_rows AS (
-        SELECT 
-          id,
-          description,
-          completed_date,
-          priority,
-          preferred_weather_type,
-          due_date,
-          year_to_work_on,
-          month_to_work_on,
-          week_to_work_on,
-          preferred_time_of_day,
-          sort_order,
-          list_id,
-          NULL::int AS group_header,
-          ctid
-        FROM 
-            list_item
-        WHERE list_id = $1
-    )
-    SELECT 
-      id,
-      description,
-      completed_date,
-      priority,
-      preferred_weather_type,
-      due_date,
-      year_to_work_on,
-      month_to_work_on,
-      week_to_work_on,
-      preferred_time_of_day,
-      sort_order,
-      list_id,
-      group_header
-    FROM ( SELECT   
-            id,
-            description,
-            completed_date,
-            priority,
-            preferred_weather_type,
-            due_date,
-            year_to_work_on,
-            month_to_work_on,
-            week_to_work_on,
-            preferred_time_of_day,
-            sort_order,
-            list_id,
-            group_header,
-            ctid
-          FROM group_headers
-            UNION ALL
-          SELECT 
-            id,
-            description,
-            completed_date,
-            priority,
-            preferred_weather_type,
-            due_date,
-            year_to_work_on,
-            month_to_work_on,
-            week_to_work_on,
-            preferred_time_of_day,
-            sort_order,
-            list_id,
-            group_header,
-            ctid
-          FROM original_rows ) AS combined
-    ORDER BY 
-      sort_order,
-      ${itemToCompare}, 
-      ctid   
-        )
-        ORDER BY sort_order,
-             group_header;
+  console.log('currentNumber:', currentNumber);
+  console.log('fieldToCompare', fieldToCompare);
+  let headerRows;
+  let listItems;
+  const sqlTextHeaderRows =`
+    SELECT * 
+      FROM header_rows 
+      ORDER BY group_current_time_period
     `;
-    console.log(sqlText)
-    pool.query(sqlText, [ listId, currentNumber])
-    .then(dbResponse => {
-      console.log('GET route for /api/list_items/:list_id without completed items sucessful!', dbResponse.rows);
-      const listItemsWithGroupBy = dbResponse.rows;
-      console.log('itemtocompare', itemToCompare);
-      console.log('ALLROWS:::::::::::::::', dbResponse.rows);
-      console.log('ONE ROW:::::::::::::::', listItemsWithGroupBy[0]);
-      console.log('listid:', listId);
-      console.log('currentNumber', currentNumber)
+  pool.query(sqlTextHeaderRows)
+    .then(headerRowsResult => {
+      headerRows = headerRowsResult.rows;
+      const sqlTextListItems = `
+        SELECT * 
+          FROM list_item
+          WHERE list_id = $1
+          ORDER BY ${fieldToCompare},
+          sort_order
+      `;
+      return pool.query(sqlTextListItems, [listId]);
+    })
+    .then(listItemsResult => {
+      listItems = listItemsResult.rows;
+      let mergedList = [];
+      let headerIndex = 0;
+      let listIndex = 0;
+      while (listIndex < listItems.length || headerIndex < headerRows.length) {
+        if (
+          headerIndex < headerRows.length &&
+          (listIndex >= listItems.length || headerRows[headerIndex].group_current_time_period <= listItems[listIndex][fieldToCompare])
+        ) {
+          // Insert header row before the current list item
+          let headerRow = headerRows[headerIndex];
+          let currentItem = listItems[listIndex] || {};
+
+          // dynamically find values of to_work_on fields based on group by
+          let weekToWorkOn = '', monthToWorkOn = '', yearToWorkOn = '';
+          switch (groupBy) {
+            case 'week':
+              weekToWorkOn = headerRow.group_current_time_period;
+              monthToWorkOn = currentItem.month_to_work_on || null;
+              yearToWorkOn = currentItem.year_to_work_on || null;
+            case 'month':
+              weekToWorkOn = currentItem.week_to_work_on || null;
+              monthToWorkOn = headerRow.group_current_time_period;
+              yearToWorkOn = currentItem.year_to_work_on || null;
+            case 'year':
+              weekToWorkOn = currentItem.week_to_work_on || null;
+              monthToWorkOn = currentItem.month_to_work_on || null;
+              yearToWorkOn = headerRow.group_current_time_period;
+              break;
+          }
+          mergedList.push({
+            id: null,
+            description: null,
+            group_header: headerRow.group_heading,
+            completed_date: null,
+            priority: null,
+            preferred_weather_type: null,
+            due_date: null,
+            year_to_work_on: yearToWorkOn,   // assigned above based on groupBy
+            month_to_work_on: monthToWorkOn, // assigned above based on groupBy
+            week_to_work_on: weekToWorkOn,   // assigned above based on groupBy
+            preferred_time_of_day: null,
+            sort_order: (currentItem.sort_order || 1) - 1, // new sort order!!
+            list_id: currentItem.list_id || null,
+            is_header: true
+          });
+          headerIndex++;
+        } else {
+          // Insert the current list item
+          mergedList.push({
+            ...listItems[listIndex],
+            is_header: false
+          });
+          listIndex++;
+        }
+      }
       const sqlTextMaxId = `
         SELECT MAX(id) AS max_id
           FROM list_item
           WHERE list_id = $1;
         `;
       pool.query(sqlTextMaxId, [listId])
-      .then(dbResponse2 => {
-        // modify header rows:
-        //    make sure there is a 0, 1, 2, 3 but no 4
-        //      (any numbers after 4, change first to 4 if no 4, 
-        //        delete rest of number records)
-        const maxNumbers = dbResponse2.rows;
-        console.log('results of  maxId query',maxNumbers);
-        let nextId = maxNumbers[0].max_id +1;
-        console.log('nextid', nextId)
-        let currentMax0 = 0;
-        let currentMax1 = 0;
-        let currentMax2 = 0;
-        let headerNotFound0 = true;
-        let headerNotFound1 = true;
-        let headerNotFound2 = true;
-        let headerNotFound3 = true;
-        for (const row of listItemsWithGroupBy) {
-          console.log('again, itemToCompare', itemToCompare);
-          // if null rows, they are header rows, check if all headers exist
-          if (row.id === null) {
-            switch (row.group_header) {
-              case 0:
-                headerNotFound0 = false;
-                break;
-              case 1:
-                headerNotFound1 = false;
-                break;
-              case 2:
-                headerNotFound2 = false;
-                break;
-              case 3:
-                headerNotFound3 = false;
-                break;
-            }  
-          // else if not null rows, they are item rows
-          //    - find the max sort order for each header category
-          } else {
-            console.log(`comparing ${row[itemToCompare]} = ${currentNumber}`);
-            console.log(`then checking if ${currentMax0} < ${row.sort_order}`);
-            if (row[itemToCompare] === currentNumber) {
-              if (currentMax0 < row.sort_order) {
-                currentMax0 = row.sort_order;
-                console.log('currentmax0', currentMax0)
-              }
-            } else if (row[itemToCompare] === currentNumber + 1) {
-              if (currentMax1 < row.sort_order) {
-                currentMax1 = row.sort_order;
-              }
-            } else if (row[itemToCompare] === currentNumber + 2) {
-              if (currentMax2 < row.sort_order) {
-                currentMax2 = row.sort_order;
-              }
-            } 
-          }   //end not null rows
-        }   // end for loop
-        if (headerNotFound0) {
-          currentMax0 = listItemsWithGroupBy[0].sort_order;
-        }
-        if (headerNotFound1) {
-          currentMax1 = currentMax0;
-        }
-        if (headerNotFound2) {
-          currentMax2 = currentMax1;
-        }
-        console.log('max results 0 1 2 : ', currentMax0, 'dd', currentMax1, 'dd', currentMax2);
-        if (headerNotFound0) {
-          //create 0 header row
-          //    group_header is 0
-          //    list_id populate from any list_id
-          //    sort order set to 1
-          //    id leave null, will populate next step
-          listItemsWithGroupBy.push({
-            id : null,
-            description : null,
-            completed_date : null,
-            priority : null,
-            preferred_weather_type : null,
-            due_date : null,
-            year_to_work_on : null,
-            month_to_work_on : null,
-            week_to_work_on : null,
-            preferred_time_of_day : null,
-            sort_order : currentMax0,
-            list_id : listItemsWithGroupBy[0].list_id,
-            group_header : 0
-          });
-        }
-        if (headerNotFound1) {
-          //create 1 header row
-          //    group_header is 1
-          //    list_id populate from any list_id
-          //    sort order set to max sort order of 0 +1
-          //    id leave null, will populate next step
-          listItemsWithGroupBy.push({
-            id : null,
-            description : null,
-            completed_date : null,
-            priority : null,
-            preferred_weather_type : null,
-            due_date : null,
-            year_to_work_on : null,
-            month_to_work_on : null,
-            week_to_work_on : null,
-            preferred_time_of_day : null,
-            sort_order : currentMax0 + 1,
-            list_id : listItemsWithGroupBy[0].list_id,
-            group_header : 1
-          });
-        }
-        if (headerNotFound2) {
-          //create 2 header row
-          //    group_header is 0
-          //    list_id populate from any list_id
-          //    sort order set to max sort order of 1 +1
-          //    id leave null, will populate next step
-          listItemsWithGroupBy.push({
-            id : null,
-            description : null,
-            completed_date : null,
-            priority : null,
-            preferred_weather_type : null,
-            due_date : null,
-            year_to_work_on : null,
-            month_to_work_on : null,
-            week_to_work_on : null,
-            preferred_time_of_day : null,
-            sort_order : currentMax1 + 1,
-            list_id : listItemsWithGroupBy[0].list_id,
-            group_header : 2
-          });
-        }
-        if (headerNotFound3) {
-          //create 3 header row
-          //    group_header is 0
-          //    list_id populate from any list_id
-          //    sort order set to max sort order of 2 +1
-          //    id leave null, will populate next step
-          listItemsWithGroupBy.push({
-            id : null,
-            description : null,
-            completed_date : null,
-            priority : null,
-            preferred_weather_type : null,
-            due_date : null,
-            year_to_work_on : null,
-            month_to_work_on : null,
-            week_to_work_on : null,
-            preferred_time_of_day : null,
-            sort_order : currentMax2 + 1,
-            list_id : listItemsWithGroupBy[0].list_id,
-            group_header : 3
-          }); 
-        }
-      //   })
-      // })
-        // add ids to new header rows
-        console.log('ROWSSS RETURNED::::::::', dbResponse2.rows)
+      .then(dbResponseMaxId => {
+        console.log('Get of Next Id successful');
+        const maxId = dbResponseMaxId.rows;
+        let nextId = maxId[0].max_id +1;
         console.log('NEXT ID:::::::::', nextId);
-        for (const row of listItemsWithGroupBy) {
+        // Loop through items + headers:
+        //    - Add labels to old list item rows
+        //    - Assign id numbers to new header rows
+        for (const row of mergedList) {
+          // label the non-header rows with 'none' for render processing
+          if (row.id !== null) {
+            row.group_header = 'none';
+          }
+          // assign id numbers to the header rows added
           if (row.id === null) {
             row.id = nextId;
             nextId++;
           }
         }
-        listItemsWithGroupBy.sort((a, b) => {
-          // Compare primary properties
-          if (a.sort_order < b.sort_order) return -1;
-          if (a.sort_order > b.sort_order) return +1;         
-          // If primary properties are equal, compare secondary properties
-          if (a.group_header < b.group_header) return 1;
-          if (a.group_header > b.group_header) return -1;
-          // If both primary and secondary properties are equal
-          return 0;
-      });
-        // re-sort array based on sort_order, 
-        console.log('FINAL BEFORE SEND:::::::::::::', listItemsWithGroupBy);
-        res.send(listItemsWithGroupBy);
+        console.log('GET of list_items in /api/list_items/:list_id successful:',
+        mergedList);
+        res.send(mergedList);
       })
-      .catch(dbError2 => {
-        console.log('Error in GET of list_items in next ID select query', dbError2);
-        res.send(500);
-      })
-    })
-    .catch(dbError1 => {
-      console.log('GET route for /api/list_items/:list_id without completed itemsfailed', dbError1);
+      .catch(dbErrorNextId => {
+        console.log('Error getting NextId in /api/list_items/:list_id:', dbErrorNextId);
+        res.sendStatus(500);
+      })  
+    .catch(error => {
+      console.error('GET of list_items in /api/list_items/:list_id failed:', error);
       res.sendStatus(500);
     })
+  })
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // try again:
+// /**
+//  * GET all list items for list
+//  */
+// router.get('/:list_id',rejectUnauthenticated, (req, res) => {
+//   console.log('Listid in GET route:')
+//   console.log('query params', req.query)
+//   const listId = Number(req.params.list_id);
+//   let groupByHeading = 'week';
+//   if (req.query.group) {
+//     groupByHeading = req.query.group;
+//   }
+//   console.log('listId', listId);
+//   const d = new Date();
+//   const currentYear = d.getFullYear();
+//   const currentMonth = d.getMonth();
+//   const currentWeek = getWeekNumber(d);
+//   if (groupByHeading === 'week') {
+//     console.log('gropubyHeading', groupByHeading)
+//     itemToCompare = 'week_to_work_on';
+//     currentNumber = currentWeek;
+//     weekCompareString = '';
+//     monthCompareString = 'NULL::int AS ';
+//     yearCompareString = 'NULL::int AS ';
+//   } else if (groupByHeading === 'month') {
+//     itemToCompare = 'month_to_work_on';
+//     currentNumber = currentMonth;
+//   } else {
+//     itemToCompare = 'year_to_work_on';
+//     currentNumber = currentYear;
+//   }
+//     console.log('currentNumber:', currentNumber);
+//     console.log('itemtocompare', itemToCompare)
+//     const sqlText = `SELECT * 
+//                       FROM header_rows 
+//                       ORDER BY group_current_week;
+//                     `;
+//       pool.query(sqlText)
+//       .then(headerRowsResult => {
+//         const headerRows = headerRowsResult.rows;
+
+//         // Chain the promises for each header row
+//         return headerRows.reduce((promiseChain, headerRow) => {
+//           return promiseChain
+//             .then(() => {
+//               return pool.query(`
+//                 SELECT * FROM list_item 
+//                 WHERE week_to_work_on >= $1 
+//                 ORDER BY week_to_work_on 
+//                 LIMIT 1
+//               `, [headerRow.group_current_week]);
+//             })
+//             .then(targetRowResult => {
+//               const targetRow = targetRowResult.rows[0];
+    
+//               if (targetRow) {
+//                 return pool.query(`
+//                   INSERT INTO list_item (
+//                     description, completed_date, priority, 
+//                     preferred_weather_type, due_date, 
+//                     year_to_work_on, month_to_work_on, 
+//                     week_to_work_on, preferred_time_of_day, 
+//                     sort_order, list_id
+//                   ) VALUES (
+//                     $1, NULL, NULL, NULL, NULL, 
+//                     $2, $3, $4, NULL, $5 - 1, $6
+//                   )
+//                 `, [
+//                   headerRow.group_heading,
+//                   targetRow.year_to_work_on,
+//                   targetRow.month_to_work_on,
+//                   targetRow.week_to_work_on,
+//                   targetRow.sort_order,
+//                   targetRow.list_id
+//                 ]);
+//               } else {
+//                 // No matching week found, find the next greatest week_to_work_on
+//                 return pool.query(`
+//                   SELECT * FROM list_item 
+//                   WHERE week_to_work_on > $1
+//                   ORDER BY week_to_work_on 
+//                   LIMIT 1
+//                 `, [headerRow.group_current_week]).then(nextRowResult => {
+//                   const nextRow = nextRowResult.rows[0];
+    
+//                   if (nextRow) {
+//                     return pool.query(`
+//                       INSERT INTO list_item (
+//                         description, completed_date, priority, 
+//                         preferred_weather_type, due_date, 
+//                         year_to_work_on, month_to_work_on, 
+//                         week_to_work_on, preferred_time_of_day, 
+//                         sort_order, list_id
+//                       ) VALUES (
+//                         $1, NULL, NULL, NULL, NULL, 
+//                         $2, $3, $4, NULL, $5 - 1, $6
+//                       )
+//                     `, [
+//                       headerRow.group_heading,
+//                       nextRow.year_to_work_on,
+//                       nextRow.month_to_work_on,
+//                       nextRow.week_to_work_on,
+//                       nextRow.sort_order,
+//                       nextRow.list_id
+//                     ]);
+//                   } else {
+//                     // If no next greatest week is found, insert at the end
+//                     return pool.query(`
+//                       SELECT * FROM list_item 
+//                       ORDER BY week_to_work_on DESC 
+//                       LIMIT 1
+//                     `).then(lastRowResult => {
+//                       const lastRow = lastRowResult.rows[0];
+    
+//                       if (lastRow) {
+//                         return pool.query(`
+//                           INSERT INTO list_item (
+//                             description, completed_date, priority, 
+//                             preferred_weather_type, due_date, 
+//                             year_to_work_on, month_to_work_on, 
+//                             week_to_work_on, preferred_time_of_day, 
+//                             sort_order, list_id
+//                           ) VALUES (
+//                             $1, NULL, NULL, NULL, NULL, 
+//                             $2, $3, $4 + 1, NULL, $5 + 1, $6
+//                           )
+//                         `, [
+//                           headerRow.group_heading,
+//                           lastRow.year_to_work_on,
+//                           lastRow.month_to_work_on,
+//                           lastRow.week_to_work_on,
+//                           lastRow.sort_order,
+//                           lastRow.list_id
+//                         ]);
+//                       } else {
+//                         return Promise.resolve();
+//                       }
+//                     });
+//                   }
+//                 });
+//               }
+//             });
+//         }, Promise.resolve());
+//       })
+//       .then(() => {
+//         console.log('Header rows inserted successfully');
+//         sqlText = ``
+//         res.send()
+//       })
+//       .catch(err => {
+//         console.error('Error inserting header rows:', err);
+//         res.sendStatus(500);
+//       })
+//  });  // end of GET route (finally)
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /**
+//  * GET all list items for list
+//  */
+// router.get('/:list_id',rejectUnauthenticated, (req, res) => {
+//   console.log('Listid in GET route:')
+//   console.log('query params', req.query)
+//   const listId = Number(req.params.list_id);
+//   let groupByHeading = 'week';
+//   if (req.query.group) {
+//     groupByHeading = req.query.group;
+//   }
+//   console.log('listId', listId);
+//   let groupByFieldName = groupByHeading + '_to_work_on';
+//   const d = new Date();
+//   const currentYear = d.getFullYear();
+//   const currentMonth = d.getMonth();
+//   const currentWeek = getWeekNumber(d);
+//   if (groupByHeading === 'week') {
+//     console.log('gropubyHeading', groupByHeading)
+//     itemToCompare = 'week_to_work_on';
+//     currentNumber = currentWeek;
+//     weekCompareString = '';
+//     monthCompareString = 'NULL::int AS ';
+//     yearCompareString = 'NULL::int AS ';
+//   } else if (groupByHeading === 'month') {
+//     itemToCompare = 'month_to_work_on';
+//     currentNumber = currentMonth;
+//   } else {
+//     itemToCompare = 'year_to_work_on';
+//     currentNumber = currentYear;
+//   }
+//     console.log('currentNumber:', currentNumber);
+//     console.log('itemtocompare', itemToCompare)
+//     const sqlText = `
+//     SELECT * FROM (
+//       WITH group_headers AS (
+//         SELECT 
+//           NULL::int AS id,
+//           NULL::text AS description,
+//           NULL::date AS completed_date,
+//           NULL::int AS priority,
+//           NULL::int AS preferred_weather_type,
+//           NULL::date AS due_date,
+//           ${yearCompareString} year_to_work_on,
+//           ${monthCompareString} month_to_work_on,
+//           ${weekCompareString} week_to_work_on,
+//           NULL::text AS preferred_time_of_day,
+//           MIN(list_id) AS list_id, 
+//           MIN(sort_order) AS sort_order,
+//           (${itemToCompare} - $2) AS group_header, 
+//           MIN(ctid) AS ctid
+//         FROM list_item
+//         WHERE list_id = $1
+//         GROUP BY ${itemToCompare}
+//     ),
+//     original_rows AS (
+//         SELECT 
+//           id,
+//           description,
+//           completed_date,
+//           priority,
+//           preferred_weather_type,
+//           due_date,
+//           year_to_work_on,
+//           month_to_work_on,
+//           week_to_work_on,
+//           preferred_time_of_day,
+//           sort_order,
+//           list_id,
+//           NULL::int AS group_header,
+//           ctid
+//         FROM 
+//             list_item
+//         WHERE list_id = $1
+//     )
+//     SELECT 
+//       id,
+//       description,
+//       completed_date,
+//       priority,
+//       preferred_weather_type,
+//       due_date,
+//       year_to_work_on,
+//       month_to_work_on,
+//       week_to_work_on,
+//       preferred_time_of_day,
+//       sort_order,
+//       list_id,
+//       group_header
+//     FROM ( SELECT   
+//             id,
+//             description,
+//             completed_date,
+//             priority,
+//             preferred_weather_type,
+//             due_date,
+//             year_to_work_on,
+//             month_to_work_on,
+//             week_to_work_on,
+//             preferred_time_of_day,
+//             sort_order,
+//             list_id,
+//             group_header,
+//             ctid
+//           FROM group_headers
+//             UNION ALL
+//           SELECT 
+//             id,
+//             description,
+//             completed_date,
+//             priority,
+//             preferred_weather_type,
+//             due_date,
+//             year_to_work_on,
+//             month_to_work_on,
+//             week_to_work_on,
+//             preferred_time_of_day,
+//             sort_order,
+//             list_id,
+//             group_header,
+//             ctid
+//           FROM original_rows ) AS combined
+//     ORDER BY 
+//       sort_order,
+//       ${itemToCompare}, 
+//       ctid   
+//         )
+//         ORDER BY sort_order,
+//              group_header;
+//     `;
+//     console.log(sqlText)
+//     pool.query(sqlText, [ listId, currentNumber])
+//     .then(dbResponse => {
+//       console.log('GET route for /api/list_items/:list_id without completed items sucessful!', dbResponse.rows);
+//       const listItemsWithGroupBy = dbResponse.rows;
+//       console.log('itemtocompare', itemToCompare);
+//       console.log('ALLROWS:::::::::::::::', dbResponse.rows);
+//       console.log('ONE ROW:::::::::::::::', listItemsWithGroupBy[0]);
+//       console.log('listid:', listId);
+//       console.log('currentNumber', currentNumber)
+//       const sqlTextMaxId = `
+//         SELECT MAX(id) AS max_id
+//           FROM list_item
+//           WHERE list_id = $1;
+//         `;
+//       pool.query(sqlTextMaxId, [listId])
+//       .then(dbResponse2 => {
+//         // modify header rows:
+//         //    make sure there is a 0, 1, 2, 3 but no 4
+//         //      (any numbers after 4, change first to 4 if no 4, 
+//         //        delete rest of number records)
+//         const maxNumbers = dbResponse2.rows;
+//         console.log('results of  maxId query',maxNumbers);
+//         let nextId = maxNumbers[0].max_id +1;
+//         console.log('nextid', nextId)
+//         let currentMax0 = 0;
+//         let currentMax1 = 0;
+//         let currentMax2 = 0;
+//         let headerNotFound0 = true;
+//         let headerNotFound1 = true;
+//         let headerNotFound2 = true;
+//         let headerNotFound3 = true;
+//         for (const row of listItemsWithGroupBy) {
+//           console.log('again, itemToCompare', itemToCompare);
+//           // if null rows, they are header rows, check if all headers exist
+//           if (row.id === null) {
+//             switch (row.group_header) {
+//               case 0:
+//                 headerNotFound0 = false;
+//                 break;
+//               case 1:
+//                 headerNotFound1 = false;
+//                 break;
+//               case 2:
+//                 headerNotFound2 = false;
+//                 break;
+//               case 3:
+//                 headerNotFound3 = false;
+//                 break;
+//             }  
+//           // else if not null rows, they are item rows
+//           //    - find the max sort order for each header category
+//           } else {
+//             console.log(`comparing ${row[itemToCompare]} = ${currentNumber}`);
+//             console.log(`then checking if ${currentMax0} < ${row.sort_order}`);
+//             if (row[itemToCompare] === currentNumber) {
+//               if (currentMax0 < row.sort_order) {
+//                 currentMax0 = row.sort_order;
+//                 console.log('currentmax0', currentMax0)
+//               }
+//             } else if (row[itemToCompare] === currentNumber + 1) {
+//               if (currentMax1 < row.sort_order) {
+//                 currentMax1 = row.sort_order;
+//               }
+//             } else if (row[itemToCompare] === currentNumber + 2) {
+//               if (currentMax2 < row.sort_order) {
+//                 currentMax2 = row.sort_order;
+//               }
+//             } 
+//           }   //end not null rows
+//         }   // end for loop
+//         if (headerNotFound0) {
+//           currentMax0 = listItemsWithGroupBy[0].sort_order;
+//         }
+//         if (headerNotFound1) {
+//           currentMax1 = currentMax0;
+//         }
+//         if (headerNotFound2) {
+//           currentMax2 = currentMax1;
+//         }
+//         console.log('max results 0 1 2 : ', currentMax0, 'dd', currentMax1, 'dd', currentMax2);
+//         if (headerNotFound0) {
+//           //create 0 header row
+//           //    group_header is 0
+//           //    list_id populate from any list_id
+//           //    sort order set to 1
+//           //    id leave null, will populate next step
+//           listItemsWithGroupBy.push({
+//             id : null,
+//             description : null,
+//             completed_date : null,
+//             priority : null,
+//             preferred_weather_type : null,
+//             due_date : null,
+//             year_to_work_on : null,
+//             month_to_work_on : null,
+//             week_to_work_on : null,
+//             preferred_time_of_day : null,
+//             sort_order : currentMax0,
+//             list_id : listItemsWithGroupBy[0].list_id,
+//             group_header : 0
+//           });
+//         }
+//         if (headerNotFound1) {
+//           //create 1 header row
+//           //    group_header is 1
+//           //    list_id populate from any list_id
+//           //    sort order set to max sort order of 0 +1
+//           //    id leave null, will populate next step
+//           listItemsWithGroupBy.push({
+//             id : null,
+//             description : null,
+//             completed_date : null,
+//             priority : null,
+//             preferred_weather_type : null,
+//             due_date : null,
+//             year_to_work_on : null,
+//             month_to_work_on : null,
+//             week_to_work_on : null,
+//             preferred_time_of_day : null,
+//             sort_order : currentMax0 + 1,
+//             list_id : listItemsWithGroupBy[0].list_id,
+//             group_header : 1
+//           });
+//         }
+//         if (headerNotFound2) {
+//           //create 2 header row
+//           //    group_header is 0
+//           //    list_id populate from any list_id
+//           //    sort order set to max sort order of 1 +1
+//           //    id leave null, will populate next step
+//           listItemsWithGroupBy.push({
+//             id : null,
+//             description : null,
+//             completed_date : null,
+//             priority : null,
+//             preferred_weather_type : null,
+//             due_date : null,
+//             year_to_work_on : null,
+//             month_to_work_on : null,
+//             week_to_work_on : null,
+//             preferred_time_of_day : null,
+//             sort_order : currentMax1 + 1,
+//             list_id : listItemsWithGroupBy[0].list_id,
+//             group_header : 2
+//           });
+//         }
+//         if (headerNotFound3) {
+//           //create 3 header row
+//           //    group_header is 0
+//           //    list_id populate from any list_id
+//           //    sort order set to max sort order of 2 +1
+//           //    id leave null, will populate next step
+//           listItemsWithGroupBy.push({
+//             id : null,
+//             description : null,
+//             completed_date : null,
+//             priority : null,
+//             preferred_weather_type : null,
+//             due_date : null,
+//             year_to_work_on : null,
+//             month_to_work_on : null,
+//             week_to_work_on : null,
+//             preferred_time_of_day : null,
+//             sort_order : currentMax2 + 1,
+//             list_id : listItemsWithGroupBy[0].list_id,
+//             group_header : 3
+//           }); 
+//         }
+//       //   })
+//       // })
+//         // add ids to new header rows
+//         console.log('ROWSSS RETURNED::::::::', dbResponse2.rows)
+//         console.log('NEXT ID:::::::::', nextId);
+//         for (const row of listItemsWithGroupBy) {
+//           if (row.id === null) {
+//             row.id = nextId;
+//             nextId++;
+//           }
+//         }
+//         listItemsWithGroupBy.sort((a, b) => {
+//           // Compare primary properties
+//           if (a.sort_order < b.sort_order) return -1;
+//           if (a.sort_order > b.sort_order) return +1;         
+//           // If primary properties are equal, compare secondary properties
+//           if (a.group_header < b.group_header) return 1;
+//           if (a.group_header > b.group_header) return -1;
+//           // If both primary and secondary properties are equal
+//           return 0;
+//       });
+//         // re-sort array based on sort_order, 
+//         console.log('FINAL BEFORE SEND:::::::::::::', listItemsWithGroupBy);
+//         res.send(listItemsWithGroupBy);
+//       })
+//       .catch(dbError2 => {
+//         console.log('Error in GET of list_items in next ID select query', dbError2);
+//         res.send(500);
+//       })
+//     })
+//     .catch(dbError1 => {
+//       console.log('GET route for /api/list_items/:list_id without completed itemsfailed', dbError1);
+//       res.sendStatus(500);
+//     })
+// });
 
 // old query:
 // router.get('/:list_id',rejectUnauthenticated, (req, res) => {

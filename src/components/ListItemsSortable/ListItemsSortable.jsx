@@ -38,39 +38,6 @@ function ListItemsSortable({ item,
         transition
     }
 
-    const assignHeader = (item) => {
-      // group header is the week/month/year to work on 
-      //    assume 1 is current week, 2 is next week, etc.
-      console.log('assigning header (selectedGroupBy, item.group_header ',
-            selectedGroupBy, item.group_header);
-    
-      let numberFromCurrent = 0;
-      const currentDate = new Date();
-      console.log('selectedGroupby', selectedGroupBy);
-      console.log('numberfromcurrent:', numberFromCurrent);
-      switch (Number(item.group_header)) {
-        case 0:
-          return `Current ${selectedGroupBy}`;
-          break;
-        case 1:
-          return `Next ${selectedGroupBy}`;
-          break;
-        case 2:
-          return `${selectedGroupBy} After Next`;
-          break;
-        default:
-          return `Three ${selectedGroupBy}s out or more`;
-          break;
-      }
-    }
-
-
-    // if (item.group_header !== null) {
-    //   headerText = assignHeader();
-    //   console.log('HEADERTEXT:::::', headerText);
-    // }
-
-
     const handleDescriptionKeyDown = (event) => {
         if (event.key === 'Enter') {
           handleUpdateDescription(item.id, inputDescription, item.list_id);
@@ -107,20 +74,17 @@ function ListItemsSortable({ item,
     };
 
     return (
-        // conditionally return a header row whenever the selected group 
-        //    header type changes
-
-        <>
-        { ((item.group_header !== null) && Number(item.group_header) < 4) ? <div id="list-item"
+      <>
+        {/* conditionally return a header row or a detail row */}
+        { item.group_header !== 'none' ? <div id="list-item"
                                    className="list-item"
                                    ref={setNodeRef} 
-                                   style={style} >{assignHeader(item)} sort:{item.sort_order} grphead:{item.group_header} weektowork:{item.week_to_work_on}</div> : 
+                                   style={style} >{item.group_header}    (sort:{item.sort_order} weekToWork:{item.week_to_work_on} monthToWork:{item.month_to_work_on} yearToWork:{item.year_to_work_on})</div> : 
         (
           <div id="list-item"
               className="list-item"
               ref={setNodeRef} 
               style={style} >
-            sort:{item.sort_order} grphead:{item.group_header} weektowork:{item.week_to_work_on}
             <button onClick={() => handleCompleteItemToggle(item.id, item.list_id)}
               >{item.completed_date === null ? '🔲' : '⬛️'}
             </button>
@@ -170,11 +134,11 @@ function ListItemsSortable({ item,
                     onChange={handleChangeForm}/>
               <button {...attributes} {...listeners}>drag me</button>
               <button onClick={() => handleDeleteItem(item.id)}>delete</button>
+              sort:{item.sort_order} grphead:{item.group_header} weektowork:{item.week_to_work_on}
           </div> 
         )}
       </>
     )
-
 }
 
 export default ListItemsSortable;
