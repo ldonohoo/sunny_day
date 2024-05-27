@@ -162,48 +162,21 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
       console.log('ONE ROW:::::::::::::::', listItemsWithGroupBy[0]);
       console.log('listid:', listId);
       console.log('currentNumber', currentNumber)
-      const sqlTextGetInfo = `
-        SELECT MAX(id) AS max_id, 
-               MAX(sort_order) AS max_sort_order,
-               (${itemToCompare} - ${currentNumber} ) AS group_header_no
-        FROM list_item
-        WHERE list_id = $1
-        GROUP BY ${itemToCompare}
-        ORDER BY max_id DESC;
+      const sqlTextMaxId = `
+        SELECT MAX(id) AS max_id
+          FROM list_item
+          WHERE list_id = $1;
         `;
-        // SELECT MAX(id) AS max_id,
-        //        MAX(SELECT sort_order
-        //             FROM list_item
-        //             WHERE ${itemToCompare} 
-        //        ) FROM list_item
-      pool.query(sqlTextGetInfo, [listId])
+      pool.query(sqlTextMaxId, [listId])
       .then(dbResponse2 => {
         // modify header rows:
         //    make sure there is a 0, 1, 2, 3 but no 4
         //      (any numbers after 4, change first to 4 if no 4, 
         //        delete rest of number records)
-        const maxNumbers = dbResponse.rows;
-        console.log('results of getinfoquery',maxNumbers);
-        let nextId = maxNumbers[0].max_id;
-
-        if (maxNumbers.at(-1).group_header === 0) {
-          currentMax0 = maxNumbers.at(-1).max_sort_order;
-        } else {
-          currentMax0 = 1;
-        }
-        for (i  = maxNumbers.length-1; i>=0; i--) {
-          if (maxNumbers[i].group_header === 0) {
-            currentMax0 = maxNumbers[i].max_sort_order;
-          } 
-          if (maxNumbers[i].group_header === 1) {
-            currentMax1 = maxNumbers[i].max_sort_order;
-          }
-          if (maxNumbers[i].group_header === 2) {
-            currentMax2 = maxNumbers[i].max_sort_order;
-          }
-        }
-        
-     
+        const maxNumbers = dbResponse2.rows;
+        console.log('results of  maxId query',maxNumbers);
+        let nextId = maxNumbers[0].max_id +1;
+        console.log('nextid', nextId)
         let currentMax0 = 0;
         let currentMax1 = 0;
         let currentMax2 = 0;
@@ -212,18 +185,7 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
         let headerNotFound2 = true;
         let headerNotFound3 = true;
         for (const row of listItemsWithGroupBy) {
-          // set item to compare and current number 
-          //    (fields used to find the max sort order by heading below)
-          if (groupByHeading === 'week') {
-            itemToCompare = row.week_to_do;
-            currentNumber = currentWeek;
-          } else if (groupByHeading === 'month') {
-            itemToCompare = row.month_to_do;
-            currentNumber = currentMonth;
-          } else {
-            itemToCompare = row.year_to_do;
-            currentNumber = currentYear;
-          }
+          console.log('again, itemToCompare', itemToCompare);
           // if null rows, they are header rows, check if all headers exist
           if (row.id === null) {
             switch (row.group_header) {
@@ -261,6 +223,15 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
             } 
           }   //end not null rows
         }   // end for loop
+        if (headerNotFound0) {
+          currentMax0 = listItemsWithGroupBy[0].sort_order;
+        }
+        if (headerNotFound1) {
+          currentMax1 = currentMax0;
+        }
+        if (headerNotFound2) {
+          currentMax2 = currentMax1;
+        }
         console.log('max results 0 1 2 : ', currentMax0, 'dd', currentMax1, 'dd', currentMax2);
         if (headerNotFound0) {
           //create 0 header row
@@ -279,7 +250,7 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
             month_to_work_on : null,
             week_to_work_on : null,
             preferred_time_of_day : null,
-            sort_order : listItemsWithGroupBy[0].sort_order,
+            sort_order : currentMax0,
             list_id : listItemsWithGroupBy[0].list_id,
             group_header : 0
           });
@@ -366,8 +337,8 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
           if (a.sort_order < b.sort_order) return -1;
           if (a.sort_order > b.sort_order) return +1;         
           // If primary properties are equal, compare secondary properties
-          if (a.group_header < b.group_header) return -1;
-          if (a.group_header > b.group_header) return 1;
+          if (a.group_header < b.group_header) return 1;
+          if (a.group_header > b.group_header) return -1;
           // If both primary and secondary properties are equal
           return 0;
       });
