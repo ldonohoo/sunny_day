@@ -33,14 +33,13 @@ function ListItems() {
     const { list_id } = useParams();
     const currentLocation = 
       useSelector(store => store.locationsReducer.currentLocation);
-    //shouldDisplayHeader, currentHeader
-    let shouldDisplayHeader = true;
-    const groupBy = { 
-      shouldDisplayHeader,
-      selectedGroupBy,
-      setSelectedGroupBy,
-      headerCounter,
-      setHeaderCounter };
+
+    // const groupBy = { 
+    //   shouldDisplayHeader,
+    //   selectedGroupBy,
+    //   setSelectedGroupBy,
+    //   headerCounter,
+    //   setHeaderCounter };
 
   useEffect(() => {
     console.log('useeffectlistitems:', list_id, showCompleted, selectedGroupBy)
@@ -59,8 +58,10 @@ function ListItems() {
     event.preventDefault();
     const d = new Date();
     const currentYear = d.getFullYear();
-    const currentMonth = d.getMonth();
-    const currentWeek = getWeekNumber(d);
+    const d2 = new Date();
+    const currentMonth = d2.getMonth();
+    const d3 = new Date();
+    const currentWeek = getWeekNumber(d3);
     console.log('year month week', currentYear, currentMonth, currentWeek)
     const newItem = {
       description: inputFormData.description, 
@@ -87,22 +88,31 @@ function ListItems() {
     });
   }
 
+  /**
+   * Handle the end of a drag event:
+   *    find the active item info (item being dragged)
+   *    find the over item info (item hovering over that slides down)
+   *    use these two to send a request to re-sort the database and 
+   *    update any week/month/year to work on information
+   */
   const handleDragEnd = (event) => {
     console.log("Drag end called");
+    //selectedGroupBy
     const {active, over} = event;
     console.log("ACTIVE: " + active.id);
     console.log("OVER :" + over.id);
-
-    if(active.id !== over.id) {
-      // re-order sortorder in database
-      // ***** NOTE: indicies are specified by list id!!
-      // active is index to move
-      console.log('Active is:', active.id);
-      // over is index to move to
-      console.log('Over is:', over.id);
+    //    Don't complete drag if:
+    //    - Drag didn't move item (same spot)
+    //       or
+    //    - If dragging before first header (header of 'CURRENT WEEK')
+    if(active.id !== over.id && 
+       over.data.current.item.group_header !== 'CURRENT WEEK') {
+      console.log('Here is active.data.current', active.data.current.item);
+      console.log('Here is the over.data.current', over.data.current.item);
+      // re-order sortorder in database, reset week/month/year to work on
         dispatch({ type: 'UPDATE_LIST_ITEMS_ORDER',
-        payload: { indexToMove: active.id,
-                   indexToReplace: over.id,
+        payload: { itemToMove: active.data.current.item,
+                   itemToReplace: over.data.current.item,
                    listId: list_id,
                    group: selectedGroupBy } });
     }

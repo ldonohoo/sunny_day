@@ -227,8 +227,9 @@ function* updateListItemsOrder(action) {
       url: `/api/list_items/sort/${action.payload.listId}`,
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
-      data: { indexToMove: action.payload.indexToMove,
-              indexToReplace: action.payload.indexToReplace }
+      data: { itemToMove: action.payload.itemToMove,
+              itemToReplace: action.payload.itemToReplace,
+              group: action.payload.group }
       });
     yield put({ type: 'GET_LIST_ITEMS',
                 payload: { listId: action.payload.listId,

@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS list_item;
 DROP TABLE IF EXISTS priority;
 DROP TABLE IF EXISTS preferred_weather_type;
 DROP TABLE IF EXISTS time_of_day;
-
+DROP TABLE IF EXISTS header_rows;
 
 DROP TABLE IF EXISTS forecast_precipitation_type;
 
@@ -152,6 +152,12 @@ CREATE TABLE forecast_precipitation_type (
   forecast_id INT REFERENCES daily_forecast
 );
 
+CREATE TABLE header_rows
+  ( id SERIAL PRIMARY KEY,
+    group_header INT,
+    group_current_time_period INT,
+    group_heading VARCHAR(100) );
+
 
 INSERT INTO location
   (name, zip, is_master_default_location)
@@ -184,6 +190,15 @@ INSERT INTO time_of_day
   (morning, afternoon, evening, night)
   VALUES ( '06:00:00', '12:00:00', '17:00:00', '20:00:00'),
          ( '06:00:00', '12:00:00', '17:00:00', '20:00:00');
+
+INSERT INTO header_rows
+  ( group_header, 
+    group_current_time_period,
+    group_heading )
+  VALUES ( 0, 22, 'CURRENT WEEK'),
+          ( 1, 23, 'NEXT WEEK'),
+          ( 2, 24, '2 WEEKS OUT'),
+          ( 2, 25, '3 WEEKS OUT OR MORE');
          
 --  INSERT INTO list
 --    (description,  user_id, location_id, sort_order)
@@ -211,3 +226,146 @@ INSERT INTO time_of_day
 --FROM new_order
 --WHERE list.id = new_order.id  AND
 --	user_id = 1;
+--
+--
+--SELECT * FROM (
+--	WITH group_headers AS (
+--    SELECT 
+--    	NULL::int AS id,
+--        NULL::text AS description,
+--		NULL::date AS completed_date,
+--		NULL::int AS priority,
+--		NULL::int AS preferred_weather_type,
+--		NULL::date AS due_date,
+--		NULL::int AS year_to_work_on,
+--		NULL::int AS month_to_work_on,
+--		week_to_work_on,
+--		NULL::text AS preferred_time_of_day,
+--		MIN(list_id) AS list_id, 
+--       	MIN(sort_order) AS sort_order,
+--        (week_to_work_on - 21)  AS group_header, 
+--        MIN(ctid) AS ctid
+--    FROM 
+--        list_item
+--                WHERE
+--            list_id = 1 
+--
+--    GROUP BY 
+--        week_to_work_on
+--),
+--original_rows AS (
+--    SELECT 
+--	id,
+--	description,
+--	completed_date,
+--	priority,
+--	preferred_weather_type,
+--	due_date,
+--	year_to_work_on,
+--	month_to_work_on,
+--	week_to_work_on,
+--	preferred_time_of_day,
+--	sort_order,
+--	list_id,
+--        NULL::int AS group_header,
+--        ctid
+--    FROM 
+--        list_item
+--                WHERE
+--            list_id = 1 
+--
+--)
+--SELECT 
+--	id,
+--	description,
+--	completed_date,
+--	priority,
+--	preferred_weather_type,
+--	due_date,
+--	year_to_work_on,
+--	month_to_work_on,
+--	week_to_work_on,
+--	preferred_time_of_day,
+--	sort_order,
+--	list_id,
+--    group_header
+--FROM (
+--    SELECT   
+--	id,
+--	description,
+--	completed_date,
+--	priority,
+--	preferred_weather_type,
+--	due_date,
+--	year_to_work_on,
+--	month_to_work_on,
+--	week_to_work_on,
+--	preferred_time_of_day,
+--	sort_order,
+--	list_id,
+--    group_header,
+--    ctid
+-- FROM group_headers
+--
+--    UNION ALL
+--SELECT 
+--	id,
+--	description,
+--	completed_date,
+--	priority,
+--	preferred_weather_type,
+--	due_date,
+--	year_to_work_on,
+--	month_to_work_on,
+--	week_to_work_on,
+--	preferred_time_of_day,
+--	sort_order,
+--	list_id,
+--    group_header,
+--    ctid
+--FROM original_rows
+--) AS combined
+--
+--ORDER BY 
+--	sort_order,
+--    week_to_work_on, 
+--    ctid
+--    
+--    )
+--    ORDER BY sort_order,
+--    		 group_header;
+--
+--
+--        SELECT MAX(id) AS max_id
+--
+--                FROM list_item;
+--                
+--                
+--        SELECT max(id) AS max_id, 
+--        		max(sort_order) AS max_sort_order,
+--        		week_to_work_on 
+--        	FROM list_item
+--        	WHERE list_id = 1
+--        	group by 
+--        	week_to_work_on
+--        	order by max_id DESC;
+--        	
+--        	
+--        	
+--       SELECT MAX(id) AS max_id, 
+--               MAX(sort_order) AS max_sort_order,
+--               (week_to_work_on - 21) AS group_header
+--        FROM list_item
+--        WHERE list_id = 1
+--        GROUP BY week_to_work_on
+--        ORDER BY max_id DESC;
+--        
+        
+        
+        
+        
+        --++++++++++++++++++++++=
+        
+        
+
+        	  

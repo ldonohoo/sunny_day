@@ -5,7 +5,10 @@ const { rejectUnauthenticated } = require('../modules/authentication-middleware'
 
 
 
+/* UTILITY FUNCTIONS *********************************************************/
 
+
+// Get the current week number
 function getWeekNumber(date) {
   // Copy date so don't modify original
   date = new Date(date);
@@ -20,13 +23,32 @@ function getWeekNumber(date) {
   return weekNumber;
 }
 
+// Get the month from a given week number
+function getMonthFromWeekNumber(year, weekNumber) {
+  // Create a new date object representing January 1st of the given year
+  let startDate = new Date(year, 0, 1);
+  // Calculate the date of the first Sunday of the year
+  let firstSunday = startDate;
+  if (firstSunday.getDay() !== 0) {
+      firstSunday.setDate(firstSunday.getDate() + (7 - firstSunday.getDay()));
+  }
+  // Calculate the number of days to add to the first Sunday to get the first day of the given week
+  let daysToAdd = (weekNumber - 1) * 7;
+  // Calculate the date of the first day of the given week
+  let weekStartDate = new Date(firstSunday);
+  weekStartDate.setDate(firstSunday.getDate() + daysToAdd);
+  // Return the month (0-11) of the week start date
+  return weekStartDate.getMonth() + 1; // Adding 1 to get 1-12 range
+}
 
 
+/* ROUTES BELOW *********************************************************
 
-
-
-// and try again again:
-
+/**
+ * GET of list items
+ *    - gets list items based on list number
+ *    - inserts header rows into results for group by sorting and display
+ */
 router.get('/:list_id',rejectUnauthenticated, (req, res) => {
   console.log('IN GET ROUTE FOR LIST_ITEMS:::::::::::::::::::::::::::::::::::')
   console.log('Listid in GET route:', req.params.list_id)
@@ -36,18 +58,22 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
   // get groupBy from query parameter, default to week if not sent
   let groupBy = 'week';
   if (req.query.group) {
+    console.log('assinging group', req.query.group);
     groupBy = req.query.group;
   }
   // get current date info: 
   //    year, month, week number
   const d = new Date();
   const currentYear = d.getFullYear();
-  const currentMonth = d.getMonth();
-  const currentWeek = getWeekNumber(d);
+  const d2 = new Date();
+  const currentMonth = d2.getMonth();
+  const d3 = new Date();
+  const currentWeek = getWeekNumber(d3);
   // set variables for dynamic query based on:
   //    - grouping by week (default, set above)
   //    - grouping by month
   //    - grouping by year
+  console.log('year,month,week', currentYear, currentMonth, currentWeek);
   switch (groupBy) {
     case 'week':
       fieldToCompare = 'week_to_work_on';
@@ -102,25 +128,28 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
 
           // dynamically find values of to_work_on fields based on group by
           let weekToWorkOn = '', monthToWorkOn = '', yearToWorkOn = '';
+          console.log('group here!!!!!!!!!!!!!!!!!!!!!', groupBy)
           switch (groupBy) {
             case 'week':
               weekToWorkOn = headerRow.group_current_time_period;
               monthToWorkOn = currentItem.month_to_work_on || null;
               yearToWorkOn = currentItem.year_to_work_on || null;
+              break;
             case 'month':
               weekToWorkOn = currentItem.week_to_work_on || null;
               monthToWorkOn = headerRow.group_current_time_period;
               yearToWorkOn = currentItem.year_to_work_on || null;
+              break;
             case 'year':
               weekToWorkOn = currentItem.week_to_work_on || null;
               monthToWorkOn = currentItem.month_to_work_on || null;
               yearToWorkOn = headerRow.group_current_time_period;
               break;
           }
+          console.log('about to push to list a header row,', yearToWorkOn, monthToWorkOn, weekToWorkOn);
           mergedList.push({
             id: null,
             description: null,
-            group_header: headerRow.group_heading,
             completed_date: null,
             priority: null,
             preferred_weather_type: null,
@@ -129,8 +158,9 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
             month_to_work_on: monthToWorkOn, // assigned above based on groupBy
             week_to_work_on: weekToWorkOn,   // assigned above based on groupBy
             preferred_time_of_day: null,
-            sort_order: (currentItem.sort_order || 1) - 1, // new sort order!!
+            sort_order: (currentItem.sort_order || 1), // new sort order!!
             list_id: currentItem.list_id || null,
+            group_header: headerRow.group_heading,
             is_header: true
           });
           headerIndex++;
@@ -182,30 +212,6 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
     })
   })
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // // try again:
@@ -363,20 +369,6 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
 //       })
 //  });  // end of GET route (finally)
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // /**
 //  * GET all list items for list
@@ -805,11 +797,8 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
 
 
 
-
-
-
 /**
- * POST a new list item for user
+ * POST: Add a new list item for user
  */
 router.post('/', rejectUnauthenticated, (req, res) => {
   console.log('req.body in POST of new item:', JSON.stringify(req.body));
@@ -872,6 +861,9 @@ router.post('/', rejectUnauthenticated, (req, res) => {
     })
 });
 
+/**
+ * DELETE a list item 
+ */
 router.delete('/:id', rejectUnauthenticated, (req, res) => {
   const listItemId = req.params.id;
   console.log('indelete:',listItemId)
@@ -890,7 +882,10 @@ router.delete('/:id', rejectUnauthenticated, (req, res) => {
     })
 });
 
-
+/**
+ * PUT: Update the description for a list item
+ *        (done separately from other update list item functions)
+ */
 router.put('/update_desc/:id', rejectUnauthenticated, (req, res) => {
   console.log('reqparams',req.params);
  const listId = Number(req.params.id);
@@ -984,88 +979,179 @@ router.put('/toggle_complete/:id', rejectUnauthenticated, (req, res) => {
 
 })
 
+/**
+ * PUT: Update the sort order of list items when they are 
+ *        dragged and dropped to a new location
+ */
 router.put('/sort/:id', rejectUnauthenticated, (req, res) => {
   console.log('in list_items sort put');
-  console.log('req.body, req.params', req.body, req.params);
+  console.log('req.params:', req.params);
+  // Read in the sorting group selected, the current list to work on,
+  //  the item to move (drag), and the item to replace.
   const listId = req.params.id;
-  const indexToMove = req.body.indexToMove;
-  const indexToReplace = req.body.indexToReplace;
-  // First, get the sort_order values for indexToMove and indexToReplace
-  const getSortOrdersQuery = `
-    SELECT id, sort_order
-    FROM list_item
-    WHERE id IN ($1, $2) AND list_id = $3;
-  `;
-  pool.query(getSortOrdersQuery, [indexToMove, indexToReplace, listId])
-    .then(result => {
-      console.log('result.rows here:', result.rows);
-      const rows = result.rows;
-      // send error if this doesn't select both items
-      if (rows.length !== 2) {
-        throw new Error('Could not find both items in the list.');
+  const itemToMove = req.body.itemToMove;
+  const itemToReplace = req.body.itemToReplace;
+  const group = req.body.group;
+  console.log('itemToMove', itemToMove);
+  console.log('itemToReplace', itemToReplace);
+  console.log('group', group);
+  // If we are dragging an item over a header (the target is a header)
+  //    set this on to specially process move
+  const replaceIsHeader = (itemToReplace.group_header === 'none' ? false : true );
+  let newWeek = 0, newMonth = 0, newYear = 0;
+  // set the movingDown if item is being dragged downward in sort order
+  let movingDown = false;
+  if (itemToMove.sort_order < itemToReplace.sort_order) {
+    movingDown = true;
+  } else {
+    movingDown = false;
+  }
+  switch(group) {
+    case 'week':
+      // if weekToMove = weekToReplace
+      if (itemToMove.week_to_work_on = 
+            itemToReplace.week_to_work_on) {
+        // if itemToReplace is a header row
+        if (replaceIsHeader) {
+          if (movingDown) {
+            newWeek = itemToMove.week_to_work_on - 1;
+            newYear = itemToMove.year_to_work_on;
+            newMonth = getMonthFromWeekNumber(newYear, newWeek);
+          } else {
+            newWeek = itemToMove.week_to_work_on + 1;
+            newYear = itemToMove.year_to_work_on;
+            newMonth = getMonthFromWeekNumber(newYear, newWeek);
+          }
+        // else if itemToReplace is not a header row, week stays same
+        } else {
+          newWeek = itemToMove.week_to_work_on;
+          newMonth = itemToMove.month_to_work_on;
+          newYear = itemToMove.year_to_work_on;
+        }
+      // if weekToMove > weekToReplace (always moving up)
+      } else if (itemToMove.week_to_work_on > 
+                    itemToReplace.week_to_work_on) {
+        if (replaceIsHeader) {
+          newWeek = itemToMove.week_to_work_on - 1; 
+          newYear = itemToReplace.week_to_work_on;
+          newMonth = getMonthFromWeekNumber(newYear, newWeek);
+
+        } else {
+          newWeek = itemToReplace.week_to_work_on;
+          newMonth = itemToReplace.month_to_work_on;
+          newYear = itemToReplace.year_to_work_on;
+        }
+      // if weekToMove < weekToReplace (always moving down)
+      } else if (itemToMove.week_to_work_on <
+                    itemToReplace.week_to_work_on) {
+          newWeek = itemToReplace.week_to_work_on;
+          newMonth = itemToReplace.month_to_work_on;
+          newYear = itemToReplace.year_to_work_on;
       }
-      // grab the the corresponding sort orders from indexToMove and 
-      //    indexToReplace
-      const itemToMove = rows.find(row => row.id == indexToMove);
-      const itemToReplace = rows.find(row => row.id == indexToReplace);
-      const sortOrderToMove = itemToMove.sort_order;
-      const sortOrderToReplace = itemToReplace.sort_order;
-      console.log('itemToMove', itemToMove);
-      console.log('itemToReplace', itemToReplace);
-      console.log('sortOrderToMove', sortOrderToMove);
-      console.log('sortOrderToReplace', sortOrderToReplace);
-      let updateSortOrderQuery = '';
-      // For moving an item down on the list
-      if (sortOrderToMove < sortOrderToReplace) {
-        console.log('moving down');
-        updateSortOrderQuery = `
-          UPDATE list_item
-          SET sort_order = CASE 
-            WHEN id = $1 THEN $2
-            WHEN sort_order BETWEEN $3 AND $4 THEN sort_order - 1
-            ELSE sort_order
-          END
-          WHERE list_id = $5;
-        `;
-        pool.query(updateSortOrderQuery, [indexToMove, sortOrderToReplace, sortOrderToMove + 1, sortOrderToReplace, listId])
-          .then((dbResponse) => {
-            console.log('PUT of sort order (move down) data successful in /api/list_items/sort/:id', dbResponse);
-            res.sendStatus(200);
-          })
-          .catch(dbError => {
-            console.log('PUT of sort order data failed in /api/list_items/sort/:id', dbError);
-            res.sendStatus(500);
-          });
-      // For moving an item up on the list 
-      } else if (sortOrderToMove > sortOrderToReplace) {
-        console.log('moving up');
-        updateSortOrderQuery = `
-          UPDATE list_item
-          SET sort_order = CASE 
-            WHEN id = $1 THEN $2
-            WHEN sort_order BETWEEN $3 AND $4 THEN sort_order + 1
-            ELSE sort_order
-          END
-          WHERE list_id = $5;
-        `;
-        pool.query(updateSortOrderQuery, [indexToMove, sortOrderToReplace, sortOrderToReplace, sortOrderToMove - 1, listId])
-          .then((dbResponse) => {
-            console.log('PUT of sort order (move up) data successful in /api/list_items/sort/:id', dbResponse);
-            res.sendStatus(200);
-          })
-          .catch(dbError => {
-            console.log('PUT of sort order data failed in /api/list_items/sort/:id', dbError);
-            res.sendStatus(500);
-          });
-      } else {
-        res.sendStatus(400); // This shouldn't happen as we check if active != over
-      }
-    })
-    .catch(dbError => {
-      console.log('Error retrieving sort order data in /api/list_items/sort/:id', dbError);
-      res.sendStatus(500);
-    });
+      break;
+    case 'month':
+      break;
+    case 'year':
+      break;
+  }
+  console.log('newWeek, newMonth, newYear', newWeek, newMonth, newYear, 'endddd');
+  let updateSortOrderQuery = '';
+  // For moving an item down on the list
+
+  if (movingDown) {
+    console.log('moving down');
+    updateSortOrderQuery = `
+      UPDATE list_item
+      SET sort_order = 
+      CASE 
+        WHEN id = $1 THEN $2
+        WHEN sort_order BETWEEN $3 AND $2 THEN sort_order - 1
+        ELSE sort_order
+      END,
+        week_to_work_on = 
+          CASE WHEN id = $1 THEN $4
+            ELSE week_to_work_on
+          END,
+          month_to_work_on = 
+            CASE WHEN id = $1 THEN $5
+              ELSE month_to_work_on
+            END,
+        year_to_work_on = 
+          CASE WHEN id = $1 THEN $6
+            ELSE year_to_work_on
+            END
+      WHERE list_id = $7;
+    `;
+    pool.query(updateSortOrderQuery, [itemToMove.id, 
+                                      itemToReplace.sort_order,
+                                      itemToMove.sort_order + 1,
+                                      newWeek,
+                                      newMonth,
+                                      newYear,
+                                      listId])
+      .then((dbResponse) => {
+        console.log('PUT of sort order (move down) data successful in /api/list_items/sort/:id', dbResponse);
+        res.sendStatus(200);
+      })
+      .catch(dbError => {
+        console.log('PUT of sort order data failed in /api/list_items/sort/:id', dbError);
+        res.sendStatus(500);
+      });
+  // For moving an item up on the list 
+  } else if (!movingDown) {
+    console.log('moving up');
+    updateSortOrderQuery = `
+      UPDATE list_item
+      SET sort_order = 
+        CASE 
+          WHEN id = $1 THEN $2
+          WHEN sort_order BETWEEN $2 AND $3 THEN sort_order + 1
+          ELSE sort_order
+        END,
+        week_to_work_on = 
+          CASE WHEN id = $1 THEN $4
+            ELSE week_to_work_on
+          END,
+        month_to_work_on = 
+          CASE WHEN id = $1 THEN $5
+            ELSE month_to_work_on
+          END,
+        year_to_work_on = 
+        CASE WHEN id = $1 THEN $6
+          ELSE year_to_work_on
+        END
+      WHERE list_id = $7;
+    `;
+    pool.query(updateSortOrderQuery, [itemToMove.id, 
+                                      itemToReplace.sort_order,
+                                      itemToMove.sort_order - 1,
+                                      newWeek,
+                                      newMonth,
+                                      newYear, 
+                                      listId])
+      .then((dbResponse) => {
+        console.log('PUT of sort order (move up) data successful in /api/list_items/sort/:id', dbResponse);
+        console.log('rows are here::::::::::::', dbResponse.rows);
+        // reset week/month/year to work on if needed
+
+        res.sendStatus(200);
+      })
+      .catch(dbError => {
+        console.log('PUT of sort order data failed in /api/list_items/sort/:id', dbError);
+        res.sendStatus(500);
+      });
+  } else {
+    res.sendStatus(400); // This shouldn't happen as we check if active != over
+  }
+  // .catch(error => {
+  //   console.log('first query failed?', error);
+  //   res.sendStatus(500);
+  // })
 });
+
+
+/* END OF ROUTES *********************************************************/
+
 
 module.exports = router;
 

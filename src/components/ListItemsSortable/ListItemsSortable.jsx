@@ -3,6 +3,7 @@ import {CSS} from "@dnd-kit/utilities";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import getWeekNumber from "../../utilities/utilities";
+import './ListItemsSortable.css';
 
 
 
@@ -31,7 +32,8 @@ function ListItemsSortable({ item,
         setNodeRef,
         transform,
         transition
-    } = useSortable({id: item.id});
+    } = useSortable({ id: item.id,
+                      data: {item} });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -77,7 +79,7 @@ function ListItemsSortable({ item,
       <>
         {/* conditionally return a header row or a detail row */}
         { item.group_header !== 'none' ? <div id="list-item"
-                                   className="list-item"
+                                   className="list-item-header"
                                    ref={setNodeRef} 
                                    style={style} >{item.group_header}    (sort:{item.sort_order} weekToWork:{item.week_to_work_on} monthToWork:{item.month_to_work_on} yearToWork:{item.year_to_work_on})</div> : 
         (
@@ -134,7 +136,7 @@ function ListItemsSortable({ item,
                     onChange={handleChangeForm}/>
               <button {...attributes} {...listeners}>drag me</button>
               <button onClick={() => handleDeleteItem(item.id)}>delete</button>
-              sort:{item.sort_order} grphead:{item.group_header} weektowork:{item.week_to_work_on}
+              sort:{item.sort_order} grphead:{item.group_header} weektowork:{item.week_to_work_on} sort:{item.sort_order} monthToWork:{item.month_to_work_on} yearToWork:{item.year_to_work_on}
           </div> 
         )}
       </>
