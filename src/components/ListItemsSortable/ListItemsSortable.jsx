@@ -38,7 +38,7 @@ function ListItemsSortable({ item,
         transition
     }
 
-    const assignHeader = () => {
+    const assignHeader = (item) => {
       // group header is the week/month/year to work on 
       //    assume 1 is current week, 2 is next week, etc.
       console.log('assigning header (selectedGroupBy, item.group_header ',
@@ -59,7 +59,7 @@ function ListItemsSortable({ item,
           return `${selectedGroupBy} After Next`;
           break;
         default:
-          return `Current ${selectedGroupBy} plus ${item.group_header}`;
+          return `Three ${selectedGroupBy}s out or more`;
           break;
       }
     }
@@ -111,16 +111,15 @@ function ListItemsSortable({ item,
         //    header type changes
 
         <>
-        { (item.group_header && item.group_header < 4) ? <div id="list-item"
+        { ((item.group_header !== null) && Number(item.group_header) < 4) ? <div id="list-item"
                                    className="list-item"
                                    ref={setNodeRef} 
-                                   style={style} >{assignHeader()} sort:{item.sort_order} grphead:{item.group_header} weektowork:{item.week_to_work_on}</div> : 
+                                   style={style} >{assignHeader(item)} sort:{item.sort_order} grphead:{item.group_header} weektowork:{item.week_to_work_on}</div> : 
         (
           <div id="list-item"
               className="list-item"
               ref={setNodeRef} 
               style={style} >
-            {/* <span>{JSON.stringify(item)}</span> */}
             sort:{item.sort_order} grphead:{item.group_header} weektowork:{item.week_to_work_on}
             <button onClick={() => handleCompleteItemToggle(item.id, item.list_id)}
               >{item.completed_date === null ? '🔲' : '⬛️'}

@@ -5,6 +5,7 @@ const { rejectUnauthenticated } = require('../modules/authentication-middleware'
 
 
 
+
 function getWeekNumber(date) {
   // Copy date so don't modify original
   date = new Date(date);
@@ -39,6 +40,7 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
   const currentMonth = d.getMonth();
   const currentWeek = getWeekNumber(d);
   if (groupByHeading === 'week') {
+    console.log('gropubyHeading', groupByHeading)
     itemToCompare = 'week_to_work_on';
     currentNumber = currentWeek;
     weekCompareString = '';
@@ -52,6 +54,7 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
     currentNumber = currentYear;
   }
     console.log('currentNumber:', currentNumber);
+    console.log('itemtocompare', itemToCompare)
     const sqlText = `
     SELECT * FROM (
       WITH group_headers AS (
@@ -149,26 +152,65 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
         ORDER BY sort_order,
              group_header;
     `;
+    console.log(sqlText)
     pool.query(sqlText, [ listId, currentNumber])
     .then(dbResponse => {
       console.log('GET route for /api/list_items/:list_id without completed items sucessful!', dbResponse.rows);
       const listItemsWithGroupBy = dbResponse.rows;
+      console.log('itemtocompare', itemToCompare);
       console.log('ALLROWS:::::::::::::::', dbResponse.rows);
       console.log('ONE ROW:::::::::::::::', listItemsWithGroupBy[0]);
-      const sqlTextNextId = `SELECT MAX(id) FROM list_item`;
-      pool.query(sqlTextNextId)
+      console.log('listid:', listId);
+      console.log('currentNumber', currentNumber)
+      const sqlTextGetInfo = `
+        SELECT MAX(id) AS max_id, 
+               MAX(sort_order) AS max_sort_order,
+               (${itemToCompare} - ${currentNumber} ) AS group_header_no
+        FROM list_item
+        WHERE list_id = $1
+        GROUP BY ${itemToCompare}
+        ORDER BY max_id DESC;
+        `;
+        // SELECT MAX(id) AS max_id,
+        //        MAX(SELECT sort_order
+        //             FROM list_item
+        //             WHERE ${itemToCompare} 
+        //        ) FROM list_item
+      pool.query(sqlTextGetInfo, [listId])
       .then(dbResponse2 => {
         // modify header rows:
         //    make sure there is a 0, 1, 2, 3 but no 4
         //      (any numbers after 4, change first to 4 if no 4, 
         //        delete rest of number records)
+        const maxNumbers = dbResponse.rows;
+        console.log('results of getinfoquery',maxNumbers);
+        let nextId = maxNumbers[0].max_id;
+
+        if (maxNumbers.at(-1).group_header === 0) {
+          currentMax0 = maxNumbers.at(-1).max_sort_order;
+        } else {
+          currentMax0 = 1;
+        }
+        for (i  = maxNumbers.length-1; i>=0; i--) {
+          if (maxNumbers[i].group_header === 0) {
+            currentMax0 = maxNumbers[i].max_sort_order;
+          } 
+          if (maxNumbers[i].group_header === 1) {
+            currentMax1 = maxNumbers[i].max_sort_order;
+          }
+          if (maxNumbers[i].group_header === 2) {
+            currentMax2 = maxNumbers[i].max_sort_order;
+          }
+        }
+        
+     
+        let currentMax0 = 0;
+        let currentMax1 = 0;
+        let currentMax2 = 0;
         let headerNotFound0 = true;
         let headerNotFound1 = true;
         let headerNotFound2 = true;
         let headerNotFound3 = true;
-        let currentMax0 = 0;
-        let currentMax1 = 0;
-        let currentMax2 = 0;
         for (const row of listItemsWithGroupBy) {
           // set item to compare and current number 
           //    (fields used to find the max sort order by heading below)
@@ -201,21 +243,25 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
           // else if not null rows, they are item rows
           //    - find the max sort order for each header category
           } else {
-            if (itemToCompare === currentNumber) {
+            console.log(`comparing ${row[itemToCompare]} = ${currentNumber}`);
+            console.log(`then checking if ${currentMax0} < ${row.sort_order}`);
+            if (row[itemToCompare] === currentNumber) {
               if (currentMax0 < row.sort_order) {
                 currentMax0 = row.sort_order;
+                console.log('currentmax0', currentMax0)
               }
-            } else if (itemToCompare === currentNumber + 1) {
+            } else if (row[itemToCompare] === currentNumber + 1) {
               if (currentMax1 < row.sort_order) {
                 currentMax1 = row.sort_order;
               }
-            } else if (itemToCompare === currentNumber + 2) {
+            } else if (row[itemToCompare] === currentNumber + 2) {
               if (currentMax2 < row.sort_order) {
                 currentMax2 = row.sort_order;
               }
             } 
           }   //end not null rows
         }   // end for loop
+        console.log('max results 0 1 2 : ', currentMax0, 'dd', currentMax1, 'dd', currentMax2);
         if (headerNotFound0) {
           //create 0 header row
           //    group_header is 0
@@ -233,7 +279,7 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
             month_to_work_on : null,
             week_to_work_on : null,
             preferred_time_of_day : null,
-            sort_order : 1,
+            sort_order : listItemsWithGroupBy[0].sort_order,
             list_id : listItemsWithGroupBy[0].list_id,
             group_header : 0
           });
@@ -308,7 +354,6 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
       // })
         // add ids to new header rows
         console.log('ROWSSS RETURNED::::::::', dbResponse2.rows)
-        let nextId = dbResponse2.rows[0].max + 1;
         console.log('NEXT ID:::::::::', nextId);
         for (const row of listItemsWithGroupBy) {
           if (row.id === null) {
@@ -316,6 +361,16 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
             nextId++;
           }
         }
+        listItemsWithGroupBy.sort((a, b) => {
+          // Compare primary properties
+          if (a.sort_order < b.sort_order) return -1;
+          if (a.sort_order > b.sort_order) return +1;         
+          // If primary properties are equal, compare secondary properties
+          if (a.group_header < b.group_header) return -1;
+          if (a.group_header > b.group_header) return 1;
+          // If both primary and secondary properties are equal
+          return 0;
+      });
         // re-sort array based on sort_order, 
         console.log('FINAL BEFORE SEND:::::::::::::', listItemsWithGroupBy);
         res.send(listItemsWithGroupBy);
