@@ -4,9 +4,30 @@
 }
 
 .list {
-    border: .1 solid rgb(181, 246, 248);
+    /* border: .1 solid rgb(181, 246, 248);
     border-radius: .5rem;
     background-color: rgb(181, 246, 248);
     padding: .5rem;
-    margin: .1rem;
+    margin: .1rem; */
 }
+
+.list-item input {
+
+    background-color: rgb(148, 210, 255);
+}
+
+.list-item select {
+    background-color: rgb(148, 210, 255);
+    outline: none;
+}
+
+
+
+
+
+
+
+
+ */
+
+

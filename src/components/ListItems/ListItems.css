@@ -1,9 +1,86 @@
 
+.list-item-main-description {
+    text-align: left;
+    padding-bottom: .3rem;
+    border-bottom: 0.1rem solid black;
+}
+
+/* 
+list-item-location-section
+list-item-options-section
+list-items-add-section {
+}
+Form
+List-item-forecast-section
+list-items-add-input-desc
+list-items-add-input-priority
+list-items-add-input-weathertype
+list-items-add-input-timeofday
+list-items-add-input-duedate
+list-items-add-submit-button */
+input {
+    font-size: 1rem;
+}
+
+.list-item input,
+.list-item select {
+    border: none;
+    border-left: .1rem solid black;
+    margin: 0;
+    padding: .4rem;
+}
+
+input.list-item-desc-input {
+    font-size: 1rem;
+    border: none;
+}
+
+select {
+    font-size: 1rem;
+}
 
 .list-item {
-    border: .1 solid rgb(199, 220, 158);
+    border: .1 solid  rgb(148, 210, 255);
     border-radius: .5rem;
-    background-color:  rgb(199, 220, 158);
-    padding: .5rem;
-    margin: .1rem;
+    /* background-color:  rgb(148, 210, 255); */
+    margin: .5rem 0;
+    padding: 0;
+    width: fit-content;
+    /* margin-right: -4rem; */
+
 }
+.item-bar {
+    background-color: rgb(148, 210, 255);
+
+}
+.list-item-completed {
+    border: none;
+    outline: none;
+    max-height: fit-content;
+}
+
+
+input.list-item-desc-editable {
+    /* border: .1rem solid black; */
+}
+
+List-item-input-delete {
+    font-size: 1.5rem;
+}
+
+#list-item-drag-bar {
+    position: relative;
+    font-size: 1.4rem;
+    top: .2rem;
+}
+/* 
+
+
+list-item-select-timeofday
+list-item-weathertype
+list-item-priority
+List-item-desc-input   && list-item-desc-editable
+List-item-bar
+List-item
+#list-item
+ */

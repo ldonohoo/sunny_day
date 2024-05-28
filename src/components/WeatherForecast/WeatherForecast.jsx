@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import './WeatherForecast.css';
 
 
 function WeatherForecast({listId}) {
@@ -10,19 +11,20 @@ function WeatherForecast({listId}) {
     const weatherForecast = 
       useSelector(store => store.weatherReducer.weatherForecast);
     const [noLocation, setNoLocation] = useState(true);
-    // const [forecastDays, setForecastDays] = useState(weatherForecast.days);
-
-  useEffect(() => {
-    dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
-               payload: {listId: listId}});
-  }, []);
+    const [errorFetchingForecast, setErrorFetchingForecast] = useState(false);
 
   useEffect(() => {
     console.log('currentLoc:', currentLocation);
     if (currentLocation !== 0) {
       setNoLocation(false);
-      dispatch({ type: 'GET_WEATHER_FORECAST',
-               payload: currentLocation[0] });
+      try {
+        // dispatch({ type: 'GET_WEATHER_FORECAST',
+        //         payload: currentLocation[0] });
+      }
+      catch(error) {
+        console.log('Error fetching forecast, please try again later');
+        setErrorFetchingForecast(true);
+      }
       // setForecastDays(weatherForecast.days);
     } else {
       setNoLocation(true);
@@ -47,22 +49,26 @@ function WeatherForecast({listId}) {
   return (
     <>
                 {/* {'::::' + JSON.stringify(weatherForecast) + '::::'}  */}
-      {!weatherForecast ? 'Select Location to see forecast' : 
+      {!noLocation ? 'Select Location to see forecast' :
+          (errorFetchingForecast ? 'Error Fetching Forecast data, try again later.' :
         ( 
           <>
-            <h4>7 Day Forecast:<span>{weatherForecast.description}</span></h4> 
+          <h4 className="weather-overview">7 Day Forecast:<span>{weatherForecast.description}</span></h4> 
+          <section className="weather-forecast">
             {weatherForecast.days?.map(day => (
-              <div>
+              <figure className="forecast-box" 
+                    key={day?.datetime}>
                 <h5>{getDayOfWeek(day?.datetime)}</h5>
                 <p>MIN {day.tempmin}°F (feels<br/>like {day.feelslikemin}°F)</p>
                 <p>MAX {day.tempmax}°F (feels<br/>like {day.feelslikemax}°F)</p>
-                <image src={getIcon(day.icon)} alt={day.description}/>
-                <p>{day.description}</p>
+                <img src={getIcon(day.icon)} alt={day.description}/>
+                <figcaption>{day.description}</figcaption>
                 <p>{day.precipprob}%, {day.precip} in</p>
-              </div>
+              </figure>
             ))}
+          </section>
           </>
-        )
+        ))
       }
     </>
   )

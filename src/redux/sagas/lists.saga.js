@@ -199,7 +199,7 @@ function* deleteListItem(action) {
     })
     console.log('here!', action.payload.listItemId);
     yield put({ type: 'GET_LIST_ITEMS',
-                payload: action.payload.listItemId });
+                payload: {listId: action.payload.listId } });
   }
   catch(error) {
     console.log('Error in delete list item', error);

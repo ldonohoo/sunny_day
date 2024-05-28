@@ -1,0 +1,18 @@
+.weather-forecast {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.weather-overview {
+    display: inline; 
+}
+
+.forecast-box {
+    border: .1rem solid black;
+    border-radius: .3rem;
+    background-color: rgb(160, 223, 255);
+    margin: 0;
+    padding: 0;
+    font-size: small;
+}

@@ -72,6 +72,7 @@ function ListsSortable({list,
           <button onClick={handleLoadList}>load<br/>list</button>
           <input type="text"
                  value={inputDescription}
+                 required
                  onChange={(e) => setInputDescription(e.target.value)}
                  onClick={handleDescriptionClick}
                  readOnly={!isDescriptionEditable}

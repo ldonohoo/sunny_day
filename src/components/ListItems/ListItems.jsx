@@ -44,7 +44,7 @@ function ListItems() {
     dispatch({ type: 'GET_TIME_OF_DAYS' });
     dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
                payload: { listId: list_id }});
-  }, []);
+  }, [list_id]);
 
   const handleAddListItem = (event) => {
     event.preventDefault();
@@ -106,10 +106,11 @@ function ListItems() {
   });
 }
 
-  const handleDeleteItem = (listItemId) => {
+  const handleDeleteItem = (listItemId, listId) => {
     dispatch({
         type: 'DELETE_LIST_ITEM',
-        payload: { listItemId: listItemId }
+        payload: { listItemId: listItemId,
+                   listId: listId }
       })
   }
 
@@ -127,16 +128,16 @@ function ListItems() {
   return (  
     <>
     <main>
-      <section>
+      <section className="list-item-forecast-section">
         <h2>Weather Forecast</h2>
         <WeatherForecast />
       </section>
-      <h2>{list_description}:</h2>
-      <section>
+      <h2 className="list-item-main-description"><span>LIST</span>  {list_description}</h2>
+      <section className="list-item-location-section">
         <LocationSelect isMasterLocation={false}
                         listId={list_id} />
       </section>
-      <section>
+      <section className="list-item-options-section">
         <h2>show completed</h2>
         <button className="show-completed yes" 
                 type="button" 
@@ -145,17 +146,20 @@ function ListItems() {
                 type="button" 
                 onClick={() => setShowCompleted(false)}>no</button>
       </section>
-      <section className="form list-items-form">
+      <section className="list-items-add-section">
         <form onSubmit={handleAddListItem}>
-            <input name="description"
+            <input className="list-items-add-input-desc"
+                   name="description"
                    type="text" 
                    value={inputFormData.description}
                    onChange={handleChangeForm}/>
-            <input name="priority"
+            <input className="list-items-add-input-priority"
+                   name="priority"
                    type="number" 
                    value={inputFormData.priority}
                    onChange={handleChangeForm}/>
-            <select name="weatherType"
+            <select className="list-items-add-input-weathertype"
+                    name="weatherType"
                     value={inputFormData.weatherType}
                     onChange={handleChangeForm}>
                       <option value="0">none
@@ -166,7 +170,8 @@ function ListItems() {
                       </option>
                     ))}
             </select>
-            <select name="timeOfDay"
+            <select className="list-items-add-input-timeofday"
+                    name="timeOfDay"
                     value={inputFormData.timeOfDay}
                     onChange={handleChangeForm}>
                       <option value="0">none</option>
@@ -183,11 +188,13 @@ function ListItems() {
                               value="night">Night
                       </option>
           </select>
-            <input name="dueDate"
+            <input className="list-items-add-input-duedate"
+                   name="dueDate"
                    type="date" 
                    value={inputFormData.dueDate}
                    onChange={handleChangeForm}/>
-            <button type="submit">+</button>
+            <button className="list-items-add-submit-button"
+                    type="submit">+</button>
         </form>
       </section>
       <DndContext collisionDetection={closestCenter}
