@@ -9,8 +9,8 @@ function* getWeatherTypes() {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
     };
-    console.log('weather types:',response.data);
     const response = yield axios.get('/api/weather/types', config);
+    console.log('weather types..', response.data);
     yield put({ type: 'SET_WEATHER_TYPES', payload: response.data });
   } 
   catch (error) {

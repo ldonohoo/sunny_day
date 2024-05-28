@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS list;
 DROP TABLE IF EXISTS hourly_forecast;
 DROP TABLE IF EXISTS location;
 DROP TABLE IF EXISTS weather_icon;
--- DROP TABLE IF EXISTS "user";
+-- DROP TABLE IF EXISTS "user" CASCADE;
 
 
 
@@ -39,7 +39,7 @@ CREATE TABLE location (
   longitude DEC,
   timezone_id INT,
   utc_offset  DEC,
-  is_master_default_location BOOLEAN DEFAULT NULL
+  is_master_default_location BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE list (
@@ -58,10 +58,10 @@ CREATE TABLE list_item (
   priority INT DEFAULT NULL,
   preferred_weather_type INT DEFAULT NULL,
   due_date DATE DEFAULT NULL,
-  year_to_complete INT NOT NULL,
-  month_to_complete INT DEFAULT NULL,
-  day_to_complete INT DEFAULT NULL,
-  time_of_day_to_complete VARCHAR(100) DEFAULT NULL,
+  year_to_work_on INT NOT NULL,
+  month_to_work_on INT DEFAULT NULL,
+  week_to_work_on INT DEFAULT NULL,
+  preferred_time_of_day VARCHAR(100) DEFAULT NULL,
   sort_order INT NOT NULL,
   list_id INT REFERENCES list(id) ON DELETE CASCADE
 );
@@ -158,9 +158,10 @@ CREATE TABLE forecast_precipitation_type (
 --         ('betty', 'pie');
 
 INSERT INTO location
-  (name, zip, is_master_default_location)
-  VALUES ('Mendota Hts, MN', 55118, TRUE),
-         ('St. Paul, MN', 55032, FALSE);
+  (name, country, zip, region, latitude, longitude, timezone_id, utc_offset)
+  VALUES ('Minneapolis, MN', 'United States',  55412, 'midwest', 44.980553, -93.270035, 5, -5),
+         ('St. Paul, MN', 'United States', 55101, 'midwest', 44.949642, -93.093124, 5, -5);
+
 
 -- INSERT INTO list 
 --   (description, location_id, sort_order, user_id)
@@ -168,7 +169,7 @@ INSERT INTO location
 --         ('to do list not done yet', 2, 2, 1);
 
 -- INSERT INTO list_item
---   (description, year_to_complete, sort_order, list_id)
+--   (description, year_to_work_on, sort_order, list_id)
 --   VALUES ('mow the lawn', 2024, 1, 1),
 --         ('make a big cake', 2024, 3, 1),
 --         ('trim the hedge', 2024, 2, 1);
@@ -185,29 +186,8 @@ INSERT INTO location
   ('warm', 'More than n degrees', NULL);
 
 
---  INSERT INTO list
---    (description,  user_id, location_id, sort_order)
---    VALUES ('treats', 1,
---          CASE WHEN (SELECT is_master_default_location
---                       FROM location
---                       WHERE location.user_id = 1       
---                        AND is_master_default_location = true)
---               THEN (SELECT id 
---                       FROM location
---                       WHERE location.user_id = 1
---                        AND is_master_default_location = true)
---               ELSE null
---          END,
---          COALESCE((SELECT MAX(sort_order) 
---                    FROM list 
---                    WHERE user_id = 1), 0) + 1);
---                    
---                    
---WITH new_order AS (
---    SELECT unnest(ARRAY[1, 2, 9, 10]) AS id, generate_series(1, array_length(ARRAY[1, 2, 9, 10], 1)) AS new_sort_order
---)
---UPDATE list
---SET sort_order = new_order.new_sort_order
---FROM new_order
---WHERE list.id = new_order.id  AND
---	user_id = 1;
+INSERT INTO time_of_day 
+  (morning, afternoon, evening, night)
+  VALUES ( '06:00:00', '12:00:00', '17:00:00', '20:00:00'),
+         ( '06:00:00', '12:00:00', '17:00:00', '20:00:00');
+

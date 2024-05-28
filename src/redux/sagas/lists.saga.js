@@ -197,9 +197,9 @@ function* deleteListItem(action) {
       header: {'Content-Type': 'application/json' },
       withCredentials: true
     })
-    console.log('here!');
+    console.log('here!', action.payload.listItemId);
     yield put({ type: 'GET_LIST_ITEMS',
-                listId: action.payload.listItemId });
+                payload: action.payload.listItemId });
   }
   catch(error) {
     console.log('Error in delete list item', error);

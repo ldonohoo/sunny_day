@@ -165,27 +165,29 @@ router.post('/copy/', rejectUnauthenticated, (req, res) => {
       const sqlTextListItems = `
         INSERT INTO list_item
           ( description,
+            completed_date,
             priority,
             preferred_weather_type,
             due_date,
-            year_to_complete,
-            month_to_complete,
-            day_to_complete,
-            time_of_day_to_complete,
-            list_id,
-            sort_order )  
+            year_to_work_on,
+            month_to_work_on,
+            week_to_work_on,
+            preferred_time_of_day,
+            sort_order,
+            list_id )  
         SELECT 
             description, 
+            completed_date,
             priority,
             preferred_weather_type,
             due_date,
-            year_to_complete,
-            month_to_complete,
-            day_to_complete,
-            time_of_day_to_complete,
-            $1,
-            sort_order  
-        FROM 
+            year_to_work_on,
+            month_to_work_on,
+            week_to_work_on,
+            preferred_time_of_day,
+            sort_order,
+            $1  
+        FROM list_item
         WHERE list_id = $2
           AND completed_date IS NULL;
       `;

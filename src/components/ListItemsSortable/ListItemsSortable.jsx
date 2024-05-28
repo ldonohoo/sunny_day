@@ -17,7 +17,7 @@ function ListItemsSortable({ item,
     const [inputFormData, setInputFormData] = useState({
         priority: item.priority || 0,
         weatherType : item.preferred_weather_type || 0,
-        timeOfDay: item.time_of_day_to_complete || '0',
+        timeOfDay: item.preferred_time_of_day || '0',
         dueDate: item.due_date || '' });
 
     const {

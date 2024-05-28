@@ -29,7 +29,7 @@ router.get('/',rejectUnauthenticated, (req, res) => {
     })
 });
 
-router.get('/master', rejectUnauthenticated, (req, res) => {
+router.get('/master/', rejectUnauthenticated, (req, res) => {
     const user = req.user;
     console.log('getting master loc! req.body', JSON.stringify(req.body))
     const sqlText = `
@@ -51,19 +51,19 @@ router.get('/master', rejectUnauthenticated, (req, res) => {
   /**
    * Get current location data for a list number
    */
-  router.get('/current_list', rejectUnauthenticated, (req, res) => {
-    console.log('in get of current location! ')
+  router.get('/current_list/:id', rejectUnauthenticated, (req, res) => {
+    console.log('In get of current location! ')
     console.log('req.user', req.user);
-    console.log('req.query', req.query);
+    console.log('req.params', req.params);
     const user = req.user;
-    const listId = req.query.list_id;
+    const listId = req.params.id;
     const sqlText = `
-      SELECT *
-        FROM location
-        INNER JOIN list
-            ON list.location_id = location.id
-        WHERE location.user_id = $1
-            AND list.id = $2;
+      SELECT location.*
+        FROM list
+        INNER JOIN location
+          ON list.location_id = location.id
+        WHERE list.user_id = $1
+          AND list.id = $2;
       `;
       pool.query(sqlText, [user.id, listId])
       .then(dbResponse => {
@@ -102,7 +102,7 @@ router.put('/current_list/:list_id', rejectUnauthenticated, (req, res) => {
     })
 });
 
-router.put('/master', rejectUnauthenticated, (req, res) => {
+router.put('/master/', rejectUnauthenticated, (req, res) => {
   const user = req.user;
   let locationId = req.body.locationId;
   console.log('locationid',locationId)

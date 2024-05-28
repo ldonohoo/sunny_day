@@ -46,18 +46,18 @@ router.post('/', rejectUnauthenticated, (req, res) => {
   }
   const sqlText = `
   INSERT INTO list_item
-    (description, 
-     priority,
-     preferred_weather_type,
-     time_of_day_to_complete,
-     due_date,
-     year_to_complete,
-     list_id,
-     sort_order)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, 
+  ( description,
+    priority,
+    preferred_weather_type,
+    preferred_time_of_day,
+    due_date,
+    year_to_work_on,
+    list_id,
+    sort_order )  
+    VALUES ($1, $2, $3, $4, $5, $6, $7,
           COALESCE((SELECT MAX(sort_order) 
                     FROM list_item
-                    WHERE list_id = $6), 0) + 1);
+                    WHERE list_id = $7), 0) + 1);
     `;
     pool.query(sqlText, [ newItem.description, 
                           newItem.priority,
@@ -65,7 +65,7 @@ router.post('/', rejectUnauthenticated, (req, res) => {
                           newItem.timeOfDay,
                           newItem.dueDate,
                           newItem.yearToComplete,
-                          newItem.listId ])
+                          newItem.listId])
     .then(dbResponse => {
       console.log('POST route for /api/list_items sucessful!', dbResponse.rows);
       res.send(dbResponse.rows);
@@ -143,7 +143,7 @@ router.put('/edit/:id', rejectUnauthenticated, (req, res) => {
   UPDATE list_item
      SET priority = $1,
          preferred_weather_type = $2,
-         time_of_day_to_complete = $3,
+         preferred_time_of_day = $3,
          due_date = $4
     WHERE id = $5;
     `;

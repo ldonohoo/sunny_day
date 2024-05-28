@@ -33,13 +33,15 @@ function* getMasterLocation() {
 
 function* getCurrentListLocation(action) {
     try {
-      const config = {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-      };
-      console.log('getcurrenloc', JSON.stringify(action.payload))
+
+      console.log('getcurrenloc', action.payload, 'asdf', action.payload.listId);
       const response = 
-        yield axios.get(`/api/locations/current_list/?list_id=${action.payload.listId}`, config);
+        yield axios({
+          method: 'GET',
+          url: `/api/locations/current_list/${action.payload.listId}`,
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true
+        })
         console.log('response.data from getcurrentlistloc', response.data)
       yield put({ type: 'SET_CURRENT_LIST_LOCATION', payload: response.data });
     } 
