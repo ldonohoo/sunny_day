@@ -74,20 +74,19 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
   //    - grouping by month
   //    - grouping by year
   console.log('year,month,week', currentYear, currentMonth, currentWeek);
+  let fieldToCompare = '';
+  let currentNumber = 0;
   switch (groupBy) {
     case 'week':
       fieldToCompare = 'week_to_work_on';
-      groupColumnName = 'group_current_week';
       currentNumber = currentWeek;
       break;
     case 'month':
       fieldToCompare = 'month_to_work_on';
-      groupColumnName = 'group_current_month';
       currentNumber = currentMonth;
       break;
     case 'year':
       fieldToCompare = 'year_to_work_on';
-      groupColumnName = 'group_current_year';
       currentNumber = currentYear;
       break;
   }
@@ -113,10 +112,14 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
       return pool.query(sqlTextListItems, [listId]);
     })
     .then(listItemsResult => {
+      // Go through the list_items to insert header rows
       listItems = listItemsResult.rows;
+      // Final list name
       let mergedList = [];
       let headerIndex = 0;
       let listIndex = 0;
+      // Keep processing while there are items in either the listItems table
+      //    or the headerRows table so we merge them all completely
       while (listIndex < listItems.length || headerIndex < headerRows.length) {
         if (
           headerIndex < headerRows.length &&
@@ -125,6 +128,8 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
           // Insert header row before the current list item
           let headerRow = headerRows[headerIndex];
           let currentItem = listItems[listIndex] || {};
+          console.log('currentitem', currentItem)
+          console.log('headerrow', headerRow)
 
           // dynamically find values of to_work_on fields based on group by
           let weekToWorkOn = '', monthToWorkOn = '', yearToWorkOn = '';
@@ -134,16 +139,19 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
               weekToWorkOn = headerRow.group_current_time_period;
               monthToWorkOn = currentItem.month_to_work_on || null;
               yearToWorkOn = currentItem.year_to_work_on || null;
+              console.log('1 week month year', weekToWorkOn, monthToWorkOn, yearToWorkOn);
               break;
             case 'month':
               weekToWorkOn = currentItem.week_to_work_on || null;
               monthToWorkOn = headerRow.group_current_time_period;
               yearToWorkOn = currentItem.year_to_work_on || null;
+              console.log('2 week month year', weekToWorkOn, monthToWorkOn, yearToWorkOn);
               break;
             case 'year':
               weekToWorkOn = currentItem.week_to_work_on || null;
               monthToWorkOn = currentItem.month_to_work_on || null;
               yearToWorkOn = headerRow.group_current_time_period;
+              console.log('3 week month year', weekToWorkOn, monthToWorkOn, yearToWorkOn);
               break;
           }
           console.log('about to push to list a header row,', yearToWorkOn, monthToWorkOn, weekToWorkOn);
@@ -984,7 +992,7 @@ router.put('/toggle_complete/:id', rejectUnauthenticated, (req, res) => {
  *        dragged and dropped to a new location
  */
 router.put('/sort/:id', rejectUnauthenticated, (req, res) => {
-  console.log('in list_items sort put');
+  console.log('In list_items sort put**************************************');
   console.log('req.params:', req.params);
   // Read in the sorting group selected, the current list to work on,
   //  the item to move (drag), and the item to replace.
@@ -1006,24 +1014,29 @@ router.put('/sort/:id', rejectUnauthenticated, (req, res) => {
   } else {
     movingDown = false;
   }
+  console.log('movingdown', movingDown);
   switch(group) {
     case 'week':
       // if weekToMove = weekToReplace
-      if (itemToMove.week_to_work_on = 
+      if (itemToMove.week_to_work_on === 
             itemToReplace.week_to_work_on) {
+        console.log('if weektomove = weektoreplace');
         // if itemToReplace is a header row
         if (replaceIsHeader) {
           if (movingDown) {
+            console.log('1 if header moving down')
             newWeek = itemToMove.week_to_work_on - 1;
             newYear = itemToMove.year_to_work_on;
             newMonth = getMonthFromWeekNumber(newYear, newWeek);
           } else {
+            console.log('2 if header moving up')
             newWeek = itemToMove.week_to_work_on + 1;
             newYear = itemToMove.year_to_work_on;
             newMonth = getMonthFromWeekNumber(newYear, newWeek);
           }
         // else if itemToReplace is not a header row, week stays same
         } else {
+          console.log('3 if not a header ')
           newWeek = itemToMove.week_to_work_on;
           newMonth = itemToMove.month_to_work_on;
           newYear = itemToMove.year_to_work_on;
@@ -1031,12 +1044,15 @@ router.put('/sort/:id', rejectUnauthenticated, (req, res) => {
       // if weekToMove > weekToReplace (always moving up)
       } else if (itemToMove.week_to_work_on > 
                     itemToReplace.week_to_work_on) {
+        console.log('4 if weektomove > weektoreplace  moving up')
         if (replaceIsHeader) {
+          console.log('5 if it is a header row ')
           newWeek = itemToMove.week_to_work_on - 1; 
           newYear = itemToReplace.week_to_work_on;
           newMonth = getMonthFromWeekNumber(newYear, newWeek);
 
         } else {
+          console.log('6 if it not a header row')
           newWeek = itemToReplace.week_to_work_on;
           newMonth = itemToReplace.month_to_work_on;
           newYear = itemToReplace.year_to_work_on;
@@ -1044,6 +1060,7 @@ router.put('/sort/:id', rejectUnauthenticated, (req, res) => {
       // if weekToMove < weekToReplace (always moving down)
       } else if (itemToMove.week_to_work_on <
                     itemToReplace.week_to_work_on) {
+          console.log('7 if week to move < weektoreplace moving down')
           newWeek = itemToReplace.week_to_work_on;
           newMonth = itemToReplace.month_to_work_on;
           newYear = itemToReplace.year_to_work_on;
@@ -1055,6 +1072,7 @@ router.put('/sort/:id', rejectUnauthenticated, (req, res) => {
       break;
   }
   console.log('newWeek, newMonth, newYear', newWeek, newMonth, newYear, 'endddd');
+  console.log('')
   let updateSortOrderQuery = '';
   // For moving an item down on the list
 

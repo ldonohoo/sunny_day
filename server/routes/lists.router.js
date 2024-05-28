@@ -186,7 +186,7 @@ router.post('/copy/', rejectUnauthenticated, (req, res) => {
             preferred_time_of_day,
             $1,
             sort_order  
-        FROM 
+        FROM list_item
         WHERE list_id = $2
           AND completed_date IS NULL;
       `;
@@ -197,6 +197,7 @@ router.post('/copy/', rejectUnauthenticated, (req, res) => {
       })
       .catch(dbError2 => {
         console.log('POST route part 2 for /api/lists/copy failed:', dbError2);
+        res.sendStatus(500);
       })
     })
     .catch(dbError => {
