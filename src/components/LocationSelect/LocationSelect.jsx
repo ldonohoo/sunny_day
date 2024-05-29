@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
+import '../LocationSelect/LocationSelect.css';
 
 function LocationSelect({isMasterLocation, listId }) {
 
@@ -80,8 +80,8 @@ function LocationSelect({isMasterLocation, listId }) {
 
 
   return (
-    <div>current location id: {JSON.stringify(currentLocation.location_id)}
-        <label>{isMasterLocation ? 'default location': 'list location'}</label>
+    <div className="location-select-add"> current location id: {JSON.stringify(currentLocation.location_id)}<br></br>
+        <label>{isMasterLocation ? 'DEFAULT LOCATION': 'LIST LOCATION'}</label>
         <select name="selectedLocation"
                 value={ isMasterLocation && 
                         locations[0]?.is_master_default_location === true ?

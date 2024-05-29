@@ -74,9 +74,10 @@ function ListItemsSortable({ item,
              ref={setNodeRef} 
              style={style} >
           <span className="list-item-bar">
-            <button className="list-item-completed" 
+            <button id="list-item-complete-checkbox" 
+                    className={item.completed_date === null ? '' : 'list-item-complete'}
                     onClick={() => handleCompleteItemToggle(item.id, item.list_id)}
-              >{item.completed_date === null ? '🔲' : '⬛️'}
+              >
             </button>
             <input type="text"
                    required
@@ -135,7 +136,7 @@ function ListItemsSortable({ item,
                       {...listeners}>::::</button>
             </span>
             <span className="list-item-delete-button" 
-                  onClick={() => handleDeleteItem(item.id, item.list_id)}><pre>   🗑️</pre></span>
+                  onClick={() => handleDeleteItem(item.id, item.list_id)}><pre> 🗑️</pre></span>
         </div>
     )
 }

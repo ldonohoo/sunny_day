@@ -14,7 +14,7 @@ import {
 import ListItemsSortable from '../ListItemsSortable/ListItemsSortable';
 import LocationSelect from '../LocationSelect/LocationSelect';
 import WeatherForecast from '../WeatherForecast/WeatherForecast';
-
+import formatDate from '../../utilities/utilities.js';
 
 function ListItems() {
 
@@ -137,27 +137,27 @@ function ListItems() {
         <LocationSelect isMasterLocation={false}
                         listId={list_id} />
       </section>
-      <section className="list-item-options-section">
-        <h2>show completed</h2>
-        <button className="show-completed yes" 
-                type="button" 
-                onClick={() => setShowCompleted(true)}>yes</button>
-        <button className="show-completed no" 
-                type="button" 
-                onClick={() => setShowCompleted(false)}>no</button>
-      </section>
       <section className="list-items-add-section">
+        <label className="list-item-add-title">ADD NEW ITEM</label>
         <form onSubmit={handleAddListItem}>
+          <div>
+            <label className="list-item-add-label">DESCRIPTION<br></br></label>
             <input className="list-items-add-input-desc"
                    name="description"
                    type="text" 
                    value={inputFormData.description}
                    onChange={handleChangeForm}/>
+            </div>
+            <div>
+            <label className="list-item-add-label">PRIORITY<br></br></label>        
             <input className="list-items-add-input-priority"
                    name="priority"
                    type="number" 
                    value={inputFormData.priority}
                    onChange={handleChangeForm}/>
+            </div>
+            <div id="list-items-add-label-weathertype">
+            <label className="list-item-add-label preferred-weather">PREFERRED<br></br>WEATHER TYPE<br></br></label>
             <select className="list-items-add-input-weathertype"
                     name="weatherType"
                     value={inputFormData.weatherType}
@@ -170,6 +170,9 @@ function ListItems() {
                       </option>
                     ))}
             </select>
+            </div>
+            <div id="list-items-add-label-timeofday">
+            <label className="list-item-add-label preferred-time">PREFERRED<br></br>TIME OF DAY<br></br></label>
             <select className="list-items-add-input-timeofday"
                     name="timeOfDay"
                     value={inputFormData.timeOfDay}
@@ -188,6 +191,9 @@ function ListItems() {
                               value="night">Night
                       </option>
           </select>
+          </div>
+          <div>
+            <label className="list-item-add-label">DUE DATE<br></br></label>
             <input className="list-items-add-input-duedate"
                    name="dueDate"
                    type="date" 
@@ -195,18 +201,34 @@ function ListItems() {
                    onChange={handleChangeForm}/>
             <button className="list-items-add-submit-button"
                     type="submit">+</button>
+          </div>
         </form>
+      </section>
+      <section className="list-item-options-section">
+        <h2 className="show-completed-heading">SHOW COMPLETED</h2>
+        <button className={showCompleted ?
+                           "hightlight show-completed-yes" :
+                          "show-completed-yes"}
+                type="button" 
+                onClick={() => setShowCompleted(true)}>YES</button>
+        <button className={!showCompleted ?
+                           "hightlight show-completed-no" :
+                          "show-completed-no"}
+                type="button" 
+                onClick={() => setShowCompleted(false)}>NO</button>
       </section>
       <DndContext collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}> 
         <section className="list-items">
           <SortableContext
+                id="list-items-container"
                 items={listItems}
                 strategy={verticalListSortingStrategy}>
             {listItems.map(item => {
               return ( 
                 (showCompleted || (!showCompleted && ! item.completed_date)) ?
                       <ListItemsSortable key={item.id}
+                                          id="list-items-top"
                                           item={item}
                                           handleCompleteItemToggle=
                                             {handleCompleteItemToggle}
@@ -220,16 +242,19 @@ function ListItems() {
         </section>
       </DndContext>
       <section>
-        <h3>{!showCompleted ? 'completed items:' : ''}</h3>
-        {listItems.map(item => {
-          return (
-            <span key={item.id}>
-              {!showCompleted && item.completed_date ? 
-                item.description + ' completed on: ' + item.completed_date : ''}
+      <h3>{!showCompleted ? 'completed items:' : ''}</h3>
+      {listItems.map(item => (
+        <article key={item.id}>
+          {!showCompleted && item.completed_date ? (
+            <span>
+              {` COMPLETED ON ${formatDate(item.completed_date)}: ${item.description}`}
             </span>
-          );
-        })}
-      </section>
+          ) : (
+            ''
+          )}
+        </article>
+      ))}
+    </section>
     </main>
     </>
   );
