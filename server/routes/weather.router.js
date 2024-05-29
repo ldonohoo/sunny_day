@@ -8,7 +8,7 @@ require('dotenv').config()
 const OPENAI_API_KEY= process.env.OPENAI_API_KEY;
 const openAIurl = 'https://api.openai.com/v1/engines/gpt-4/completions';
 const openAIheaders = { 'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}` };
+                        'Authorization': `Bearer ${OPENAI_API_KEY}` };
 const VISUAL_CROSSING_API_KEY = process.env.VISUAL_CROSSING_API_KEY
 const visualCrossUrl = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/';
 const visualCrossIconSet = 'icons2';
@@ -409,10 +409,12 @@ router.get('/forecast/', rejectUnauthenticated, (req, res) => {
  *    1. get location data for list (used for weather data API call)
  *    2. get list data from list & list_items table (for openAI call)
  *    3. get weather data from visual crossing (for openAI call)
- *    4. make call to openAI assistant with data and prompt
- *    5. get recommendations response back from openAI
- *    6. process recommendations and save to recommendations table
- *    7. send recommendations table data back to display on screen
+ *    4. prepare data for openAI call 
+ *    5. prepare prompts for openAI call
+ *    6. make call to openAI assistant with data and prompt
+ *    7. get recommendations response back from openAI
+ *    8. process recommendations and save to recommendations table
+ *    9. send recommendations table data back to display on screen
  */
 router.get('/recommendations/:list_id', rejectUnauthenticated, async (res, req) => {
   console.log('Getting recommendations with OPENAI', req.params);
@@ -435,13 +437,20 @@ router.get('/recommendations/:list_id', rejectUnauthenticated, async (res, req) 
     const locationData = await connection.query(sqlTextLocation, [listId, userId]);
     // 2. get list data from list & list_items table (for openAI call)
     const sqlTextList = `
-      SELECT list_item.*,
-             list.description AS list_description
-        FROM list_item
-        INNER JOIN list
-          ON list.id = list_item.list_id
-        WHERE list.id = $1
-          AND user.id = $2;
+      SELECT list.description AS list_description,
+             list_item.description AS item_description,
+             list_item.priority AS priority,
+             list_item.preferred_time_of_day AS preferred_time_of_day,
+             weather_type.title AS preferred_weather,
+             list_item.due_date AS due_date
+      FROM list_item
+      INNER join list
+       ON list.id = list_item.list_id
+      LEFT OUTER JOIN preferred_weather_type AS weather_type
+        ON weather_type.id = list_item.preferred_weather_type
+      where list.id = $1 
+        AND list.user_id = $2 
+        AND completed_date IS NULL;
       `;
     const listData = await connection.query(sqlTextList, [listId, userId]);
   }
@@ -481,20 +490,52 @@ router.get('/recommendations/:list_id', rejectUnauthenticated, async (res, req) 
   //                  weatherAPIerror);
   //   res.sendStatus(500);
   // }
+  // 4. prepare data for openAI call 
+
+  // create list item table in text format to pass to open AI:
+  //    - first put data in an array of arrays
+  //    - second add the headers array to the top of the arrays
+  //    - third reformat table to text format with tabs and newlines  
+  let listDataArray = listData.map(listObject => Object.values(listObject));
+  console.log('listdataarray:', listDataArray)
+  listDataArray = listData.shift(["List Description", 
+                                "Item Description",
+                                "Priority",
+                                "Preferred Time Of Day",
+                                "Preferred Weather", 
+                                "Due Date"]);
+  console.log('listdataarray2', listDataArray);               
+  const tableText = listDataArray.map(row => row.join('\t')).join('\n');
+  console.log('listdatatext', listDataText);
+
+  // create weather data table in text format to pass to open AI:
+  //    - first put data in an array of arrays
+  //    - second add the headers array to the top of the arrays
+  //    - third reformat table to text format with tabs and newlines 
+
+  
   const weatherData = testData;
-  //4. make call to openAI assistant with data and prompt
+  // 5. prepare prompts for openAI call
+
+  //6. make call to openAI assistant with data and prompt
+
+
+  const dataAndPrompt = { 
+  }
   try {
     const recommendations = await axios({
       method: 'POST',
       url: `${openAIurl}`,
       headers: openAIheaders,
-      payload: 
+      payload: dataAndPrompt
     });
     if (recommendations.rows.length = 0) {
       console.log('No recommendations received!');
       res.sendStatus(500);
     }
-    // else send back recommendations!
+  // 7. get recommendations response back from openAI
+  // 8. process recommendations and save to recommendations table
+  // 9. send recommendations table data back to display on screen
     res.send(recommendations.rows);
   }
   catch(openAIapiError) {
