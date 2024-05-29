@@ -141,7 +141,7 @@ function ListItems() {
         <label className="list-item-add-title">ADD NEW ITEM</label>
         <form onSubmit={handleAddListItem}>
           <div>
-            <label className="list-item-add-label">DESCRIPTION<br></br></label>
+            <label className="label list-item-add-label">DESCRIPTION<br></br></label>
             <input className="list-items-add-input-desc"
                    name="description"
                    type="text" 
@@ -149,15 +149,15 @@ function ListItems() {
                    onChange={handleChangeForm}/>
             </div>
             <div>
-            <label className="list-item-add-label">PRIORITY<br></br></label>        
-            <input className="list-items-add-input-priority"
+            <label className="label list-item-add-label">PRIORITY<br></br></label>        
+            <input className="list-item-add-input-priority"
                    name="priority"
                    type="number" 
                    value={inputFormData.priority}
                    onChange={handleChangeForm}/>
             </div>
             <div id="list-items-add-label-weathertype">
-            <label className="list-item-add-label preferred-weather">PREFERRED<br></br>WEATHER TYPE<br></br></label>
+            <label className=" label list-item-add-label preferred-weather">PREFERRED<br></br>WEATHER TYPE<br></br></label>
             <select className="list-items-add-input-weathertype"
                     name="weatherType"
                     value={inputFormData.weatherType}
@@ -172,7 +172,7 @@ function ListItems() {
             </select>
             </div>
             <div id="list-items-add-label-timeofday">
-            <label className="list-item-add-label preferred-time">PREFERRED<br></br>TIME OF DAY<br></br></label>
+            <label className="label list-item-add-label preferred-time">PREFERRED<br></br>TIME OF DAY<br></br></label>
             <select className="list-items-add-input-timeofday"
                     name="timeOfDay"
                     value={inputFormData.timeOfDay}
@@ -193,7 +193,7 @@ function ListItems() {
           </select>
           </div>
           <div>
-            <label className="list-item-add-label">DUE DATE<br></br></label>
+            <label className=" label list-item-add-label">DUE DATE<br></br></label>
             <input className="list-items-add-input-duedate"
                    name="dueDate"
                    type="date" 
@@ -217,6 +217,12 @@ function ListItems() {
                 type="button" 
                 onClick={() => setShowCompleted(false)}>NO</button>
       </section>
+      {/* <label className="label list-item-desc-label">COMPLETE</label> */}
+      <label className="label list-item-desc-label">DESCRIPTION</label>
+      <label className="label list-item-priority-label">PRIORITY</label>
+      <label className="label list-item-weather-label">PREF. WEATHER</label>
+      <label className="label list-item-timeofday-label">PREF. TIME OF DAY</label>
+      <label className="label list-item-duedate-label">DUE DATE</label>
       <DndContext collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}> 
         <section className="list-items">

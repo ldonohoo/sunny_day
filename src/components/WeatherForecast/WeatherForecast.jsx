@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './WeatherForecast.css';
 
-
 function WeatherForecast({listId}) {
 
     const dispatch = useDispatch();
@@ -18,8 +17,8 @@ function WeatherForecast({listId}) {
     if (currentLocation !== 0) {
       setNoLocation(false);
       try {
-        // dispatch({ type: 'GET_WEATHER_FORECAST',
-        //         payload: currentLocation[0] });
+        dispatch({ type: 'GET_WEATHER_FORECAST',
+                payload: currentLocation[0] });
       }
       catch(error) {
         console.log('Error fetching forecast, please try again later');
@@ -30,6 +29,7 @@ function WeatherForecast({listId}) {
       setNoLocation(true);
     }
   }, [currentLocation])
+
 
   const getDayOfWeek = (dateString) => {
     // turn dateString into a date object
@@ -48,22 +48,82 @@ function WeatherForecast({listId}) {
   
   return (
     <>
-                {/* {'::::' + JSON.stringify(weatherForecast) + '::::'}  */}
-      {!noLocation ? 'Select Location to see forecast' :
+                {/* {'::::' + JSON.stringify(weatherForecast) + '::::'} 
+                {'********' + JSON.stringify(weatherForecast + '*******')} */}
+      {noLocation ? 'Select Location to see forecast' :
           (errorFetchingForecast ? 'Error Fetching Forecast data, try again later.' :
         ( 
           <>
-          <h4 className="weather-overview">7 Day Forecast:<span>{weatherForecast.description}</span></h4> 
+          <h4 className="weather-overview">7 Day Forecast:<span>{weatherForecast?.description}</span></h4> 
           <section className="weather-forecast">
             {weatherForecast.days?.map(day => (
-              <figure className="forecast-box" 
+              <figure className="forecast-card" 
                     key={day?.datetime}>
-                <h5>{getDayOfWeek(day?.datetime)}</h5>
-                <p>MIN {day.tempmin}°F (feels<br/>like {day.feelslikemin}°F)</p>
-                <p>MAX {day.tempmax}°F (feels<br/>like {day.feelslikemax}°F)</p>
-                <img src={getIcon(day.icon)} alt={day.description}/>
-                <figcaption>{day.description}</figcaption>
-                <p>{day.precipprob}%, {day.precip} in</p>
+                <h5 className="forecast-day">{getDayOfWeek(day?.datetime)}</h5>
+                <div className="forecast-box">
+                <h6 className="forecast-current
+                               title
+                               temp
+                               sm-font">CURRENT</h6>
+                  <div className="no-margin-padding">
+                    <div className="inline-block">
+                      <p className="forecast-current data temp">{weatherForecast.currentConditions.temp}°F</p>
+                    </div>
+                    <div className="inline-block small-padding">
+                      <h6 className="forecast-current
+                                     title
+                                     feelslike
+                                     inline-block">FEELS<br/>LIKE</h6> 
+                      <p className="forecast-current
+                                    data
+                                    feelslike
+                                    inline-block">{weatherForecast.current?.feelslike}°F</p>
+                    </div>
+                  </div>
+                  <div>
+                  <h6 className="forecast-daily
+                               title
+                               temp
+                               sm-font">DAILY</h6>
+                    <div className="inline-block
+                                    small-padding">
+                      <h6 className="forecast-daily
+                                     title
+                                     high">HIGH</h6>
+                      <p className="forecast-daily data high med-font">{day.tempmax}°F</p>
+                    </div>
+                    {/* <div className="inline-block">
+                      <h6 className="forecast-daily title feels-high ">FEELS<br/>LIKE</h6>
+                      <p className="forecast-daily data feels-high">{day.feelslikemax}°F</p>
+                    </div> */}
+                    <div className="inline-block small-padding">
+                      <h6 className="forecast-daily
+                                     title
+                                     low">LOW</h6>
+                      <p className="forecast-daily data low med-font">{day.tempmin}°F</p>
+                    </div>
+                    {/* <div className="inline-block">
+                      <h6 className="forecast-daily title feels-low">FEELS<br/>LIKE</h6>
+                      <p className="forecast-daily data feels-low">{day.feelslikemin}°F</p>
+                    </div> */}
+                  </div>
+                  <img className="forecast-daily-img"src={`../../../public/images/${day.icon}.png`} alt={day.description}/>
+                  <figcaption className="forecast-daily desc">{day.description}</figcaption>
+                  <h6 className="forecast-daily title precip">PRECIPITATION TODAY</h6>
+                  <div className="inline-block">
+                    <p className="forecast-daily
+                                  data precip-percent
+                                  inline-block 
+                                  small-padding
+                                  med-font">{day.precipprob}%</p>
+                    <p className="forecast-daily
+                                  data
+                                  precip-amount 
+                                  inline-block 
+                                  small-padding
+                                  med-font">{day.precip} in</p>
+                  </div>
+                </div>
               </figure>
             ))}
           </section>

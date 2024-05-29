@@ -110,8 +110,11 @@ function Lists() {
         <LocationSelect isMasterLocation={true} />
       </section>
       <section>
+        <label>ADD LIST</label>
         <form onSubmit={handleAddList}>
-            <input type="text" 
+            <input className="list-add-description" 
+                   type="text" 
+                   placeholder="Enter description..."
                    value={inputDescription}
                    onChange={(e) => setInputDescription(e.target.value)}/>
             <button type="submit">+</button>
@@ -120,6 +123,7 @@ function Lists() {
       <DndContext collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}>           
         <section className="lists">
+          <label className="list-show-on-open-label">SHOW ON OPEN</label>
           <SortableContext
               items={lists}
               strategy={verticalListSortingStrategy}>

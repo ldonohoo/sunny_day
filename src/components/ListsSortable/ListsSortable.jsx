@@ -64,13 +64,16 @@ function ListsSortable({list,
       }
 
     return (
-        <div className="lists-part"
+      <div className="lists-part"
             ref={setNodeRef} 
             style={style} 
             key={list.id}>
-          <button onClick={() => handleProcessCopyList(list.id, list.description)}>copy</button>
-          <button onClick={handleLoadList}>load<br/>list</button>
-          <input type="text"
+        <button className="list-copy-button"
+                onClick={() => handleProcessCopyList(list.id, list.description)}>COPY<br></br>LIST</button>
+        <button className="list-load-button"
+                onClick={handleLoadList}>LOAD<br></br>LIST</button>
+        <input id="list-description" 
+                 type="text"
                  value={inputDescription}
                  required
                  onChange={(e) => setInputDescription(e.target.value)}
@@ -79,13 +82,18 @@ function ListsSortable({list,
                  className={`lists-desc-input  ${isDescriptionEditable ? 'lists-desc-editable' : ''}`}
                  onKeyDown={handleDescriptionKeyDown}
                  onBlur={handleDescriptionBlur}/>
-          <button {...attributes} {...listeners}>drag me</button>
-          <input type="radio" 
-                 checked={list.show_on_open} 
-                 onClick={() =>
-                  handleToggleShowOnOpen(list.id, list.description)}></input>
-          <button onClick={() => handleDeleteList(list.id)}>delete</button>   
-        </div>
+          <span className="list-show-on-open">
+            <input type="radio" 
+                    checked={list.show_on_open} 
+                    onClick={() =>
+                    handleToggleShowOnOpen(list.id, list.description)}></input>
+          </span>
+          <button id="list-drag-button"
+                  {...attributes} 
+                  {...listeners}>::::</button>
+          <span className="list-delete-button" 
+                onClick={() => handleDeleteList(list.id)}><pre> 🗑️</pre></span>  
+       </div> 
     )
 }
 

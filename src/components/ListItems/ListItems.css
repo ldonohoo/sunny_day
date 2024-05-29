@@ -15,11 +15,14 @@
 }
 
 .list-item-add-title {
+    position: relative;
     font-size: 1rem;
     font-weight: 200;
     margin: 0;
     padding: 0;
+    bottom: .5rem;
 }
+
 .show-completed-heading {
     display: inline-block;
     font-size: .9rem;
@@ -29,7 +32,7 @@
 
 .show-completed {
     font-size: .9rem;
-    border: .1rem solid black;
+    border: .05rem solid black;
 }
 
 .show-completed.yes {
@@ -49,19 +52,12 @@
     margin: 0;
     padding: 0;
 }
-/* 
-list-item-location-section
-list-item-options-section
-list-items-add-section {
+
+.list-show-on-open-label {
+    margin-left: 32rem;
+    font-size: .7rem;
 }
-Form
-List-item-forecast-section
-list-items-add-input-desc
-list-items-add-input-priority
-list-items-add-input-weathertype
-list-items-add-input-timeofday
-list-items-add-input-duedate
-list-items-add-submit-button */
+
 input {
     font-size: 1rem;
 }
@@ -69,7 +65,7 @@ input {
 .list-item input,
 .list-item select {
     border: none;
-    border-left: .1rem solid black;
+    border-left: .05rem solid black;
     margin: 0;
     padding: .4rem;
 }
@@ -87,10 +83,11 @@ select {
 }
 
 .list-item {
-    border: .1 solid  rgb(148, 210, 255);
+    border: .05 solid  rgb(148, 210, 255);
+    background-color: rgb(222, 239, 252);
     border-radius: .5rem;
     /* background-color:  rgb(148, 210, 255); */
-    margin: .5rem 0;
+    margin: 0;
     padding: 0;
     width: fit-content;
     /* margin-right: -4rem; */
@@ -103,16 +100,13 @@ select {
     margin: 0;
 }
 .item-bar {
+
     background-color: rgb(148, 210, 255);
 
 }
-/* .list-item-completed {
-    border: none;
-    outline: none;
-    font-size: 1.2rem;
-} */
+
 #list-item-complete-checkbox {
-    border: .2rem solid black;
+    border: .15rem solid black;
     height: 1.1rem;
     width: 1rem;
     margin-right: .7rem;
@@ -120,10 +114,6 @@ select {
 .list-item-complete {
     background-color:rgb(119, 118, 118);
     width: 1rem;
-}
-
-input.list-item-desc-editable {
-    /* border: .1rem solid black; */
 }
 
 .list-item-delete-button {
@@ -143,32 +133,62 @@ input.list-item-desc-editable {
     background-color: rgb(148, 210, 255);
 }
 
+.list-item select {
+    background-color: rgb(148, 210, 255);
+    outline: none;
+}
+
+.list-item.checked-off input,
+.list-item.checked-off select {
+    /* background-color: blue; */
+}
+
 #list-items-add-label-timeofday,
 #list-items-add-label-weathertype {
     transform: translateY(-5px);
 }
 
 .list-item-add-label.preferred-time {
-    
+
    padding-bottom: 7rem;
 }
-/* .list-items-add-input-timeofday,
-.list-items-add-input-weathertype {
-    transform: translateY(-5px);
-    font-size: 1rem;
+
+.list-items-add-input-desc {
+    min-width: 30rem;
 }
 
-.list-item-add-label.preferred-weather {
-    transform: translateY(-10px);
-} */
-/* 
+.list-item-add-input-priority {
+    width: 2rem;
+}
 
+.list-item-bar.checked-off {
+    /* background-color: rgb(164, 195, 217);; */
+}
 
-list-item-select-timeofday
-list-item-weathertype
-list-item-priority
-List-item-desc-input   && list-item-desc-editable
-List-item-bar
-List-item
-#list-item
- */
+.list-item-desc-label {
+    margin-left: 2rem;
+}
+.list-item-priority-label {
+    margin-left: 31.3rem;
+}
+
+.list-item-weather-label {
+    margin-left: 1.3rem;
+}
+
+.list-item-timeofday-label {
+    margin-left: 1.5rem;
+}
+
+.list-item-duedate-label {
+    margin-left: 3.5rem;
+}
+
+#list-items-top {
+    padding: 0;
+    margin: 0;
+}
+#list-item {
+    padding: 0;
+    margin: 0;
+}

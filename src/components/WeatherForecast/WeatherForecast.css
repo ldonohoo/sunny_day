@@ -2,17 +2,67 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.forecast-box > div,
+.forecast-daily-img,
+.figcaption,
+.forecast-daily.desc,
+.forecast-daily {
+    margin: 0;
+    padding: 0;
 }
 
 .weather-overview {
     display: inline; 
+    font-size: 0.9rem;
+    font-weight: 200;
 }
 
+.forecast-day {
+    margin: .5rem 0 0 0;
+}
 .forecast-box {
     border: .1rem solid black;
     border-radius: .3rem;
     background-color: rgb(160, 223, 255);
     margin: 0;
     padding: 0;
-    font-size: small;
+    font-size: 0.7rem;
+    font-weight: 200;
+    text-align: center;
+}
+
+.forecast-card {
+    margin: 0;
+    padding: 0;
+    min-width: 11%;
+    width:min-content;
+    height: 
+}
+
+.forecast-card h6, p {
+    padding: 0;
+    margin: 0;
+}
+
+
+.forecast-current.data.temp {
+    font-size: 1rem;
+}
+
+.forecast-daily.desc {
+    text-wrap:wrap;
+    max-width: 60%;
+    margin: 0 20%;
+}
+
+.forecast-daily.title.precip{
+    margin-top: 0.3rem;
+}
+
+.forecast-current.title, 
+.forecast-daily.title {
+   border-bottom: .05rem solid black;
 }

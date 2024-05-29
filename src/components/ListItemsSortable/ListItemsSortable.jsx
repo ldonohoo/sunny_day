@@ -31,6 +31,7 @@ function ListItemsSortable({ item,
     const style = {
         transform: CSS.Transform.toString(transform),
         transition
+       
     }
 
     const handleDescriptionKeyDown = (event) => {
@@ -73,7 +74,8 @@ function ListItemsSortable({ item,
              className="list-item"
              ref={setNodeRef} 
              style={style} >
-          <span className="list-item-bar">
+          <span className={ item.completed_date === null ? 
+                        "list-item-bar" : "list-item-bar checked-off"}>
             <button id="list-item-complete-checkbox" 
                     className={item.completed_date === null ? '' : 'list-item-complete'}
                     onClick={() => handleCompleteItemToggle(item.id, item.list_id)}
@@ -86,17 +88,20 @@ function ListItemsSortable({ item,
                    onClick={handleDescriptionClick}
                    readOnly={!isDescriptionEditable}
                    className={`list-item-desc-input ${isDescriptionEditable ? 
-                              'list-item-desc-editable' : ''}`}
+                              'list-item-desc-editable' : ''} ${ item.completed_date === null ? 
+                                "list-item-bar" : "list-item-bar checked-off"}`}              
                    onKeyDown={handleDescriptionKeyDown}
                    onBlur={handleDescriptionBlur}/>
-            <input className="list-item-priority"
+            <input className={ item.completed_date === null ? 
+                "list-item-priority" : "list-item-priority checked-off"}
                     name="priority"
                     type="number" 
                     min="0"
                     max="5"
                     value={inputFormData.priority}
                     onChange={handleChangeForm}/>
-            <select className="list-item-weathertype"
+            <select className={ item.completed_date === null ? 
+                        "list-item-weathertype" : "list-item-weathertype checked-off"}
                       name="weatherType"
                       value={inputFormData.weatherType}
                       onChange={handleChangeForm}>
@@ -108,7 +113,8 @@ function ListItemsSortable({ item,
                         </option>
                       ))}
             </select>
-            <select className="list-item-select-timeofday" 
+            <select className={ item.completed_date === null ? 
+                        "list-item-select-timeofday" : "list-item-select-timeofday checked-off"}
                       name="timeOfDay"
                       value={inputFormData.timeOfDay}
                       onChange={handleChangeForm}>
@@ -126,7 +132,7 @@ function ListItemsSortable({ item,
                                 value="night">Night
                         </option>
             </select>
-            <input className="list-item-input-delete"
+            <input className="list-item-input-delete" 
                     name="dueDate"
                     type="date" 
                     value={inputFormData.dueDate ? inputFormData.dueDate.slice(0,10) : ''}
