@@ -107,7 +107,7 @@ function WeatherForecast({listId}) {
                       <p className="forecast-daily data feels-low">{day.feelslikemin}°F</p>
                     </div> */}
                   </div>
-                  <img className="forecast-daily-img"src={`../../../public/images/${day.icon}.svg`} width="50px" height="50px" alt={day.description}/>
+                  <img className="forecast-daily-img"src={`../../../images/${day.icon}.svg`} width="50px" height="50px" alt={day.description}/>
                   <figcaption className="forecast-daily desc">{day.description}</figcaption>
                   <h6 className="forecast-daily title precip">PRECIPITATION TODAY</h6>
                   <div className="inline-block">

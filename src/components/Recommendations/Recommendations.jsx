@@ -14,6 +14,7 @@ function Recommendations() {
         dispatch({
             type: 'GET_SINGLE_LIST',
             payload: {listId: list_id } });
+        
     }, [list_id])
 
     const handleLoadListAndFocus = (listId, itemId) => {

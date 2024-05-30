@@ -36,11 +36,11 @@ function* getWeatherForecast(action) {
 }
 
 function* getRecommendations(action) {
-  console.log('In get of recommendations, payload:', action.payload);
+  console.log('In get of recommendations, payload:', action.payload.listId);
   try {
     const response = yield axios({
       method: 'GET',
-      url: `/api/weather/recommendations/?id=${action.payload.listId}`,
+      url: `/api/weather/recommendations/${action.payload.listId}`,
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
     })

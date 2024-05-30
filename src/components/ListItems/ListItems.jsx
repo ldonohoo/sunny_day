@@ -129,9 +129,9 @@ function ListItems() {
   const getRecommendations = (listId) => {
     dispatch({
       type: 'GET_RECOMMENDATIONS',
-      payload: {listId: listId} })
+      payload: { listId: listId } })
       setRecsAvailable(true);
-      history.push(`/recommendations/${list_id}`);
+      // history.push(`/recommendations/${list_id}`);
   }
 
   return (  
