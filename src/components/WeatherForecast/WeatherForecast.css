@@ -38,8 +38,7 @@
     margin: 0;
     padding: 0;
     min-width: 11%;
-    width:min-content;
-    height: 
+    width: min-content;
 }
 
 .forecast-card h6, p {
@@ -65,4 +64,8 @@
 .forecast-current.title, 
 .forecast-daily.title {
    border-bottom: .05rem solid black;
+}
+
+.weather-overview span {
+    padding-left: 1rem;
 }

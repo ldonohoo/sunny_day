@@ -18,6 +18,24 @@ function* getLists() {
   }
 }
 
+
+function* getSingleList(action) {
+  console.log('in single list payload', action.payload)
+  try {
+    const config = {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    };
+    const response = yield axios.get(`/api/lists/single_list/${action.payload.listId}`, config);
+    console.log('Single List GET sucessful:', response.data)
+    yield put({ type: 'SET_LISTS',
+                payload: response.data });
+  } 
+  catch (error) {
+    console.log('Error getting lists for user:', error);
+  }
+}
+
 function* addList(action) {
   try {
     const config = {
@@ -230,6 +248,7 @@ function* updateListItemsOrder(action) {
 
 function* listSagas() {
   yield takeLatest('GET_LISTS', getLists);
+  yield takeLatest('GET_SINGLE_LIST', getSingleList);
   yield takeLatest('ADD_LIST', addList);
   yield takeLatest('UPDATE_LIST', updateList);
   yield takeLatest('DELETE_LIST', deleteList);

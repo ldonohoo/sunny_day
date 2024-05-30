@@ -13,21 +13,35 @@ import {
   verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import ListsSortable from '../ListsSortable/ListsSortable';
+import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
 
 function Lists() {
 
     const [inputDescription, setInputDescription] = useState('');
     const [selectedLists, setSelectedLists] = useState([]);
     const lists = useSelector(store => store.listsReducer.lists);
-    
+    const { initial_load } = useParams();
     const dispatch = useDispatch();
     const history = useHistory();
 
   useEffect(() => {
     dispatch({ type: 'GET_LISTS',
                payload: {id : 1} });
+    loadDefaultList();
   }, []);
 
+  // useEffect(() => {
+  //   if (lists) {
+  //     loadDefaultList();
+  //   }
+  // }, [])
+
+  const loadDefaultList = () => {
+    const defaultList = lists.filter(list => list.show_on_open === true);
+    if (defaultList.length === 1 && initial_load === "true") {
+      history.push(`/list_items/${defaultList[0].id}/0`);
+    }
+  }
 
   const handleAddList = (event) => {
     event.preventDefault();

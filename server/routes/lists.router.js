@@ -25,6 +25,30 @@ router.get('/',rejectUnauthenticated, (req, res) => {
 });
 
 /**
+ * GET a single list 
+ */
+router.get('/single_list/:id',rejectUnauthenticated, (req, res) => {
+  const userId = req.user.id;
+  const listId = Number(req.params.id);
+  console.log('userid,listid', userId, listId)
+  const sqlText = `
+    SELECT * FROM list
+      WHERE user_id = $1
+        AND id = $2
+      ORDER BY sort_order;
+    `;
+    pool.query(sqlText, [userId, listId])
+    .then(dbResponse => {
+      console.log('GET route for /api/lists/single_list sucessful!', dbResponse.rows);
+      res.send(dbResponse.rows);
+    })
+    .catch(dbError => {
+      console.log('GET route for /api/lists/single_list failed', dbError);
+      res.sendStatus(500);
+    })
+});
+
+/**
  * POST a new list for user
  */
 router.post('/', rejectUnauthenticated, (req, res) => {

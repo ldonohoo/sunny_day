@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom/cjs/react-router-dom.min';
+import { useParams, useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import './ListItems.css'
 import {
   DndContext,
@@ -19,6 +19,7 @@ import formatDate from '../../utilities/utilities.js';
 function ListItems() {
 
     const dispatch = useDispatch();
+    const history = useHistory();
     const [inputFormData, setInputFormData] = useState({
               description: '',
               priority: 0,
@@ -34,9 +35,10 @@ function ListItems() {
     const locations = useSelector(store => store.locationsReducer.locations);
     const weatherTypes = useSelector(store => store.weatherReducer.weatherTypes);
     const timeOfDays = useSelector(store => store.timeOfDayReducer.timeOfDays)
-    const { list_id, list_description } = useParams();
+    const { list_id } = useParams();
     const currentLocation = 
       useSelector(store => store.locationsReducer.currentLocation);
+    const [recsAvailable, setRecsAvailable] = useState(true);
 
   useEffect(() => {
     dispatch({ type: 'GET_LIST_ITEMS', payload: { listId : list_id }});
@@ -124,6 +126,13 @@ function ListItems() {
     });
   }
 
+  const getRecommendations = (listId) => {
+    dispatch({
+      type: 'GET_RECOMMENDATIONS',
+      payload: {listId: listId} })
+      setRecsAvailable(true);
+      history.push(`/recommendations/${list_id}`);
+  }
 
   return (  
     <>
@@ -132,7 +141,7 @@ function ListItems() {
         <h2>Weather Forecast</h2>
         <WeatherForecast />
       </section>
-      <h2 className="list-item-main-description"><span>LIST</span>  {list_description}</h2>
+      <h2 className="list-item-main-description"><span>LIST:</span>{listItems[0]?.description}</h2>
       <section className="list-item-location-section">
         <LocationSelect isMasterLocation={false}
                         listId={list_id} />
@@ -216,6 +225,12 @@ function ListItems() {
                           "show-completed-no"}
                 type="button" 
                 onClick={() => setShowCompleted(false)}>NO</button>
+        <button className="get-recommendations-button" 
+                onClick={() => getRecommendations(list_id)}>GET RECOMMENDATIONS
+        </button>
+        <button className={`see-recommendations-button ${recsAvailable ? 'recs-available' : ''}`}
+                onClick={() => getRecommendations(list_id)}>SEE RECOMMENDATIONS
+        </button>
       </section>
       {/* <label className="label list-item-desc-label">COMPLETE</label> */}
       <label className="label list-item-desc-label">DESCRIPTION</label>

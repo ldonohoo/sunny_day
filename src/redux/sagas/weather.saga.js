@@ -20,24 +20,42 @@ function* getWeatherTypes() {
 
 function* getWeatherForecast(action) {
   console.log('In get of weather forecast, payload:', action.payload);
-try {
-  const response = yield axios({
-    method: 'GET',
-    url: `/api/weather/forecast/?id=${action.payload.id}`,
-    headers: { 'Content-Type': 'application/json' },
-    withCredentials: true
-  })
-  console.log('Weather forecast data!!!!', response.data);
-  yield put({ type: 'SET_WEATHER_FORECAST', payload: response.data });
-} 
-catch (error) {
-  console.log('Error getting weather types:', error);
+  try {
+    const response = yield axios({
+      method: 'GET',
+      url: `/api/weather/forecast/?id=${action.payload.id}`,
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    })
+    console.log('Weather forecast data!!!!', response.data);
+    yield put({ type: 'SET_WEATHER_FORECAST', payload: response.data });
+  } 
+  catch (error) {
+    console.log('Error getting weather types:', error);
+  }
 }
+
+function* getRecommendations(action) {
+  console.log('In get of recommendations, payload:', action.payload);
+  try {
+    const response = yield axios({
+      method: 'GET',
+      url: `/api/weather/recommendations/?id=${action.payload.listId}`,
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    })
+    console.log('Recommendations!!!!', response.data);
+    yield put({ type: 'SET_RECOMMENDATIONS', payload: response.data });
+  } 
+  catch (error) {
+    console.log('Error getting weather types:', error);
+  }
 }
 
 function* locationSagas() {
   yield takeLatest('GET_WEATHER_TYPES', getWeatherTypes);
   yield takeLatest('GET_WEATHER_FORECAST', getWeatherForecast);
+  yield takeLatest('GET_RECOMMENDATIONS', getRecommendations);
 }
 
 export default locationSagas;

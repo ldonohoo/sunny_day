@@ -513,10 +513,10 @@ router.get('/recommendations/:list_id', rejectUnauthenticated, async (res, req) 
   //    - second add the headers array to the top of the arrays
   //    - third reformat table to text format with tabs and newlines 
 
-  
-  const weatherData = testData;
-  // 5. prepare prompts for openAI call
 
+  let weatherData = testData;
+  // 5. prepare prompts for openAI call
+  
   //6. make call to openAI assistant with data and prompt
 
 

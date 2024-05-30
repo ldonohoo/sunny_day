@@ -16,6 +16,7 @@ import LoginPage from '../LoginPage/LoginPage';
 import RegisterPage from '../RegisterPage/RegisterPage';
 import Lists from '../Lists/Lists';
 import ListItems from '../ListItems/ListItems';
+import Recommendations from '../Recommendations/Recommendations';
 
 import './App.css';
 
@@ -35,78 +36,51 @@ function App() {
         <Switch>
           {/* Visiting localhost:5173 will redirect to localhost:5173/home */}
           <Redirect exact from="/" to="/home" />
-
-          {/* Visiting localhost:5173/about will show the about page. */}
-          <Route
-            // shows AboutPage at all times (logged in or not)
-            exact
-            path="/about"
-          >
+          {/* Visiting localhost:5173/about will show the about page. */} 
+          <Route exact path="/about">
+            {/* // shows AboutPage at all times (logged in or not) */}
             <AboutPage />
           </Route>
-
           {/* For protected routes, the view could show one of several things on the same route.
             Visiting localhost:5173/user will show the UserPage if the user is logged in.
             If the user is not logged in, the ProtectedRoute will show the LoginPage (component).
             Even though it seems like they are different pages, the user is always on localhost:5173/user */}
-          <ProtectedRoute exact path="/lists">
+          <ProtectedRoute exact path="/lists/:initial_load">
             <Lists />
           </ProtectedRoute>
-
-          <ProtectedRoute exact path="/list_items/:list_id/:list_description">
+          <ProtectedRoute exact path="/list_items/:list_id/:list_item">
             <ListItems />
           </ProtectedRoute>
-
-          <ProtectedRoute
-            // logged in shows InfoPage else shows LoginPage
-            exact
-            path="/info"
-          >
-            <InfoPage />
+          <ProtectedRoute exact path="/recommendations/:list_id">
+            <Recommendations />
           </ProtectedRoute>
-
-          <Route
-            exact
-            path="/login"
-          >
+          {/* logged in shows InfoPage else shows LoginPage */}
+          <ProtectedRoute exact path="/info"> 
+            <InfoPage />           
+          </ProtectedRoute>
+          <Route exact path="/login">
             {user.id ?
               // If the user is already logged in, 
               // redirect to the /user page
-              <Redirect to="/lists" />
+              <Redirect to="/lists/true" />
               :
               // Otherwise, show the login page
               <LoginPage />
             }
           </Route>
-
-          <Route
-            exact
-            path="/registration"
-          >
-            {user.id ?
-              // If the user is already logged in, 
-              // redirect them to the /user page
-              <Redirect to="/lists" />
-              :
-              // Otherwise, show the registration page
-              <RegisterPage />
+          {/* // If the user is already logged in, 
+              // redirect them to the /user page */}
+                            {/* // Otherwise, show the registration page */}
+          <Route exact path="/registration">
+            {user.id ? <Redirect to="/lists/false" /> : <RegisterPage />
             }
           </Route>
-
-          <Route
-            exact
-            path="/home"
-          >
-            {user.id ?
-              // If the user is already logged in, 
+          {/* // If the user is already logged in, 
               // redirect them to the /user page
-              <Redirect to="/lists" />
-              :
-              // Otherwise, show the Landing page
-              <LandingPage />
-            }
+              // Otherwise, show the Landing page */}
+          <Route exact path="/home">
+            {user.id ? <Redirect to="/lists/false" />  : <LandingPage /> }
           </Route>
-
           {/* If none of the other routes matched, we will show a 404. */}
           <Route>
             <h1>404</h1>

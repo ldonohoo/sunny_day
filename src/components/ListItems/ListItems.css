@@ -161,9 +161,9 @@ select {
     width: 2rem;
 }
 
-.list-item-bar.checked-off {
-    /* background-color: rgb(164, 195, 217);; */
-}
+/* .list-item-bar.checked-off {
+    background-color: rgb(164, 195, 217);;
+} */
 
 .list-item-desc-label {
     margin-left: 2rem;
@@ -192,3 +192,42 @@ select {
     padding: 0;
     margin: 0;
 }
+
+.get-recommendations-button {
+    display: inline-block;
+    margin-left: 5rem;
+    background-color: rgb(252, 228, 151);
+    border: .05rem solid black;
+    border-radius: .5rem;
+    height: 1.5rem;
+}
+
+.see-recommendations-button {
+    display: none;
+    margin-left: 5rem;
+    background-color: rgb(254, 195, 132);
+    border: .05rem solid black;
+    border-radius: .5rem;
+    height: 1.5rem;
+    animation: colorChange 1900ms linear infinite;
+}
+
+.see-recommendations-button.recs-available {
+    display: inline-block;
+}
+
+.list-item-main-description span {
+    margin-right: 1.8rem;
+}
+
+@keyframes colorChange {
+    0% {
+      background-color:  rgb(254, 195, 132);
+    }
+    50% {
+      background-color: rgb(252, 228, 151);
+    }
+    100% {
+        background-color:  rgb(254, 195, 132);
+      }
+  }

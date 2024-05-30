@@ -10,7 +10,9 @@ router.get('/:list_id',rejectUnauthenticated, (req, res) => {
   console.log('listid in GET route:', req.params.list_id)
   const listId = req.params.list_id;
   const sqlText = `
-    SELECT * FROM list_item
+    SELECT list_item.*, list.description AS list_description FROM list_item
+      INNER JOIN list
+        ON list_item.list_id = list.id
       WHERE list_id = $1
       ORDER BY sort_order;
     `;
