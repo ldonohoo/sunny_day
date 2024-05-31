@@ -5,9 +5,9 @@ const axios = require('axios');
 const { rejectUnauthenticated } = require('../modules/authentication-middleware');
 require('dotenv').config()
 
-const TESTING = true; //bypass weather API call if test mode
+const TESTING = false; //bypass weather API call if test mode
 const OPENAI_API_KEY= process.env.OPENAI_API_KEY;
-const openAIurl = 'https://api.openai.com/v1/engines/gpt-4/completions';
+const openAIurl = 'https://api.openai.com/v1/chat/completions';
 const openAIheaders = { 'Content-Type': 'application/json',
                         'Authorization': `Bearer ${OPENAI_API_KEY}` };
 const VISUAL_CROSSING_API_KEY = process.env.VISUAL_CROSSING_API_KEY;
@@ -342,6 +342,13 @@ seventhDay.setDate(seventhDay.getDate() + 6);
 seventhDay = seventhDay.toISOString().split('T')[0];
 console.log('today,seventhday', today, seventhDay);
 
+// Used to prep tables to text format for openAI complete endpoint call
+function convertArrayToTSV(array) {
+  console.log('array in convert to TSV', array);
+  return array.map(row => row.map(item => {
+    console.log('row', row)
+    return (item !== null ? item : '')}).join('\t')).join('\n');
+}
 
 /**
  * GET all preferred weather types for selection dropdown 
@@ -383,21 +390,24 @@ router.get('/forecast/', rejectUnauthenticated, (req, res) => {
       const {utc_offset, name, country, latitude, longitude} = dbResponse.rows[0];
       console.log('GETTING WEATHER FROM API BELOW***************');
       console.log('utc offset, name, country, lat, long', utc_offset, name, country, latitude, longitude);
-      res.send(testData);
-      // sample format (visual crossing timeline weather api)
-      //    https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/[location]/[date1]/[date2]?key=YOUR_API_KEY 
-      // axios({
-      //   method: 'GET',
-      //   url: `${visualCrossUrl}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utc_offset}`
-      // })
-      // .then(apiResponse => {
-      //   console.log('GET of data from visual crossing worked at /api/weather/forecast/!', apiResponse.data);
-      //   res.send(apiResponse.data);
-      // })
-      // .catch(apiError => {
-      //   console.log('GET of API data from visual crossing failed in /api/weather/forecast/, please try again later', apiError);
-      //   res.sendStatus(500);
-      // })
+      if (TESTING) {
+        res.send(testData);
+      } else {
+        // sample format (visual crossing timeline weather api)
+        //    https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/[location]/[date1]/[date2]?key=YOUR_API_KEY 
+        axios({
+          method: 'GET',
+          url: `${visualCrossUrl}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utc_offset}`
+        })
+        .then(apiResponse => {
+          console.log('GET of data from visual crossing worked at /api/weather/forecast/!', apiResponse.data);
+          res.send(apiResponse.data);
+        })
+        .catch(apiError => {
+          console.log('GET of API data from visual crossing failed in /api/weather/forecast/, please try again later', apiError);
+          res.sendStatus(500);
+        })
+      } 
     })
     .catch(dbError => {
       console.log('Get of location lat/log in api/weather/forecast/ failed', dbError);
@@ -543,7 +553,7 @@ router.get('/forecast/', rejectUnauthenticated, (req, res) => {
 //                      max_temperature: day.tempmax,
 //                      min_temperature: day.tempmin,
 //                      feels_like_max_temperature: day.feelslikemax,
-//                      feels_like_min_temerapture: day.feelslikemin,
+//                      feels_like_min_temperature: day.feelslikemin,
 //                      humidity: day.humidity,
 //                      precipitation_amount: day.precip,
 //                      precipitation_probability: day.precipprob,
@@ -598,6 +608,25 @@ router.get('/forecast/', rejectUnauthenticated, (req, res) => {
 //   }
 // })
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /********************************** */
 
 /**  
@@ -619,95 +648,147 @@ router.get('/recommendations/:list_id', rejectUnauthenticated, async (req, res) 
   const userId = req.user.id;
     try {
       // Make multiple API calls and database queries:
-
+      console.log('GET location data from db *****************')
       // 1. get location data for list (used for weather data API call)
       const dbLocationData = await getLocationData(listId, userId);
+      console.log('GET list data from db*****************')
       // 2. get list data from list & list_items table (for openAI call)
       console.log('dblocdata', dbLocationData);
-      const dbListData = await getListData(listId, userId);
+      let dbListData = await getListData(listId, userId);
       console.log('dbListData', dbListData);
+      console.log('GET weather data from visual crossing API *****************')
       // 3. get weather data from visual crossing (for openAI call)
       const apiWeatherData = await getWeatherData(dbLocationData);
 
-    // main call to API
+    // ****** set up and call to openAI API below. **************************
     // 4. prepare data for openAI call 
-
+    console.log('Prepare data for openAI call *****************')
     // create list item table in text format to pass to open AI:
     //    - first put data in an array of arrays
     //    - second add the headers array to the top of the arrays
     //    - third reformat table to text format with tabs and newlines  
+    //    - fourth add table header
+    //  (create list array, convert to text, add table title)
     let listDataArray = dbListData.map(listObject => Object.values(listObject));
     console.log('listdataarray:', listDataArray)
-    listDataArray = listData.shift(["List Description", 
-                                  "Item Description",
-                                  "Priority",
-                                  "Preferred Time Of Day",
-                                  "Preferred Weather", 
-                                  "Due Date"]);
-    console.log('listdataarray2', listDataArray);               
-    const tableText = listDataArray.map(row => row.join('\t')).join('\n');
+    listDataArray.unshift(["List Description", 
+                        "Item Description",
+                        "Priority",
+                        "Preferred Time Of Day",
+                        "Preferred Weather", 
+                        "Due Date"]);
+    console.log('listdataarray2', listDataArray);   
+    let listDataText = convertArrayToTSV(listDataArray)  
+    listDataText =
+    `*** To Do list Data *** \n\n${listDataText}`;          
     console.log('listdatatext', listDataText);
 
-    // create weather data table in text format to pass to open AI:
-    //    - first put data in an array of arrays
-    //    - second add the headers array to the top of the arrays
-    //    - third reformat table to text format with tabs and newlines 
-
-    let weatherDataReformatted = [], formattedDays = [], formattedDay = {};
-    weatherDataReformatted.push(apiWeatherData.latitude);
-    weatherDataReformatted.push(apiWeatherData.longitude);
-    weatherDataReformatted.push(apiWeatherData.timezone);
-    weatherDataReformatted.push(apiWeatherData.alerts);
+    // create weather data tables in text format to pass to open AI:
+    // this data set is a manually built subset of the api weather data
+    //    received, do not want to send up entire data set
+    let alertsArray = [], weatherLocationArray = [];
+    let forecastDaysArray = [], forecastHoursArray = [];
+    let forecastDay = {};
+    // create location array, convert to text, add table title
+    weatherLocationArray = [['lattitude', 'longitude', 'timezone'],
+                           [ apiWeatherData.latitude, 
+                             apiWeatherData.longitude,
+                             apiWeatherData.timezone ]];
+    let weatherLocationText = convertArrayToTSV(weatherLocationArray);
+    weatherLocationText =
+     `*** Location data for Weather Forecasts *** \n\n${weatherLocationText}`;
+    // grab already created alerts array, convert to text, add table title
+    let alertsText = convertArrayToTSV( apiWeatherData.alerts);
+    alertsText =
+    `*** Current Weather Alerts for Location *** \n\n${alertsText}`;
+    // create days array, convert to tex, add table title                        
+    //  - first set header row for formatted day
+    forecastDaysArray.push([  
+      'max_temperature',
+      'min_temperature',
+      'feels_like_max_temperature',
+      'feels_like_min_temperature',
+      'humidity',
+      'precipitation_amount',
+      'precipitation_probability',
+      'precipitation_type',
+      'snow_amount',
+      'current_snow_depth',
+      'wind_gust_max',
+      'wind_speed_max',
+      'cloud_cover_percentage',
+      'uv_index',
+      'risk_of_severe_weather_percentage',
+      'daily_weather_description' ]);
+    // - then loop through api data and select fields for rest of array
     apiWeatherData.days.map(day => {
-    formattedDay = { datetime: day.datetime,
-                      max_temperature: day.tempmax,
-                      min_temperature: day.tempmin,
-                      feels_like_max_temperature: day.feelslikemax,
-                      feels_like_min_temerapture: day.feelslikemin,
-                      humidity: day.humidity,
-                      precipitation_amount: day.precip,
-                      precipitation_probability: day.precipprob,
-                      precipitation_type: day.preciptype,
-                      snow_amount: day.snow,
-                      current_snow_depth: day.snowdepth,
-                      wind_gust_max: day.windgust,
-                      wind_speed_max: day.windspeed,
-                      cloud_cover_percentage: day.cloudcover,
-                      uv_index: day.uvindex,
-                      risk_of_severe_weather_percentage: day.severerisk,
-                      dailly_weather_description: day.description }
-      formattedDays.push(formattedDay);
+    forecastDay = [ day.datetime,
+                      day.tempmax,
+                      day.tempmin,
+                      day.feelslikemax,
+                      day.feelslikemin,
+                      day.humidity,
+                      day.precip,
+                      day.precipprob,
+                      day.preciptype,
+                      day.snow,
+                      day.snowdepth,
+                      day.windgust,
+                      day.windspeed,
+                      day.cloudcover,
+                      day.uvindex,
+                      day.severerisk,
+                      day.description ];
+      forecastDaysArray.push(forecastDay);
       })
-      // turn formattedDays into a text table
-      console.log(weatherDataReformatted);
-      const daysText = formattedDays.map(row => row.join('\t')).join('\n');
-      weatherDataReformatted.push({days: daysText});
-      console.log(weatherDataReformatted);
-      const weatherDataText = weatherDataReformatted.map(row => row.join('\t')).join('\n');
-      console.log(weatherDataText);
+      // -then convert to text table
+      let daysText = convertArrayToTSV(forecastDaysArray);
+      daysText =
+      `*** Weather forecast information by day for location *** \n\n${daysText}`;
+      // combine text tables into one string:
+      let textTables =
+       `\n\nFour Data Tables:\n${listDataText}\n\n${weatherLocationText}\n\n${daysText}\n\n${alertsText}`;
+       console.log('texttables', textTables);
+      console.log('Prepare prompts for openAI call *****************')
     // 5. prepare prompts for openAI call
-      const prompt = `look through stuff do stuff`;
-      const apiRequestData = {
-        model: 'text-davinci-003', 
-        prompt: `${prompt}\n\nTable Data:\n${tableData}`,
-        max_tokens: 150, // Adjust the number of tokens based on your needs
-        temperature: 0.7,
-      }
-    //6. make call to openAI assistant with data and prompt
-      const AIresponse = await axios({
-        method: 'POST',
-        url: `${openAIurl}`,
-        headers: openAIheaders,
-        data: apiRequestData
-      });
-      // 7. get recommendations response back from openAI
-      console.log(response.data);
+    //   const prompt = 
+    //     `Look through the following tables and provide recommendations on when to move to do list items taking into account preferred weather and the current forecast for the week.  Please provide 3 recommendations for when to do a particular to do item based on the weather, and format the response in JSON.`;
+    //     const data = {
+    //       model: 'gpt-4',
+    //       messages: [
+    //         {
+    //           role: 'system',
+    //           content: 'You are a helpful assistant.'
+    //         },
+    //         {
+    //           role: 'user',
+    //           content: `${prompt}\n\n${textTables}`
+    //         }
+    //       ],
+    //       max_tokens: 150,
+    //       temperature: 0.7
+    //     };
+    //   console.log('apiRequest', apiRequestData);
+    //   console.log('Make call to openAI *****************')
+    // //6. make call to openAI assistant with data and prompt
+    //   const AIresponse = await axios({
+    //     method: 'POST',
+    //     url: `${openAIurl}`,
+    //     headers: openAIheaders,
+    //     data: apiRequestData
+    //   });
+    //   console.log('Get recommendations back from openAI *****************')
+    //   // 7. get recommendations response back from openAI
+    //   console.log(AIresponse.data);
+    //   let recommendations = json(AIresponse.data);
+      console.log('Process recommendations *****************')
       // 8. process recommendations and save to recommendations table
       if (recommendations.rows.length = 0) {
         console.log('No recommendations received!');
         res.sendStatus(500);
       } else {
          //process data HERE ???
+      console.log('Send recommendations back to recommendations component *****************')
       // 9. send recommendations table data back to display on screen
       // res.send(response.data);   
         console.log(recommendations);
@@ -769,7 +850,7 @@ const getListData = async (listId, userId) => {
   let connection;
   try {
     console.log( 'user, list', userId, listId);
-    connection = await pool.connect(listId, userId);
+    connection = await pool.connect();
     // 2. get list data from list & list_items table (for openAI call)
     const sqlTextList = `
       SELECT list.description AS list_description,
@@ -790,13 +871,15 @@ const getListData = async (listId, userId) => {
     const listData = await connection.query(sqlTextList, [listId, userId]);
     console.log('listdata', listData.rows);
     if (listData.rows.length === 0) {
+      console.log('no items in listdata')
       throw new Error('No list items on this list, so no recommendations! Failure in /api/weather/recommendations');
     } else {
+      console.log('wowo')
       connection.release();
-      console.error(error.stack)
       return listData.rows;
     }
   } catch(dbError) {
+    console.error(dbError.stack)
     throw new Error ('Error fetching list data in /api/weather/recommendations', dbError);
     connection.release();
   }
@@ -820,7 +903,7 @@ const getListData = async (listId, userId) => {
           console.log('No rows received for weather data, error in getWeatherData in /api/weather/recommendations!');
           throw new Error('No rows received for weather data, error in getWeatherData in /api/weather/recommendations!');
         }
-        return weatherApiResponse.rows;
+        return weatherApiResponse.data;
       } catch (apiError) {
         console.error(error.stack)
           console.log('GET of API data from visual crossing failed in /api/weather/forecast/, please try again later', apiError);
@@ -832,3 +915,24 @@ const getListData = async (listId, userId) => {
 
 
 module.exports = router;
+
+
+
+
+// formattedDay = [ datetime: day.datetime,
+  // max_temperature: day.tempmax,
+  // min_temperature: day.tempmin,
+  // feels_like_max_temperature: day.feelslikemax,
+  // feels_like_min_temperature: day.feelslikemin,
+  // humidity: day.humidity,
+  // precipitation_amount: day.precip,
+  // precipitation_probability: day.precipprob,
+  // precipitation_type: day.preciptype,
+  // snow_amount: day.snow,
+  // current_snow_depth: day.snowdepth,
+  // wind_gust_max: day.windgust,
+  // wind_speed_max: day.windspeed,
+  // cloud_cover_percentage: day.cloudcover,
+  // uv_index: day.uvindex,
+  // risk_of_severe_weather_percentage: day.severerisk,
+  // dailly_weather_description: day.description ];

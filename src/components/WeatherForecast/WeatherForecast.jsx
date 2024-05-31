@@ -67,7 +67,7 @@ function WeatherForecast({listId}) {
                                sm-font">CURRENT</h6>
                   <div className="no-margin-padding">
                     <div className="inline-block">
-                      <p className="forecast-current data temp">{weatherForecast.currentConditions.temp}°F</p>
+                      <p className="forecast-current data temp">{weatherForecast.currentConditions?.temp}°F</p>
                     </div>
                     <div className="inline-block small-padding">
                       <h6 className="forecast-current
@@ -90,7 +90,7 @@ function WeatherForecast({listId}) {
                       <h6 className="forecast-daily
                                      title
                                      high">HIGH</h6>
-                      <p className="forecast-daily data high med-font">{day.tempmax}°F</p>
+                      <p className="forecast-daily data high med-font">{day?.tempmax}°F</p>
                     </div>
                     {/* <div className="inline-block">
                       <h6 className="forecast-daily title feels-high ">FEELS<br/>LIKE</h6>
@@ -100,28 +100,28 @@ function WeatherForecast({listId}) {
                       <h6 className="forecast-daily
                                      title
                                      low">LOW</h6>
-                      <p className="forecast-daily data low med-font">{day.tempmin}°F</p>
+                      <p className="forecast-daily data low med-font">{day?.tempmin}°F</p>
                     </div>
                     {/* <div className="inline-block">
                       <h6 className="forecast-daily title feels-low">FEELS<br/>LIKE</h6>
                       <p className="forecast-daily data feels-low">{day.feelslikemin}°F</p>
                     </div> */}
                   </div>
-                  <img className="forecast-daily-img"src={`../../../images/${day.icon}.svg`} width="50px" height="50px" alt={day.description}/>
-                  <figcaption className="forecast-daily desc">{day.description}</figcaption>
+                  <img className="forecast-daily-img"src={`../../../images/${day?.icon}.svg`} width="50px" height="50px" alt={day.description}/>
+                  <figcaption className="forecast-daily desc">{day?.description}</figcaption>
                   <h6 className="forecast-daily title precip">PRECIPITATION TODAY</h6>
                   <div className="inline-block">
                     <p className="forecast-daily
                                   data precip-percent
                                   inline-block 
                                   small-padding
-                                  med-font">{day.precipprob}%</p>
+                                  med-font">{day?.precipprob}%</p>
                     <p className="forecast-daily
                                   data
                                   precip-amount 
                                   inline-block 
                                   small-padding
-                                  med-font">{day.precip} in</p>
+                                  med-font">{day?.precip} in</p>
                   </div>
                 </div>
               </figure>

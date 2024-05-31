@@ -127,11 +127,15 @@ function ListItems() {
   }
 
   const getRecommendations = (listId) => {
-    dispatch({
-      type: 'GET_RECOMMENDATIONS',
-      payload: { listId: listId } })
-      setRecsAvailable(true);
-      // history.push(`/recommendations/${list_id}`);
+    if (!currentLocation || currentLocation === null || currentLocation === 0) {
+      alert('Please select a location for your list to get recommendations!');
+      setRecsAvailable(false);
+    } else {
+      dispatch({
+        type: 'GET_RECOMMENDATIONS',
+        payload: { listId: listId } })
+        setRecsAvailable(true);
+    }
   }
 
   return (  
