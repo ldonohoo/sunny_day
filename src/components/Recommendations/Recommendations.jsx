@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useHistory } from "react-router-dom/cjs/react-router-dom.min";
-
+import '../Recommendations/Recommendations.css'
 function Recommendations() {
 
     const dispatch = useDispatch();
@@ -17,8 +17,8 @@ function Recommendations() {
         
     }, [list_id])
 
-    const handleLoadListAndFocus = (listId, itemId) => {
-        history.push(`/list_items/${listId}/${list.itemId}`);
+    const handleLoadListAndFocus = (itemId, listId) => {
+        history.push(`/list_items/${listId}/${itemId}`);
       }
     const handleLoadList = () => {
         history.push(`/list_items/${list_id}/0`);
@@ -26,19 +26,24 @@ function Recommendations() {
 
     return (
         <main>
-            <h2>Recommendations for {singleList?.description}</h2>
+            <h2 className="med-font">RECOMMENDATIONS FOR <br/><span className="lg-font">{singleList?.description}</span> </h2>
             <button onClick={handleLoadList}>BACK TO LIST</button>
-            {/* <section>{recommendations.map(recommendation => {
+            <div className="divider"></div>
+            <h3 className="rec-header">{recommendations[0]?.header + ':'}</h3>
+            <section>{recommendations.map(rec => {
                 return (
-                    <>
-                        <h3 key={recommendation.id}>{recommendation.detail}</h3>
-                        <button></button>
-                        <button></button>
-                        <button onClick={() => handleLoadListAndFocus(recommendation.item_id, recommendations.list_id)}>GO TO ITEM</button>
+                     <>
+                        <article key={rec?.id}
+                                className="rec-item">
+                            <p className="rec-item-title inline-block med-lg-font">{rec?.recommendation_number}. {rec?.todo_desc}</p>
+                            <p className="rec-item-desc inline-block">{rec?.recommend_desc}</p>
+                            <button className="rec-item-goto-button inline-block med-font"
+                                    onClick={() => handleLoadListAndFocus(rec.todo_id, rec.list_id)}>Go To<br></br>Item</button>
+                        </article>
                     </>
                 )
             })}
-            </section> */}
+            </section>
         </main>
     )
 }

@@ -350,6 +350,21 @@ function convertArrayToTSV(array) {
     return (item !== null ? item : '')}).join('\t')).join('\n');
 }
 
+// Used to flatten small arrays contained in weather data
+function arrayToCSV(array) {
+  return array.map(item => {
+      if (item === null || item === undefined) {
+          return '';
+      }
+      return item.toString();
+  }).join(', ');
+}
+
+// Example usage:
+const mixedData = ['treats', 'fun', 123, null, 'tasty', undefined, 'lovely'];
+const csv = arrayToCSV(mixedData);
+console.log(`"${csv}"`); // Output: "treats, fun, 123, , tasty, lovely"
+
 /**
  * GET all preferred weather types for selection dropdown 
  */
@@ -393,11 +408,11 @@ router.get('/forecast/', rejectUnauthenticated, (req, res) => {
       if (TESTING) {
         res.send(testData);
       } else {
-        // sample format (visual crossing timeline weather api)
+        // sample format (visual crossing timeline weather api)    Minneapolis%2C%20MN/2024-05-30/2024-06-06?unitGroup=metric&key=YOUR_API_KEY&contentType=json
         //    https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/[location]/[date1]/[date2]?key=YOUR_API_KEY 
         axios({
           method: 'GET',
-          url: `${visualCrossUrl}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utc_offset}`
+          url: `${visualCrossUrl}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utc_offset}&contentType=json`
         })
         .then(apiResponse => {
           console.log('GET of data from visual crossing worked at /api/weather/forecast/!', apiResponse.data);
@@ -415,222 +430,10 @@ router.get('/forecast/', rejectUnauthenticated, (req, res) => {
     })
 })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//old:
-
-// router.get('/recommendations/:list_id', rejectUnauthenticated, async (req, res) => {
-//   console.log('Getting recommendations with OPENAI', req.params);
-//   const listId = req.params.list_id;
-//   const userId = req.user.id;
-
-//   let connection;
-//   // 1. get location data for list (used for weather data API call)
-//   try {
-//     connection = await pool.connect()
-//     const sqlTextLocation = `
-//     SELECT *
-//       FROM location
-//       INNER JOIN list
-//         ON location.id = list.location_id
-//       WHERE list.id = $1 
-//         AND list.user_id = $2;
-//     `;
-//     const locationData = await connection.query(sqlTextLocation, [listId, userId]);
-//     // 2. get list data from list & list_items table (for openAI call)
-//     const sqlTextList = `
-//       SELECT list.description AS list_description,
-//              list_item.description AS item_description,
-//              list_item.priority AS priority,
-//              list_item.preferred_time_of_day AS preferred_time_of_day,
-//              weather_type.title AS preferred_weather,
-//              list_item.due_date AS due_date
-//       FROM list_item
-//       INNER join list
-//        ON list.id = list_item.list_id
-//       LEFT OUTER JOIN preferred_weather_type AS weather_type
-//         ON weather_type.id = list_item.preferred_weather_type
-//       where list.id = $1 
-//         AND list.user_id = $2 
-//         AND completed_date IS NULL;
-//       `;
-//     const listData = await connection.query(sqlTextList, [listId, userId]);
-//     if (locationData.rows.length !== 1) {
-//       console.log('Location data not found! Failure in /api/weather/recommendations');
-//       res.sendStatus(500);
-//     } else {
-//       const locData = locationData.rows[0];
-//       console.log('lat', locData.latitude);
-//       console.log('locdata', locData)
-//       console.log('locationdata.rows:', locationData.rows[0]);
-//       console.log('latitude', locationData.rows[0].latitude);
-//       const latitude = locData.latitude;
-//       console.log('hey', latitude);
-//       const utcOffset = locData.utc_offset;
-//       const longitude = locData.longitude;
-//       const country = locData.country;
-//       const name = locData.name;
-//       // const {  name, country } = locationData.rows[0];
-//       console.log('utc offset, name, country, lat, long', utcOffset, name, country, latitude, longitude);
-//       if (listData.rows.length === 0) {
-//         console.log('No list items on this list, so no recommendations! Failure in /api/weather/recommendations');
-//         res.sendStatus(500);
-//       } else if (!latitude || !longitude) {
-//         console.log('Lat and Long not found! Failure in /api/weather/recommendations');
-//         res.sendStatus(500);
-//       }
-//     }
-
-//   }
-//   catch(dbError) {
-//     console.log('Error getting location or list data in /api/weather/recommendations',dbError);
-//   }
-//   // 3. get weather data from visual crossing (for openAI call)
-//   console.log('GETTING WEATHER FROM API BELOW***************');
-//   console.log('utc offset, name, country, lat, long', utc_offset, name, country, latitude, longitude);
-//   // sample format (visual crossing timeline weather api)
-//   //    https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/[location]/[date1]/[date2]?key=YOUR_API_KEY 
-//   // try {
-//   //   const weatherData = await axios({
-//   //     method: 'GET',
-//   //     url: `${visualCrossUrl}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utc_offset}&include=alerts,hours,days`
-//   //   })
-//   //   if (weatherData.rows.length === 0) {
-//   //     console.log('No weather data received, error in /api/weather/recommendations');
-//   //     res.sendStatus(500);
-//   //   }
-//   // }
-//   // catch(weatherAPIerror) {
-//   //   console.log('Error in GET from visual crossing in /api/weather/recommendations',
-//   //                  weatherAPIerror);
-//   //   res.sendStatus(500);
-//   // }
-//   // 4. prepare data for openAI call 
-
-//   // create list item table in text format to pass to open AI:
-//   //    - first put data in an array of arrays
-//   //    - second add the headers array to the top of the arrays
-//   //    - third reformat table to text format with tabs and newlines  
-//   let listDataArray = listData.map(listObject => Object.values(listObject));
-//   console.log('listdataarray:', listDataArray)
-//   listDataArray = listData.shift(["List Description", 
-//                                 "Item Description",
-//                                 "Priority",
-//                                 "Preferred Time Of Day",
-//                                 "Preferred Weather", 
-//                                 "Due Date"]);
-//   console.log('listdataarray2', listDataArray);               
-//   const tableText = listDataArray.map(row => row.join('\t')).join('\n');
-//   console.log('listdatatext', listDataText);
-
-//   // create weather data table in text format to pass to open AI:
-//   //    - first put data in an array of arrays
-//   //    - second add the headers array to the top of the arrays
-//   //    - third reformat table to text format with tabs and newlines 
-
-//   let weatherDataReformatted = [], formattedDays = [], formattedDay = {};
-//   weatherDataReformatted.push(weatherData.latitude);
-//   weatherDataReformatted.push(weatherData.longitude);
-//   weatherDataReformatted.push(weatherData.timezone);
-//   weatherDataReformatted.push(weatherData.alerts);
-//   weatherData.days.map(day => {
-//    formattedDay = { datetime: day.datetime,
-//                      max_temperature: day.tempmax,
-//                      min_temperature: day.tempmin,
-//                      feels_like_max_temperature: day.feelslikemax,
-//                      feels_like_min_temperature: day.feelslikemin,
-//                      humidity: day.humidity,
-//                      precipitation_amount: day.precip,
-//                      precipitation_probability: day.precipprob,
-//                      precipitation_type: day.preciptype,
-//                      snow_amount: day.snow,
-//                      current_snow_depth: day.snowdepth,
-//                      wind_gust_max: day.windgust,
-//                      wind_speed_max: day.windspeed,
-//                      cloud_cover_percentage: day.cloudcover,
-//                      uv_index: day.uvindex,
-//                      risk_of_severe_weather_percentage: day.severerisk,
-//                      dailly_weather_description: day.description }
-//     formattedDays.push(formattedDay);
-//     })
-//     // turn formattedDays into a text table
-//     console.log(weatherDataReformatted);
-//     const daysText = formattedDays.map(row => row.join('\t')).join('\n');
-//     weatherDataReformatted.push({days: daysText});
-//     console.log(weatherDataReformatted);
-//     const weatherDataText = weatherDataReformatted.map(row => row.join('\t')).join('\n');
-//     console.log(weatherDataText);
-//   // 5. prepare prompts for openAI call
-//     const prompt = `look through stuff do stuff`;
-//     const apiRequestData = {
-//       model: 'text-davinci-003', 
-//       prompt: `${prompt}\n\nTable Data:\n${tableData}`,
-//       max_tokens: 150, // Adjust the number of tokens based on your needs
-//       temperature: 0.7,
-//     }
-//   //6. make call to openAI assistant with data and prompt
-//   try {
-//       const AIresponse = await axios({
-//         method: 'POST',
-//         url: `${openAIurl}`,
-//         headers: openAIheaders,
-//         data: apiRequestData
-//       });
-//     // 7. get recommendations response back from openAI
-//     console.log(response.data);
-//     // 8. process recommendations and save to recommendations table
-//           //process data???
-//     // 9. send recommendations table data back to display on screen
-//     // res.send(response.data);   
-//   }
-//   catch(openAIapiError) {
-//     if (recommendations.rows.length = 0) {
-//       console.log('No recommendations received!');
-//       res.sendStatus(500);
-//     }
-//     console.log('Error in POST API call to openAI at /api/weather/recommendations', openAIapiError);
-//     res.sendStatus(500);
-//   }
-// })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /********************************** */
 
 /**  
- * Get recommendations!
+ * Get recommendations from openAI!
  *   (based on weather data from openAI complete endpoint)
  *    1. get location data for list (used for weather data API call)
  *    2. get list data from list & list_items table (for openAI call)
@@ -671,7 +474,8 @@ router.get('/recommendations/:list_id', rejectUnauthenticated, async (req, res) 
     //  (create list array, convert to text, add table title)
     let listDataArray = dbListData.map(listObject => Object.values(listObject));
     console.log('listdataarray:', listDataArray)
-    listDataArray.unshift(["List Description", 
+    listDataArray.unshift(["Todo_ID",
+                        "List Description", 
                         "Item Description",
                         "Priority",
                         "Preferred Time Of Day",
@@ -730,7 +534,7 @@ router.get('/recommendations/:list_id', rejectUnauthenticated, async (req, res) 
                       day.humidity,
                       day.precip,
                       day.precipprob,
-                      day.preciptype,
+                      day.preciptype ? day.preciptype.toString() : "",
                       day.snow,
                       day.snowdepth,
                       day.windgust,
@@ -751,52 +555,70 @@ router.get('/recommendations/:list_id', rejectUnauthenticated, async (req, res) 
        console.log('texttables', textTables);
       console.log('Prepare prompts for openAI call *****************')
     // 5. prepare prompts for openAI call
-    //   const prompt = 
-    //     `Look through the following tables and provide recommendations on when to move to do list items taking into account preferred weather and the current forecast for the week.  Please provide 3 recommendations for when to do a particular to do item based on the weather, and format the response in JSON.`;
-    //     const data = {
-    //       model: 'gpt-4',
-    //       messages: [
-    //         {
-    //           role: 'system',
-    //           content: 'You are a helpful assistant.'
-    //         },
-    //         {
-    //           role: 'user',
-    //           content: `${prompt}\n\n${textTables}`
-    //         }
-    //       ],
-    //       max_tokens: 150,
-    //       temperature: 0.7
-    //     };
-    //   console.log('apiRequest', apiRequestData);
-    //   console.log('Make call to openAI *****************')
-    // //6. make call to openAI assistant with data and prompt
-    //   const AIresponse = await axios({
-    //     method: 'POST',
-    //     url: `${openAIurl}`,
-    //     headers: openAIheaders,
-    //     data: apiRequestData
-    //   });
-    //   console.log('Get recommendations back from openAI *****************')
-    //   // 7. get recommendations response back from openAI
-    //   console.log(AIresponse.data);
-    //   let recommendations = json(AIresponse.data);
-      console.log('Process recommendations *****************')
+      // const prompt = 
+      //   `Look through the following tables and provide recommendations on when to move to do list items taking into account preferred weather and the current forecast for the week.  Please provide 5 recommendations for when to do a particular to do item based on the weather, or to do an activity that seems like an indoor activity on very hot or very cold or rainy or snowy days. For your response, can you respond in JavaScript object notation.  The response should consist of a header property with related text, and five item properties, item1, item2, item3, item 4 and item5. Each item should hold an object with the following: a numerical sequential id  property, a todo_id property, a todo_item description, and a description of the recommendation called recommend_desc.  If there is not enough data for 3 recommendations, you may assign null to: the item3 property for one missing recommendation, assign null to item3 and item2 for two missing recommendations, and assign null to item1, item2 and item3  for three missing recommendations.
+      //   An example of the data structure to be returned if there were 3 recommendations given the data sent would be:           For your response, can you respond in JavaScript object notation.
+      //   Content: { header: 'Header text generated by role’,
+      //   Item1: { number: 1, todo_id : 5, todo_ desc: 'Mow the Lawn', 'Role generated recommendation text goes here’},
+      //   Item 2: {number: 2 todo_id : 5, todo_ desc: ‘Rake the leaves’, 'Role generated recommendation text number 2 goes here},
+      //   Item 3: {number: 3, todo_id : 5, todo_ desc: ‘Clean the kitchen floor’, 'Role generated recommendation text number 3 goes here},
+      //   Item4: null,
+      //   Item5: null} `;
+        const prompt = 
+        `Look through the following tables and provide recommendations on when to move to do list items taking into account preferred weather and the current forecast for the week.  Please provide 3 recommendations for when to do a particular to do item based on the weather, or to do an activity that seems like an indoor activity on very hot or very cold or rainy or snowy days.  For your response, respond using JSON format. The response should consist of a header property with related text, and three item properties, item1, item2, and item3. Each item should hold the following: a numerical sequential id  property, a todo_id property, a todo_item description, and a description of the recommendation called recommend_desc. 
+        Content: { "header": 'Header text generated by role",
+        "item1": {"number": "1", "todo_id" : "5","todo_desc": 'Mow the Lawn', "recommend_desc": 'Role generated recommendation text goes here"},
+        "item2": {number: "2", "todo_id" : "5", "todo_desc": "Rake the leaves", "recommend_desc": 'Role generated recommendation text number 2 goes here},
+        "item3": {number: "3", "todo_id" : "5", "todo_desc": "Clean the kitchen floor", "recommend_desc": 'Role generated recommendation text number 3 goes here}
+        }`;
+        const apiRequestData = {
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful assistant generating recommendations based on to do lists and a current weather forecast for the week.'
+            },
+            {
+              role: 'user',
+              content: `${prompt}\n\n${textTables}`
+            }
+          ],
+          max_tokens: 600,
+          temperature: 1
+        };
+      console.log('apiRequest', apiRequestData);
+      console.log('Make call to openAI *****************')
+    //6. make call to openAI assistant with data and prompt
+      const AIresponse = await axios({
+        method: 'POST',
+        url: `${openAIurl}`,
+        headers: openAIheaders,
+        data: apiRequestData
+      });
+      console.log('Get recommendations back from openAI *****************')
+      // 7. get recommendations response back from openAI
+      console.log(AIresponse.data);
+      let recommendations = AIresponse.data.choices[0].message.content;
+      console.log('recommendations*************', recommendations);
+     recommendations = recommendations.replace(/^```json\n/, '').replace(/\n```$/, '');
+      console.log('rec2*********',recommendations);
+      // Now parse the cleaned JSON string
+      const parsedData = JSON.parse(recommendations);
+      console.log('parsed data:', parsedData)
+      let theheader = parsedData.header;
+      console.log('head:', theheader);
+      console.log('number:', parsedData.item1.number)
+      console.log('recommend_desc', parsedData.item2.recommend_desc)
       // 8. process recommendations and save to recommendations table
-      if (recommendations.rows.length = 0) {
-        console.log('No recommendations received!');
-        res.sendStatus(500);
-      } else {
-         //process data HERE ???
+      const responseDeleteOK = await deleteOldRecommendations(listId);
+      const responseAddOK = await addNewRecommendations(listId, parsedData);
       console.log('Send recommendations back to recommendations component *****************')
-      // 9. send recommendations table data back to display on screen
-      // res.send(response.data);   
-        console.log(recommendations);
-      }
-      }
-      catch(openAIapiError) {
-        console.log('Error in POST API call to openAI at /api/weather/recommendations', openAIapiError);
-        res.sendStatus(500);
+      // 9. send sucessful response back in order to call get and set
+      //      of new recommendations
+      res.sendStatus(201);
+    } catch(openAIapiError) {
+      console.log('Error in POST API call to openAI at /api/weather/recommendations', openAIapiError);
+      res.sendStatus(500);
     }
 })
 
@@ -835,7 +657,7 @@ const getLocationData = async (listId, userId) => {
         console.log('utc offset, name, country, lat, long', utc_offset, name, country, latitude, longitude);
       }
       connection.release();
-      return locationData.rows;
+      return locationData.rows[0];
     }
   } catch (error) {
     connection.release();
@@ -853,7 +675,8 @@ const getListData = async (listId, userId) => {
     connection = await pool.connect();
     // 2. get list data from list & list_items table (for openAI call)
     const sqlTextList = `
-      SELECT list.description AS list_description,
+      SELECT list_item.id AS todo_id,
+             list.description AS list_description,
              list_item.description AS item_description,
              list_item.priority AS priority,
              list_item.preferred_time_of_day AS preferred_time_of_day,
@@ -886,8 +709,9 @@ const getListData = async (listId, userId) => {
 }
 
 
-  const getWeatherData = async (listId) => {
+  const getWeatherData = async (location) => {
     console.log('GETTING WEATHER FROM API BELOW***************');
+    console.log('latlong', location.latitude, location.longitude)
     if (TESTING) {
       return testData;
     } else {
@@ -896,21 +720,100 @@ const getListData = async (listId, userId) => {
         //    https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/[location]/[date1]/[date2]?key=YOUR_API_KEY 
         const weatherApiResponse = await axios({
           method: 'GET',
-          url: `${visualCrossUrl}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utc_offset}`
+          url: `${visualCrossUrl}${location.latitude},${location.longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${location.utc_offset}&contentType=json`
         })
         console.log('GET of data from visual crossing worked at /api/weather/forecast/!', weatherApiResponse.data);
-        if (weatherApiResponse.rows.length === 0) {
+        if (typeof weatherApiResponse === undefined ) {
           console.log('No rows received for weather data, error in getWeatherData in /api/weather/recommendations!');
           throw new Error('No rows received for weather data, error in getWeatherData in /api/weather/recommendations!');
         }
         return weatherApiResponse.data;
       } catch (apiError) {
-        console.error(error.stack)
+        console.error(apiError.stack)
           console.log('GET of API data from visual crossing failed in /api/weather/forecast/, please try again later', apiError);
           throw new Error('Error in getWeatherData in /api/weather/forecast/', apiError);
       }
     }
   };
+
+  const addNewRecommendations = async (listId, recommendations) => {
+    let connection;
+    // 1. get location data for list (used for weather data API call)
+    try {
+      connection = await pool.connect()
+      const sqlText = `
+      INSERT INTO recommendations
+        ( header, recommendation_number, list_id, todo_id, todo_desc, recommend_desc )
+        VALUES ( $2, $3, $1, $4, $5, $6),
+               ( $2, $7, $1, $8, $9, $10),
+               ( $2, $11, $1, $12, $13, $14)
+      `;
+      const response = 
+        await connection.query(sqlText, [listId,
+                                         recommendations.header,
+                                         recommendations.item1.number,
+                                         recommendations.item1.todo_id,
+                                         recommendations.item1.todo_desc,
+                                         recommendations.item1.recommend_desc,                 
+                                         recommendations.item2.number,
+                                         recommendations.item2.todo_id,
+                                         recommendations.item2.todo_desc,
+                                         recommendations.item2.recommend_desc,
+                                         recommendations.item3.number,
+                                         recommendations.item3.todo_id,
+                                         recommendations.item3.todo_desc,
+                                         recommendations.item3.recommend_desc
+                                        ]);
+        connection.release();
+        return true;
+      } catch(dbError) {
+        console.error(dbError.stack)
+        throw new Error ('Error adding to recommendations table in /api/weather/recommendations', dbError);
+        connection.release();  
+      }
+  }
+
+
+  const deleteOldRecommendations = async (listId) => {
+    let connection;
+    // 1. get location data for list (used for weather data API call)
+    try {
+      connection = await pool.connect()
+      const sqlText = `
+      DELETE FROM recommendations
+        WHERE list_id = $1
+      `;
+      const response = 
+        await connection.query(sqlText, [listId]);
+        connection.release();
+        return true;
+      } catch(dbError) {
+        console.error(dbError.stack)
+        throw new Error ('Error deleting old recommendations in /api/weather/recommendations', dbError);
+        connection.release();  
+      }
+  }
+
+/**
+ * GET all the recommendations for a listId
+ */
+router.get('/get_recommendation_text/:list_id',rejectUnauthenticated, (req, res) => {
+  const listId = req.params.list_id;
+  const sqlText = `
+    SELECT * FROM recommendations
+      WHERE list_id = $1
+      ORDER BY recommendation_number;
+    `;
+    pool.query(sqlText, [listId])
+    .then(dbResponse => {
+      console.log('GET route for /api/weather/get_recommendation_text/ sucessful!', dbResponse.rows);
+      res.send(dbResponse.rows);
+    })
+    .catch(dbError => {
+      console.log('GET route for/api/weather/get_recommendation_text/ failed', dbError);
+      res.sendStatus(500);
+    })
+});
 
 
 
@@ -918,21 +821,3 @@ module.exports = router;
 
 
 
-
-// formattedDay = [ datetime: day.datetime,
-  // max_temperature: day.tempmax,
-  // min_temperature: day.tempmin,
-  // feels_like_max_temperature: day.feelslikemax,
-  // feels_like_min_temperature: day.feelslikemin,
-  // humidity: day.humidity,
-  // precipitation_amount: day.precip,
-  // precipitation_probability: day.precipprob,
-  // precipitation_type: day.preciptype,
-  // snow_amount: day.snow,
-  // current_snow_depth: day.snowdepth,
-  // wind_gust_max: day.windgust,
-  // wind_speed_max: day.windspeed,
-  // cloud_cover_percentage: day.cloudcover,
-  // uv_index: day.uvindex,
-  // risk_of_severe_weather_percentage: day.severerisk,
-  // dailly_weather_description: day.description ];

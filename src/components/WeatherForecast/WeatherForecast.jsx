@@ -54,7 +54,7 @@ function WeatherForecast({listId}) {
           (errorFetchingForecast ? 'Error Fetching Forecast data, try again later.' :
         ( 
           <>
-          <h4 className="weather-overview md-font">7 DAY FORECAST:<span>{weatherForecast?.description}</span></h4> 
+          <h4 className="weather-overview sm-med-font">7 DAY<br></br> FORECAST:<span className="med-lg-font">{weatherForecast?.description}</span></h4> 
           <section className="weather-forecast">
             {weatherForecast.days?.map(day => (
               <figure className="forecast-card" 
@@ -67,7 +67,7 @@ function WeatherForecast({listId}) {
                                sm-font">CURRENT</h6>
                   <div className="no-margin-padding">
                     <div className="inline-block">
-                      <p className="forecast-current data temp">{weatherForecast.currentConditions?.temp}°F</p>
+                      <p className="forecast-current data temp">{day?.temp}°F</p>
                     </div>
                     <div className="inline-block small-padding">
                       <h6 className="forecast-current
@@ -77,7 +77,7 @@ function WeatherForecast({listId}) {
                       <p className="forecast-current
                                     data
                                     feelslike
-                                    inline-block">{weatherForecast.current?.feelslike}°F</p>
+                                    inline-block">{day?.feelslike}°F</p>
                     </div>
                   </div>
                   <div>

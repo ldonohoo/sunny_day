@@ -38,8 +38,18 @@ main {
 .med-font {
     font-size: 1rem;
 }
-/* .no-margin-padding {
-    background-color: aqua;
-    margin: 0;
-    padding: 0;
-} */
+
+.med-lg-font {
+    font-size: 1.2rem;
+}
+
+.lg-font {
+    font-size: 1.8rem;
+}
+
+.divider {
+    width: 100%;
+    border: .1rem solid black;
+    height: 0rem;
+    margin: 1rem 0;
+}

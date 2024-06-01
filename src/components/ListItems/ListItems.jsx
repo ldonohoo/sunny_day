@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import './ListItems.css'
@@ -33,20 +33,43 @@ function ListItems() {
     const [showCompleted, setShowCompleted] = useState(true);
     const listItems = useSelector(store => store.listsReducer.listItems);
     const locations = useSelector(store => store.locationsReducer.locations);
+    const recommendations = useSelector(store => store.weatherReducer.recommendations);
     const weatherTypes = useSelector(store => store.weatherReducer.weatherTypes);
     const timeOfDays = useSelector(store => store.timeOfDayReducer.timeOfDays)
-    const { list_id } = useParams();
+    const { list_id, item_id } = useParams();
     const currentLocation = 
       useSelector(store => store.locationsReducer.currentLocation);
-    const [recsAvailable, setRecsAvailable] = useState(true);
+    const [recsAvailable, setRecsAvailable] = useState(false);
+    const inputRef = useRef(null);
+    
+    useEffect(() => {
+      // if the item id parameter is not equal to zero, focus on that
+      //    specific item in the load of the list
+      if (item_id !== 0) {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }
+    }, []);
+
+
+    useEffect(() => {
+      dispatch({ type: 'GET_LIST_ITEMS', payload: { listId : list_id }});
+      dispatch({ type: 'GET_WEATHER_TYPES' });
+      dispatch({ type: 'GET_TIME_OF_DAYS' });
+      dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
+                payload: { listId: list_id } });
+      dispatch({ type: 'GET_RECOMMENDATIONS',
+                payload: { listId: list_id } });
+    }, [list_id]);
 
   useEffect(() => {
-    dispatch({ type: 'GET_LIST_ITEMS', payload: { listId : list_id }});
-    dispatch({ type: 'GET_WEATHER_TYPES' });
-    dispatch({ type: 'GET_TIME_OF_DAYS' });
-    dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
-               payload: { listId: list_id }});
-  }, [list_id]);
+    if (recommendations.length > 0) {
+      setRecsAvailable(true);
+    } else {
+      setRecsAvailable(false);
+    }
+  }, [recommendations])
 
   const handleAddListItem = (event) => {
     event.preventDefault();
@@ -132,20 +155,24 @@ function ListItems() {
       setRecsAvailable(false);
     } else {
       dispatch({
-        type: 'GET_RECOMMENDATIONS',
+        type: 'CREATE_RECOMMENDATIONS',
         payload: { listId: listId } })
-        setRecsAvailable(true);
     }
+  }
+
+  const seeRecommendations = (listId) => {
+
+      history.push(`/recommendations/${listId}`)
   }
 
   return (  
     <>
     <main>
       <section className="list-item-forecast-section">
-        <h2>Weather Forecast</h2>
+        <h2>Weather Forecast {currentLocation?.name}</h2>
         <WeatherForecast />
       </section>
-      <h2 className="list-item-main-description"><span>LIST:</span>{listItems[0]?.description}</h2>
+      <h2 className="list-item-main-description"><span className="med-lg-font">LIST:</span>{listItems[0]?.list_description}</h2>
       <section className="list-item-location-section">
         <LocationSelect isMasterLocation={false}
                         listId={list_id} />
@@ -233,7 +260,7 @@ function ListItems() {
                 onClick={() => getRecommendations(list_id)}>GET RECOMMENDATIONS
         </button>
         <button className={`see-recommendations-button ${recsAvailable ? 'recs-available' : ''}`}
-                onClick={() => getRecommendations(list_id)}>SEE RECOMMENDATIONS
+                onClick={() => seeRecommendations(list_id)}>SEE RECOMMENDATIONS
         </button>
       </section>
       {/* <label className="label list-item-desc-label">COMPLETE</label> */}

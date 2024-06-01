@@ -3,7 +3,14 @@
     display: inline-block;
 }
 
-
+.list-page-title {
+    text-align: left;
+    padding-bottom: .3rem;
+    border: 0.1rem solid black;
+    border-radius: .3rem;
+    background-color: rgb(99, 189, 253);
+    padding: .5rem;
+}
 
 
 .list-add-description {

@@ -2,7 +2,10 @@
 .list-item-main-description {
     text-align: left;
     padding-bottom: .3rem;
-    border-bottom: 0.1rem solid black;
+    border: 0.1rem solid black;
+    border-radius: .3rem;
+    background-color: rgb(99, 189, 253);
+    padding: .5rem;
 }
 
 .list-items-add-section form {

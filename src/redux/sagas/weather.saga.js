@@ -35,12 +35,36 @@ function* getWeatherForecast(action) {
   }
 }
 
-function* getRecommendations(action) {
-  console.log('In get of recommendations, payload:', action.payload.listId);
+/**
+ * Create recommendataions 
+ *   - issues a request for recommendations from an
+ *    openAI chat complete endpoint
+ *   - creates new recommendations in the recommendations table
+
+ */
+function* createRecommendations(action) {
+  console.log('In get/create of recommendations from openAI, payload:', action.payload.listId);
   try {
     const response = yield axios({
       method: 'GET',
       url: `/api/weather/recommendations/${action.payload.listId}`,
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    })
+    console.log('Recommendations!!!!', response.data);
+    yield put({ type: 'GET_RECOMMENDATIONS', payload: response.data });
+  } 
+  catch (error) {
+    console.log('Error getting recommendations:', error);
+  }
+}
+
+function* getRecommendations(action) {
+  console.log('In get of recommendations from table, payload:', action.payload.listId);
+  try {
+    const response = yield axios({
+      method: 'GET',
+      url: `/api/weather/get_recommendation_text/${action.payload.listId}`,
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
     })
@@ -55,6 +79,7 @@ function* getRecommendations(action) {
 function* locationSagas() {
   yield takeLatest('GET_WEATHER_TYPES', getWeatherTypes);
   yield takeLatest('GET_WEATHER_FORECAST', getWeatherForecast);
+  yield takeLatest('CREATE_RECOMMENDATIONS', createRecommendations);
   yield takeLatest('GET_RECOMMENDATIONS', getRecommendations);
 }
 

@@ -3,6 +3,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     gap: .5rem;
+    margin: 1rem 0 2rem 0;
 }
 
 .forecast-box > div,
@@ -16,7 +17,6 @@
 
 .weather-overview {
     display: inline; 
-    font-size: 0.9rem;
     font-weight: 200;
 }
 
@@ -32,6 +32,7 @@
     font-size: 0.7rem;
     font-weight: 200;
     text-align: center;
+    height: 90%;
 }
 
 .forecast-card {
@@ -52,7 +53,7 @@
 }
 
 .forecast-daily.desc {
-    text-wrap:wrap;
+    text-wrap: wrap;
     max-width: 60%;
     margin: 0 20%;
 }

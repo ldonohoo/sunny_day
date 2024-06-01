@@ -1,0 +1,42 @@
+.rec-header {
+    text-align: left;
+    width: 40%;
+    border: .05rem solid black;
+    border-radius: .3rem;
+    background-color:  rgb(148, 210, 255);
+    padding: 1rem;
+}
+
+.rec-item {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: .5rem 0;
+}
+
+.rec-item-title {
+    border: .05rem solid black;
+    border-radius: .3rem;
+    background-color: rgb(99, 189, 253);
+    padding: 1rem;
+    width: 15%;
+}
+
+.rec-item-desc {
+    border: .05rem solid black;
+    border-radius: .3rem;
+    background-color: rgb(148, 210, 255);
+    padding: 1rem; 
+    width: 40%;
+}
+
+.rec-item-goto-button {
+    border: .05rem solid black;
+    background-color: rgb(252, 228, 151);
+    border-radius: .3rem;
+    width: 5rem;
+    /* text-wrap: wrap;
+    outline: 1rem solid rgb(99, 189, 253);
+    padding: 1.6rem;
+    outline-offset: -1rem; */
+}

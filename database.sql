@@ -18,7 +18,7 @@ DROP TABLE IF EXISTS hourly_forecast;
 DROP TABLE IF EXISTS location;
 DROP TABLE IF EXISTS weather_icon;
 -- DROP TABLE IF EXISTS "user" CASCADE;
-
+DROP TABLE IF EXISTS recommendations;
 
 
 -- create tables ----------------------------------------------
@@ -39,7 +39,7 @@ CREATE TABLE location (
   longitude DEC,
   timezone_id INT,
   utc_offset  DEC,
-  is_master_default_location BOOLEAN DEFAULT FALSE
+  is_master_default_location BOOLEAN DEFAULT NULL
 );
 
 CREATE TABLE list (
@@ -152,6 +152,17 @@ CREATE TABLE forecast_precipitation_type (
   forecast_id INT REFERENCES daily_forecast
 );
 
+
+CREATE TABLE recommendations (
+  id  SERIAL PRIMARY KEY,
+  header VARCHAR(900) NOT NULL,
+  recommendation_number INT,
+  list_id INT REFERENCES list,
+  todo_id INT REFERENCES list_item,
+  todo_desc VARCHAR(300),
+  recommend_desc VARCHAR(900)
+);
+
 -- INSERT INTO "user" 
 --   (username, password)
 --   VALUES ('lisa', 'cat'),
@@ -191,3 +202,43 @@ INSERT INTO time_of_day
   VALUES ( '06:00:00', '12:00:00', '17:00:00', '20:00:00'),
          ( '06:00:00', '12:00:00', '17:00:00', '20:00:00');
 
+      SELECT location.*
+        FROM list
+			INNER JOIN location
+				ON list.location_id = location.id
+        WHERE list.user_id = 2
+            AND list.id = 1;
+            
+            
+      SELECT list.description AS list_description,
+             list_item.description AS item_description,
+             list_item.priority AS priority,
+             preferred_weather_type.title AS preferred_weather,
+             list_item.due_date AS due_date
+        FROM list_item
+        INNER JOIN list
+          ON list.id = list_item.list_id
+        INNER JOIN preferred_weather_type
+          ON preferred_weather_type.id = list_item.preferred_weather_type
+        WHERE list.id = 2
+          AND list.user_id = 2
+          AND list_item.completed_date IS NULL;
+      `;
+      
+      SELECT list.description AS list_description,
+             list_item.description AS item_description,
+             list_item.priority AS priority,
+             list_item.preferred_time_of_day AS preferred_time_of_day,
+             weather_type.title AS preferred_weather,
+             list_item.due_date AS due_date
+      from list_item
+      inner join list
+      on list.id = list_item.list_id
+      left join preferred_weather_type AS weather_type
+      on weather_type.id = list_item.preferred_weather_type
+      where list.id = 2 and list.user_id = 2 AND completed_date IS NULL
+      
+      
+      
+      
+      
