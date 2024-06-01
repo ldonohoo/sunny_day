@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import './ListItems.css'
@@ -40,18 +40,6 @@ function ListItems() {
     const currentLocation = 
       useSelector(store => store.locationsReducer.currentLocation);
     const [recsAvailable, setRecsAvailable] = useState(false);
-    const inputRef = useRef(null);
-    
-    useEffect(() => {
-      // if the item id parameter is not equal to zero, focus on that
-      //    specific item in the load of the list
-      if (item_id !== 0) {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }
-    }, []);
-
 
     useEffect(() => {
       dispatch({ type: 'GET_LIST_ITEMS', payload: { listId : list_id }});
@@ -61,6 +49,7 @@ function ListItems() {
                 payload: { listId: list_id } });
       dispatch({ type: 'GET_RECOMMENDATIONS',
                 payload: { listId: list_id } });
+  
     }, [list_id]);
 
   useEffect(() => {
@@ -263,12 +252,11 @@ function ListItems() {
                 onClick={() => seeRecommendations(list_id)}>SEE RECOMMENDATIONS
         </button>
       </section>
-      {/* <label className="label list-item-desc-label">COMPLETE</label> */}
       <label className="label list-item-desc-label">DESCRIPTION</label>
       <label className="label list-item-priority-label">PRIORITY</label>
       <label className="label list-item-weather-label">PREF. WEATHER</label>
       <label className="label list-item-timeofday-label">PREF. TIME OF DAY</label>
-      <label className="label list-item-duedate-label">DUE DATE</label>
+      <label className="label list-item-duedate-label">DUE DATE{item_id}</label>
       <DndContext collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}> 
         <section className="list-items">
@@ -282,6 +270,7 @@ function ListItems() {
                       <ListItemsSortable key={item.id}
                                           id="list-items-top"
                                           item={item}
+                                          highlightItem={item_id}
                                           handleCompleteItemToggle=
                                             {handleCompleteItemToggle}
                                           handleDeleteItem={handleDeleteItem}

@@ -157,8 +157,8 @@ CREATE TABLE recommendations (
   id  SERIAL PRIMARY KEY,
   header VARCHAR(900) NOT NULL,
   recommendation_number INT,
-  list_id INT REFERENCES list,
-  todo_id INT REFERENCES list_item,
+  list_id INT REFERENCES list ON DELETE CASCADE,
+  todo_id INT REFERENCES list_item ON DELETE CASCADE,
   todo_desc VARCHAR(300),
   recommend_desc VARCHAR(900)
 );

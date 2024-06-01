@@ -141,10 +141,10 @@ select {
     outline: none;
 }
 
-.list-item.checked-off input,
+/* .list-item.checked-off input,
 .list-item.checked-off select {
     /* background-color: blue; */
-}
+} */
 
 #list-items-add-label-timeofday,
 #list-items-add-label-weathertype {
@@ -192,8 +192,8 @@ select {
     margin: 0;
 }
 #list-item {
-    padding: 0;
-    margin: 0;
+    padding: 0 .5rem!important;
+    margin:  0;
 }
 
 .get-recommendations-button {
@@ -221,6 +221,10 @@ select {
 
 .list-item-main-description span {
     margin-right: 1.8rem;
+}
+
+.highlight-item {
+    background-color: rgb(253, 191, 191);
 }
 
 @keyframes colorChange {

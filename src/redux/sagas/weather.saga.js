@@ -51,8 +51,8 @@ function* createRecommendations(action) {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
     })
-    console.log('Recommendations!!!!', response.data);
-    yield put({ type: 'GET_RECOMMENDATIONS', payload: response.data });
+    console.log('Recommendations are in the database!!!!');
+    yield put({ type: 'GET_RECOMMENDATIONS', payload: action.payload.listId });
   } 
   catch (error) {
     console.log('Error getting recommendations:', error);

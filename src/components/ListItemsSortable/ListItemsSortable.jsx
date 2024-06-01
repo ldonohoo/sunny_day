@@ -6,6 +6,7 @@ import { useHistory} from "react-router-dom/cjs/react-router-dom.min";
 
 
 function ListItemsSortable({ item, 
+                             highlightItem,
                              handleCompleteItemToggle,
                              handleUpdateDescription,
                              handleDeleteItem,
@@ -68,13 +69,13 @@ function ListItemsSortable({ item,
                                           listItemId: item.id }}
       });
     };
-
+    console.log('HIGHLIGHT ITEM++++++++++++++++++++', highlightItem)
     return (
         <div id="list-item"
-             className="list-item"
+             className={`list-item ${Number(highlightItem) === item.id ? 'highlight-item' : ''}`}
              ref={setNodeRef} 
-             style={style} >
-          <span className={ item.completed_date === null ? 
+             style={style}>
+          <span className={item.completed_date === null ? 
                         "list-item-bar" : "list-item-bar checked-off"}>
             <button id="list-item-complete-checkbox" 
                     className={item.completed_date === null ? '' : 'list-item-complete'}
