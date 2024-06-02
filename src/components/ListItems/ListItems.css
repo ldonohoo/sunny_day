@@ -227,6 +227,22 @@ select {
     background-color: rgb(253, 191, 191);
 }
 
+.work-on.bar1,
+.work-on.bar2 {
+    border-bottom: .1rem solid black;
+    width: 45%;
+    height: .5rem;
+
+}
+
+.list-item-options-section {
+    /* border: .05rem solid black;
+    border-radius: .3rem;
+    padding: .1rem; */
+    margin: 1rem 0;
+    /* background-color: rgb(148, 210, 255); */
+}
+
 @keyframes colorChange {
     0% {
       background-color:  rgb(254, 195, 132);

@@ -252,11 +252,14 @@ function ListItems() {
                 onClick={() => seeRecommendations(list_id)}>SEE RECOMMENDATIONS
         </button>
       </section>
+      <div className="work-on bar1 inline-block"></div>
+      <h4 className="work-on title inline-block sm-med-font">work on first</h4>
+      <div className="work-on bar2 inline-block"></div>
       <label className="label list-item-desc-label">DESCRIPTION</label>
       <label className="label list-item-priority-label">PRIORITY</label>
       <label className="label list-item-weather-label">PREF. WEATHER</label>
       <label className="label list-item-timeofday-label">PREF. TIME OF DAY</label>
-      <label className="label list-item-duedate-label">DUE DATE{item_id}</label>
+      <label className="label list-item-duedate-label">DUE DATE</label>
       <DndContext collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}> 
         <section className="list-items">
@@ -282,6 +285,9 @@ function ListItems() {
           </SortableContext>
         </section>
       </DndContext>
+      <div className="work-on bar1 inline-block"></div>
+      <h4 className="work-on title inline-block sm-med-font">work on last</h4>
+      <div className="work-on bar2 inline-block"></div>
       <section>
       <h3>{!showCompleted ? 'completed items:' : ''}</h3>
       {listItems.map(item => (
