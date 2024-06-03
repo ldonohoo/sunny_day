@@ -206,6 +206,16 @@ select {
     height: 1.5rem;
 }
 
+.get-recommendations-button:hover,
+.see-recommendations-button:hover {
+    background-color: var(--primary-darker);
+}
+
+.get-recommendations-button:active,
+.see-recommendations-button:active {
+    background-color: var(--primary);
+}
+
 .see-recommendations-button {
     display: none;
     margin-left: 5rem;
