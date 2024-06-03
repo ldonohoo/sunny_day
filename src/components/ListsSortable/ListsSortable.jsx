@@ -3,6 +3,7 @@ import {CSS} from "@dnd-kit/utilities";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import '../ListsSortable/ListsSortable.css';
 
 function ListsSortable({list, 
                         handleDeleteList,
@@ -40,7 +41,8 @@ function ListsSortable({list,
     
       const handleDescriptionKeyDown = (event) => {
         if (event.key === 'Enter') {
-          handleUpdateDescription(list.id, list.description);
+          console.log('desc!:', inputDescription)
+          handleUpdateDescription(list.id, inputDescription);
           setIsDescriptionEditable(false);
           event.target.classList.toggle('lists-desc-editable');
         }
@@ -49,7 +51,8 @@ function ListsSortable({list,
       // blur is when item loses focus 
       //  (when lose input field focus, update the description)
       const handleDescriptionBlur = (event) => {
-        handleUpdateDescription(list.id, list.description);
+        console.log('desc!:', inputDescription)
+        handleUpdateDescription(list.id, inputDescription);
         setIsDescriptionEditable(false);
         event.target.classList.toggle('lists-desc-editable');
       };

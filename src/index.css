@@ -1,9 +1,49 @@
+/* 
+    Sunny Day
+    index.css
+    Main Index file, defaults
+    Lisa Donohoo
+    May 2024
+    */
+
+:root {
+
+    /* default styling */
+    /* font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; */
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    box-sizing: border-box;
+
+
+    /* standard sizes */
+    --radius: 0.7rem;
+    --border-width: 0.4rem;
+    --border-width2: 0.3rem;
+    --sm-marg: 0.1rem;
+    --md-marg: 0.5rem;
+    --sm-pad: 0.5rem;
+    --md-pad: 0.9rem;
+    --main-title-font: 3rem;
+
+    /* colors */
+    --background: white;
+    --background-alt: white;
+    --highlight: rgb(253, 191, 191);
+
+    --primary: rgb(148, 210, 255);
+    --primary-lighter: rgb(222, 239, 252);
+    --primary-darker:  rgb(99, 189, 253);
+    --primary-darkest: rgb(41, 164, 251);
+    --contrast:  rgb(252, 228, 151);
+    --contrast-2: rgb(254, 195, 132);
+
+    --border: black;
+    --grayed-out: rgb(119, 118, 118);
+}
 
 body {
     margin: 0;
     padding: 0;
-    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    box-sizing: border-box;
+
 }
 
 main {
@@ -11,7 +51,7 @@ main {
 }
 
 .hightlight {
-    background-color: rgb(193, 193, 193);
+    background-color: var(--contrast-1);
 }
 
 .label {
@@ -49,7 +89,30 @@ main {
 
 .divider {
     width: 100%;
-    border: .1rem solid black;
+    border: .1rem solid var(--border);
     height: 0rem;
     margin: 1rem 0;
+}
+
+
+/* visited link */
+a:visited {
+    color: black;
+}
+
+/* link moment it is clicked */
+a:active {
+    color: white; 
+}
+
+.font-weight-med {
+    font-weight: 300;
+}
+
+.font-weight-lt {
+    font-weight: 100;
+}
+
+.italic {
+    font-style: italic;
 }

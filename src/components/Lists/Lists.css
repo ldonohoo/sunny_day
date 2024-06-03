@@ -6,10 +6,12 @@
 .list-page-title {
     text-align: left;
     padding-bottom: .3rem;
-    border: 0.1rem solid black;
+    border: 0.01rem solid black;
     border-radius: .3rem;
-    background-color: rgb(99, 189, 253);
+    background-image: linear-gradient(to right,  var(--primary-darker), var(--primary-lighter));
     padding: .5rem;
+    font-weight: 500;
+    margin-top: 2rem;
 }
 
 
@@ -63,5 +65,4 @@
 .list-delete-button {
     display: inline-block;
 }
-
 

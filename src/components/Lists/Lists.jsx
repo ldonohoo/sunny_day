@@ -119,7 +119,7 @@ function Lists() {
     <>
     {/* <LocationSelect isMasterLocation={true}/> */}
     <main>
-      <h1 className="list-page-title">Your lists</h1>
+      <h1 className="list-page-title med-lg-font">YOUR LISTS</h1>
       <section>
         <LocationSelect isMasterLocation={true} />
       </section>

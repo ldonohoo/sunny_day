@@ -7,3 +7,22 @@
 .lists-desc-input.lists-desc-editable {
     border: .1rem solid red;
 }
+
+
+/* .list-load-button {
+    position: relative;
+    background-image: url(../../../public/images/upload_4204507.png);
+
+    border: .05rem solid var(--border);
+    border-radius: .3rem;
+    top: .7rem;
+}
+
+.list-copy-button {
+    position: relative;
+    background-image: url(../../../public/images/duplicate_10415897.png);
+
+    border: .05rem solid var(--border);
+    border-radius: .3rem;
+    top: .7rem;
+} */

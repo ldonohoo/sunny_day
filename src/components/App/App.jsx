@@ -9,15 +9,15 @@ import {
 import Nav from '../Nav/Nav';
 import Footer from '../Footer/Footer';
 import ProtectedRoute from '../ProtectedRoute/ProtectedRoute';
+import WelcomePage from '../WelcomePage/WelcomePage';
 import AboutPage from '../AboutPage/AboutPage';
-import InfoPage from '../InfoPage/InfoPage';
 import LandingPage from '../LandingPage/LandingPage';
 import LoginPage from '../LoginPage/LoginPage';
 import RegisterPage from '../RegisterPage/RegisterPage';
 import Lists from '../Lists/Lists';
 import ListItems from '../ListItems/ListItems';
 import Recommendations from '../Recommendations/Recommendations';
-
+import Header from '../Header/Header';
 import './App.css';
 
 function App() {
@@ -32,14 +32,15 @@ function App() {
   return (
     <Router>
       <div>
+        <Header />
         <Nav />
         <Switch>
           {/* Visiting localhost:5173 will redirect to localhost:5173/home */}
           <Redirect exact from="/" to="/home" />
           {/* Visiting localhost:5173/about will show the about page. */} 
-          <Route exact path="/about">
-            {/* // shows AboutPage at all times (logged in or not) */}
-            <AboutPage />
+          <Route exact path="/welcome">
+            {/* // shows WelcomePage at all times (logged in or not) */}
+            <WelcomePage/>
           </Route>
           {/* For protected routes, the view could show one of several things on the same route.
             Visiting localhost:5173/user will show the UserPage if the user is logged in.
@@ -54,9 +55,9 @@ function App() {
           <ProtectedRoute exact path="/recommendations/:list_id">
             <Recommendations />
           </ProtectedRoute>
-          {/* logged in shows InfoPage else shows LoginPage */}
-          <ProtectedRoute exact path="/info"> 
-            <InfoPage />           
+          {/* logged in shows AboutPage else shows LoginPage */}
+          <ProtectedRoute exact path="/about"> 
+            <AboutPage />           
           </ProtectedRoute>
           <Route exact path="/login">
             {user.id ?

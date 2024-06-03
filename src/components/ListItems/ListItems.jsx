@@ -49,7 +49,6 @@ function ListItems() {
                 payload: { listId: list_id } });
       dispatch({ type: 'GET_RECOMMENDATIONS',
                 payload: { listId: list_id } });
-  
     }, [list_id]);
 
   useEffect(() => {
@@ -150,7 +149,6 @@ function ListItems() {
   }
 
   const seeRecommendations = (listId) => {
-
       history.push(`/recommendations/${listId}`)
   }
 

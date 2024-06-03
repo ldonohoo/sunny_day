@@ -97,6 +97,7 @@ router.put('/update/:id', rejectUnauthenticated, (req, res) => {
   const listId = Number(req.params.id);
   const newList = req.body;
   const user = req.user;
+  console.log('newlist', newList);
   console.log('changeShowonopen?', newList.changeShowOnOpen)
   if (newList.changeShowOnOpen === false) {
     // update the description only for edit and add mode 
@@ -106,7 +107,7 @@ router.put('/update/:id', rejectUnauthenticated, (req, res) => {
         WHERE id = $1 AND
           user_id = $2;
       `;
-    pool.query(sqlUpdateDescription, [listId, user.id])
+    pool.query(sqlUpdateDescription, [listId, user.id, newList.description])
     .then(dbResponse1 => {
       console.log('PUT at /api/lists/:id successful updating description:', dbResponse1);
       res.sendStatus(200);

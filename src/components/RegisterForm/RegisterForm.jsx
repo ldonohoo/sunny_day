@@ -19,9 +19,11 @@ function RegisterForm() {
     });
   }; // end registerUser
 
+
   return (
     <form className="formPanel" onSubmit={registerUser}>
-      <h2>Register User</h2>
+      <h2>Plan for real life with Sunny Day!</h2>
+      <h3>Register now for a free account:</h3>
       {errors.registrationMessage && (
         <h3 className="alert" role="alert">
           {errors.registrationMessage}

@@ -1,0 +1,41 @@
+.welcome-title {
+    border: .05rem solid var(--border);
+    border-radius: .3rem;
+    background-color: var(--primary-lighter);
+    width: 40%;
+    margin-left: 5%;
+    font-weight: 300;
+    padding: 1.5rem;
+}
+
+.welcome-blurb,
+.welcome-tagline {
+    border: .05rem solid var(--border);
+    border-radius: .3rem;
+    background-color: var(--contrast-2);
+    width: fit-content;
+    margin-left: 10%;
+    font-weight: 300;
+    padding: 1.5rem;
+}
+
+
+.welcome-list,
+.welcome-lis > li {
+    /* border: .05rem solid var(--border);
+    border-radius: .3rem;
+    background-color: var(--primary); */
+    width: fit-content;
+    margin-left: 10%;
+    font-weight: 300;
+    padding: 1.5rem;
+    list-style: disc;
+}
+
+.welcome-list li {
+    margin: 2rem;
+}
+
+.welcome-tagline {
+    margin-left: 10%;
+}

@@ -798,6 +798,7 @@ const getListData = async (listId, userId) => {
  * GET all the recommendations for a listId
  */
 router.get('/get_recommendation_text/:list_id',rejectUnauthenticated, (req, res) => {
+  console.log('reqparams', req.params);
   const listId = req.params.list_id;
   const sqlText = `
     SELECT * FROM recommendations

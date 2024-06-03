@@ -52,7 +52,8 @@ function* createRecommendations(action) {
       withCredentials: true
     })
     console.log('Recommendations are in the database!!!!');
-    yield put({ type: 'GET_RECOMMENDATIONS', payload: action.payload.listId });
+    yield put({ type: 'GET_RECOMMENDATIONS', 
+                payload: { listId: action.payload.listId } });
   } 
   catch (error) {
     console.log('Error getting recommendations:', error);
