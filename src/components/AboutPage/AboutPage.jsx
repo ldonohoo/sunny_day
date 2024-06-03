@@ -41,6 +41,13 @@ function AboutPage() {
         <br></br>
         <br></br>
         <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+        <div>Connect with me!   https://www.linkedin.com/in/lisa-donohoo/</div>
+        <br></br>
+        <br></br>
+        <br></br>
       </section>
     </div>
   );

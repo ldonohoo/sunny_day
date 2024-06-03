@@ -80,7 +80,7 @@ function LocationSelect({isMasterLocation, listId }) {
 
 
   return (
-    <div className="location-select-add"> current location id: {JSON.stringify(currentLocation.location_id)}<br></br>
+    <div className="location-select-add">
         <label>{isMasterLocation ? 'DEFAULT LOCATION': 'LIST LOCATION'}</label>
         <select name="selectedLocation"
                 value={ isMasterLocation && 
@@ -90,7 +90,7 @@ function LocationSelect({isMasterLocation, listId }) {
             ><option value="0">none selected</option>{locations.map(location =>(
             <option key={location.id}
                     value={location.id}
-                    name={location.name}>{location.name}::{location.id}
+                    name={location.name}>{location.name}
             </option>
         ))}
         </select>

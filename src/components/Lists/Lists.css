@@ -62,14 +62,15 @@
     border-top-right-radius: .2rem;
     border-bottom-right-radius: .2rem;
     border-left: none;
-    height: 1.8rem;
+    height: 1.85rem;
     background-color:  rgb(206, 234, 255);
 }
 
 #list-drag-button {
+    display: relative;
     display: inline-block;
-    height: 1.85rem;
-
+    height: 1.9rem;
+    top: .4rem;
 }
 
 .list-delete-button {
