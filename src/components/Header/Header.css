@@ -1,41 +1,16 @@
-.header {
 
-}
-/* .backgroundclip h1 {
-    background: url(images/west.jpg) -100px -40px no-repeat;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  h1 {
-    color: orangered;
-  } */
-  /* h1 {
-    position: absolute;
-    top: 40%;
-    left: 40%;
- 
-    font-size: 40px;
-    font-family: Arial,Helvetica, sans-serif;
-    background: linear-gradient(to right, #f32170, #ff6b08,#cf23cf, #eedd44);
-    -webkit-text-fill-color: transparent;
-    -webkit-background-clip: text;
-} */
 
 .header h2 {
     position: relative;
     margin: 0;
     text-align: left;
-    font-size: var(--main-title-font);
+    font-size: 5vw!important;
     top: 20px;
     padding-left: 5.5%;
-    /* color: var(--) */
     background: linear-gradient(to right, #f3b821, #ff3300, #f3b821);
     font-size: 6rem;
     -webkit-text-fill-color: transparent;
     -webkit-background-clip: text;
-    /* text-emphasis: 1px black;
-    text-shadow: 4px 4px yellow; */
 }
 
 .happy-cloud-box {
@@ -74,6 +49,6 @@
 .header-tagline {
     font-style: italic;
     margin-left: 7%;
-    font-size: 1.8rem;
+    font-size: 5vw;
     padding-top: 1rem;
 }
