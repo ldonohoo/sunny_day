@@ -10,7 +10,6 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@googlemaps/js-api-loader": "^1.16.6",
-    "@react-google-maps/api": "^2.19.3",
     "axios": "^1.6.8",
     "bcryptjs": "^2.4.3",
     "connect-pg-simple": "^9.0.1",
@@ -37,6 +36,7 @@
     "test": "vitest"
   },
   "devDependencies": {
+    "@vis.gl/react-google-maps": "^1.0.2",
     "@vitejs/plugin-react": "^4.2.1",
     "nodemon": "^2.0.4",
     "vite": "^5.0.7",
