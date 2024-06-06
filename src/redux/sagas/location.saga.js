@@ -87,12 +87,29 @@ function* getCurrentListLocation(action) {
       }
     }
 
+    function* getGoogleMapData(action) {
+      try {
+        response = yield axios({
+          method: 'GET',
+          url: `/api/locations/map/$lat=${action.payload.lat}&long=${action.payload.long}`
+        })
+        console.log('Get of google map data successful!', response.data);
+        yield put({
+          type: 'SET_GOOGLE_MAP_DATA',
+          payload: response.data
+        })
+      } catch(error) {
+        console.log('Error in get of google map data')
+      }
+    }
+
 function* locationSagas() {
   yield takeLatest('GET_LOCATIONS', getLocations);
   yield takeLatest('GET_MASTER_LOCATION', getMasterLocation);
   yield takeLatest('GET_CURRENT_LIST_LOCATION', getCurrentListLocation);
   yield takeLatest('UPDATE_MASTER_LOCATION', updateMasterLocation);
   yield takeLatest('UPDATE_CURRENT_LIST_LOCATION', updateCurrentListLocation);
+  yield takeLatest('GET_GOOGLE_MAP_DATA', getGoogleMapData);
 }
 
 export default locationSagas;

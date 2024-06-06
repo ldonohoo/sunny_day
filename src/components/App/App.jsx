@@ -19,6 +19,7 @@ import ListItems from '../ListItems/ListItems';
 import Recommendations from '../Recommendations/Recommendations';
 import Header from '../Header/Header';
 import './App.css';
+import AddEditLocation from '../AddEditLocation/AddEditLocation';
 
 function App() {
   const dispatch = useDispatch();
@@ -54,6 +55,9 @@ function App() {
           </ProtectedRoute>
           <ProtectedRoute exact path="/recommendations/:list_id">
             <Recommendations />
+          </ProtectedRoute>
+          <ProtectedRoute exact path="/add_edit_location">
+            <AddEditLocation />
           </ProtectedRoute>
           {/* logged in shows AboutPage else shows LoginPage */}
           <ProtectedRoute exact path="/about"> 

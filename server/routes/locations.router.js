@@ -3,7 +3,8 @@ const pool = require('../modules/pool');
 const router = express.Router();
 const { rejectUnauthenticated } = require('../modules/authentication-middleware');
 
-
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
+const googleAPIurl = `https://maps.googleapis.com/maps/api/geocode/json`;
 /**
  * GET all locations for user
  */
@@ -156,5 +157,27 @@ router.put('/master/', rejectUnauthenticated, (req, res) => {
       })
     } 
 });
+
+router.get('/map/', rejectUnauthenticated, async (req, res) => {
+  try {
+    const { lat, long } = req.query;
+    apiParams = {
+      latLong: `${lat},${long}`,
+      key: GOOGLE_MAPS_API_KEY
+    };
+
+    const response = await axios({
+      method: 'GET',
+      url: '',
+      params: apiParams
+    });
+    console.log(response.data);
+    res.json(response.data)
+  } catch(apiError) {
+    console.log('Error in /api/locations/map/', apiError);
+    res.sendStatus(500);
+  }
+})
+
 
 module.exports = router;

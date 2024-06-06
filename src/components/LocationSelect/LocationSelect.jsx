@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import '../LocationSelect/LocationSelect.css';
+import AddEditLocation from '../AddEditLocation/AddEditLocation';
+import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
+
 
 function LocationSelect({isMasterLocation, listId }) {
 
@@ -23,6 +26,8 @@ function LocationSelect({isMasterLocation, listId }) {
     // we need to get the location from the list number
     // and update that if it changes
     const dispatch = useDispatch();
+    const history = useHistory();
+
     const locations = 
       useSelector(store => store.locationsReducer.locations);
     const currentLocation = 
@@ -78,6 +83,9 @@ function LocationSelect({isMasterLocation, listId }) {
     }
   };
 
+  const handleAddEditLocation = () => {
+    history.push('/add_edit_location/');
+  }
 
   return (
     <div className="location-select-add">
@@ -94,6 +102,7 @@ function LocationSelect({isMasterLocation, listId }) {
             </option>
         ))}
         </select>
+        <button onClick={handleAddEditLocation}>ADD/EDIT</button>
     </div>
   )
 }
