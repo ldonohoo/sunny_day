@@ -1,0 +1,56 @@
+
+.location-add-edit-section {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 5%;
+    align-items: flex-start;
+    gap: var(--md-pad);
+}
+
+.location-add-edit-select {
+    width: 40%;
+    border: .05rem solid var(--border);
+    border-radius: 0.3rem;
+    padding: var(--md-pad);
+}
+
+.location-add-edit-select h3,
+.current-locations-list h3 {
+    border-bottom: 0.05rem solid var(--border);
+    padding-left: var(--sm-pad);
+}
+
+.input-new-location {
+    width: 90%;
+}
+
+.current-locations {
+    width: 40%;
+    border: .05rem solid var(--border);
+    border-radius: 0.3rem;
+    padding: var(--md-pad);
+}
+
+.location-add-edit-section li {
+    list-style-type: none;
+    padding-left: var(--sm-pad);
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    gap: var(--sm-pad);
+}
+
+.location-add-edit-section button {
+    align-self: flex-start;
+
+}
+
+.location-add-edit-section li > span {
+    flex: 1;
+    word-wrap: break-word;
+}
+
+.current-locations-list button {
+    border: none;
+    background-color: white;
+}

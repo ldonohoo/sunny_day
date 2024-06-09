@@ -14,11 +14,11 @@ function WeatherForecast({listId}) {
 
   useEffect(() => {
     console.log('currentLoc:', currentLocation);
-    if (currentLocation !== 0) {
+    if (currentLocation.id !== 0) {
       setNoLocation(false);
       try {
         dispatch({ type: 'GET_WEATHER_FORECAST',
-                payload: currentLocation[0] });
+                   payload: currentLocation });
       }
       catch(error) {
         console.log('Error fetching forecast, please try again later');
@@ -48,10 +48,8 @@ function WeatherForecast({listId}) {
   
   return (
     <>
-                {/* {'::::' + JSON.stringify(weatherForecast) + '::::'} 
-                {'********' + JSON.stringify(weatherForecast + '*******')} */}
-      {noLocation ? 'Select Location to see forecast' :
-          (errorFetchingForecast ? 'Error Fetching Forecast data, try again later.' :
+      {noLocation ? <h4 className="error-msg italic font-weight-med">Select Location to see forecast</h4> :
+          (errorFetchingForecast ? <h4 className='error-msg italic font-weight-med'>Error Fetching Forecast data, try again later...</h4> :
         ( 
           <>
           <h4 className="weather-overview sm-med-font">7 DAY<br></br> FORECAST:<span className="med-lg-font">{weatherForecast?.description}</span></h4> 
@@ -61,67 +59,67 @@ function WeatherForecast({listId}) {
                     key={day?.datetime}>
                 <h5 className="forecast-day">{getDayOfWeek(day?.datetime)}</h5>
                 <div className="forecast-box">
-                <h6 className="forecast-current
-                               title
-                               temp
-                               sm-font">CURRENT</h6>
+                  <h6 className="forecast-current
+                                title
+                                temp
+                                sm-font">CURRENT</h6>
                   <div className="no-margin-padding">
                     <div className="inline-block">
                       <p className="forecast-current data temp">{day?.temp}°F</p>
                     </div>
-                    <div className="inline-block small-padding">
+                  <div className="inline-block small-padding">
                       <h6 className="forecast-current
-                                     title
-                                     feelslike
-                                     inline-block">FEELS<br/>LIKE</h6> 
+                                      title
+                                      feelslike
+                                      inline-block">FEELS<br/>LIKE</h6> 
                       <p className="forecast-current
-                                    data
-                                    feelslike
-                                    inline-block">{day?.feelslike}°F</p>
-                    </div>
+                                      data
+                                      feelslike
+                                      inline-block">{day?.feelslike}°F</p>
                   </div>
-                  <div>
+                </div>
+                <div>
                   <h6 className="forecast-daily
                                title
                                temp
                                sm-font">DAILY</h6>
-                    <div className="inline-block
+                  <div className="inline-block
                                     small-padding">
-                      <h6 className="forecast-daily
+                    <h6 className="forecast-daily
                                      title
                                      high">HIGH</h6>
-                      <p className="forecast-daily data high med-font">{day?.tempmax}°F</p>
-                    </div>
-                    {/* <div className="inline-block">
+                    <p className="forecast-daily data high med-font">{day?.tempmax}°F</p>
+                  </div>
+                  {/* <div className="inline-block">
                       <h6 className="forecast-daily title feels-high ">FEELS<br/>LIKE</h6>
                       <p className="forecast-daily data feels-high">{day.feelslikemax}°F</p>
                     </div> */}
-                    <div className="inline-block small-padding">
-                      <h6 className="forecast-daily
+                <div className="inline-block small-padding">
+                  <h6 className="forecast-daily
                                      title
                                      low">LOW</h6>
-                      <p className="forecast-daily data low med-font">{day?.tempmin}°F</p>
-                    </div>
-                    {/* <div className="inline-block">
+                  <p className="forecast-daily data low med-font">{day?.tempmin}°F</p>
+                </div>
+                {/* <div className="inline-block">
                       <h6 className="forecast-daily title feels-low">FEELS<br/>LIKE</h6>
                       <p className="forecast-daily data feels-low">{day.feelslikemin}°F</p>
                     </div> */}
-                  </div>
+              </div>
                   <img className="forecast-daily-img"src={`../../../images/${day?.icon}.svg`} width="50px" height="50px" alt={day.description}/>
                   <figcaption className="forecast-daily desc">{day?.description}</figcaption>
-                  <h6 className="forecast-daily title precip">PRECIPITATION TODAY</h6>
                   <div className="inline-block">
-                    <p className="forecast-daily
-                                  data precip-percent
-                                  inline-block 
-                                  small-padding
-                                  med-font">{day?.precipprob}%</p>
-                    <p className="forecast-daily
-                                  data
-                                  precip-amount 
-                                  inline-block 
-                                  small-padding
-                                  med-font">{day?.precip} in</p>
+                    <h6 className="forecast-daily title precip">PRECIPITATION TODAY</h6>
+                      <p className="forecast-daily
+                                    data precip-percent
+                                    inline-block 
+                                    small-padding
+                                    med-font">{day?.precipprob}%</p>
+                      <p className="forecast-daily
+                                    data
+                                    precip-amount 
+                                    inline-block 
+                                    small-padding
+                                    med-font">{day?.precip} in</p>
                   </div>
                 </div>
               </figure>

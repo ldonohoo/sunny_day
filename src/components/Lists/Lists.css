@@ -6,9 +6,7 @@
 .list-page-title {
     text-align: left;
     padding-bottom: .3rem;
-    border: 0.01rem solid black;
-    border-radius: .3rem;
-    background-image: linear-gradient(to right,  var(--primary-darker), var(--primary-lighter));
+    border-bottom: 0.2rem solid var(--primary-darker);
     padding: .5rem;
     font-weight: 500;
     margin-top: 2rem;
@@ -52,7 +50,7 @@
     border-right: none;
     top: .1rem;
     padding-left: .5rem;
-    background-color:  rgb(206, 234, 255);
+    background-color: var(--primary-lighter);
     border-right: none;
 }
 
@@ -63,7 +61,7 @@
     border-bottom-right-radius: .2rem;
     border-left: none;
     height: 1.85rem;
-    background-color:  rgb(206, 234, 255);
+    background-color:  var(--primary-lighter);
 }
 
 #list-drag-button {
@@ -77,3 +75,6 @@
     display: inline-block;
 }
 
+.lists {
+    padding-bottom: 100px;
+}

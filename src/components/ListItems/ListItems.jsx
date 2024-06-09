@@ -138,7 +138,7 @@ function ListItems() {
   }
 
   const getRecommendations = (listId) => {
-    if (!currentLocation || currentLocation === null || currentLocation === 0) {
+    if (!currentLocation || currentLocation === null || currentLocation.id === 0) {
       alert('Please select a location for your list to get recommendations!');
       setRecsAvailable(false);
     } else {
@@ -156,10 +156,10 @@ function ListItems() {
     <>
     <main>
       <section className="list-item-forecast-section">
-        <h2>Weather Forecast {currentLocation?.name}</h2>
+        <h2 className=''>Weather Forecast for: <span className='font-weight-med'>{currentLocation?.name}</span></h2>
         <WeatherForecast />
       </section>
-      <h2 className="list-item-main-description"><span className="med-lg-font">LIST:</span>{listItems[0]?.list_description}</h2>
+      <h2 className="list-item-main-description">List:<span className='font-weight-med'>{listItems[0]?.list_description}</span></h2>
       <section className="list-item-location-section">
         <LocationSelect isMasterLocation={false}
                         listId={list_id} />

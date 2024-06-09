@@ -20,7 +20,7 @@ import Recommendations from '../Recommendations/Recommendations';
 import Header from '../Header/Header';
 import './App.css';
 import AddEditLocation from '../AddEditLocation/AddEditLocation';
-import Map from '../FindLocation/FindLocation';
+
 
 function App() {
   const dispatch = useDispatch();
@@ -32,6 +32,7 @@ function App() {
   }, []);
 
   return (
+
     <Router>
       <div>
         <Header />

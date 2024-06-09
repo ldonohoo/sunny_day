@@ -34,21 +34,30 @@ function LocationSelect({isMasterLocation, listId }) {
       useSelector(store => store.locationsReducer.currentLocation);
     const [selectedLocation, setSelectedLocation] = useState(0);
 
-    // if (isMasterLocation) {
-    //     const masterDefaultLoc = useSelector(store => store.masterLocation);
-    //     setSelectedLocaation(masterDefaultLoc);
-    // } else {a
-
-    // }
-
   useEffect(() => {
     dispatch({ type: 'GET_LOCATIONS' });
-    // if (!isMasterLocation) {
-    //   console.log('not a master loc!')
-    //   dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
-    //              payload: { listId: listId }});
-    // }
+    if (!isMasterLocation) {
+      console.log('not a master loc!')
+      dispatch({ type: 'GET_CURRENT_LIST_LOCATION',
+                 payload: { listId: listId }});
+      setSelectedLocation(currentLocation?.id);
+    } else if (locations[0]?.is_master_default_location) {
+      setSelectedLocation(locations[0]?.id);
+    }
+    
   }, []);  
+
+  useEffect(() => {
+    if (isMasterLocation && locations[0]?.is_master_default_location) {
+      setSelectedLocation(locations[0]?.id);
+    }
+  }, [locations])
+
+  useEffect(() => {
+    if (!isMasterLocation && currentLocation.id) {
+      setSelectedLocation(currentLocation.id);
+    }
+  }, [currentLocation])
 
   const handleListLocationSelect = (event) => {
     setSelectedLocation(event.target.value);
@@ -70,10 +79,10 @@ function LocationSelect({isMasterLocation, listId }) {
     setSelectedLocation(event.target.value);
     console.log('ismaster:', isMasterLocation)
     if (isMasterLocation) {
-        // dispatch({
-        //     type: 'UPDATE_MASTER_LOCATION',
-        //     payload: { locationId: event.target.value }
-        // })   
+        dispatch({
+            type: 'UPDATE_MASTER_LOCATION',
+            payload: { locationId: event.target.value }
+        })   
     } else {
       dispatch({
           type: 'UPDATE_CURRENT_LIST_LOCATION',
@@ -90,10 +99,9 @@ function LocationSelect({isMasterLocation, listId }) {
   return (
     <div className="location-select-add">
         <label>{isMasterLocation ? 'DEFAULT LOCATION': 'LIST LOCATION'}</label>
+
         <select name="selectedLocation"
-                value={ isMasterLocation && 
-                        locations[0]?.is_master_default_location === true ?
-                        locations[0]?.id : ( !isMasterLocation ? selectedLocation : 0 ) }
+                value={selectedLocation}
                 onChange={handleLocationSelect}
             ><option value="0">none selected</option>{locations.map(location =>(
             <option key={location.id}

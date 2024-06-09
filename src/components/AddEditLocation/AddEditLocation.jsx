@@ -2,46 +2,78 @@
 // import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import {APIProvider, Map, Marker} from '@vis.gl/react-google-maps';
 import { useEffect, useState } from 'react';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+// import MapBox from '../MapBox/MapBox';
+import './AddEditLocation.css';
 
 function AddEditLocation() {
 
-  const [location, setLocation] = useState({ lat: 41.3851, long: 2.1734 });
-  // const googleMapData = useSelector(store => store.locationReducer.googleMapData);
-  const mapStyles = {
-    height: '100vh',
-    width: '100%',
-  };  
-  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
-  console.log('apikeyhere:', googleMapsApiKey);
-  const position = {lat: 53.54992, lng: 10.00678};
-//   const {isLoaded} = useLoadScript({
-//     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_API_KEY,
-//   });
-//   if (!isLoaded) { 
-//     return <div>Loading...</div>
-// } else {
+  const dispatch = useDispatch();
+  const autoCompleteResults = 
+    useSelector(state => state.locationsReducer.autoCompleteResults);
+  const locations = 
+    useSelector(store => store.locationsReducer.locations);
+  const [inputLocation, setInputLocation] = useState('');
+  
+
+  useEffect(() => {
+    dispatch({ type: 'GET_LOCATIONS' });
+  }, [])
+
+  const handleLocationChange = (event) => {
+    const newLocation = event.target.value;
+    setInputLocation(newLocation);
+    if (newLocation.length > 2) {
+      dispatch({
+        type: 'GET_GOOGLE_LOCATION_AUTOCOMPLETE',
+        payload:  { locString: newLocation }
+      })
+    }
+  }
+
+  const handleLocationSelect = (placeId) => {
+    dispatch({
+      type: 'GET_GOOGLE_LOCATION_DETAILS',
+      payload: { placeId: placeId }
+    })
+    setInputLocation('');
+  }
+
+  const handleLocationRemove = (locationId) => {
+    dispatch({
+      type: 'DELETE_LOCATION',
+      payload: { locationId: locationId }
+    })
+  }
+
   return (
-  //   <APIProvider apiKey={API_KEY}>
-  //   <Map
-  //     defaultZoom={3}
-  //     defaultCenter={{lat: 22.54992, lng: 0}}
-  //     gestureHandling={'greedy'}
-  //     disableDefaultUI={true}
-  //   />
-  //   <ControlPanel />
-  // </APIProvider>
-
-
-
-    <APIProvider apiKey={googleMapsApiKey}>
-      <Map defaultCenter={position} defaultZoom={10}
-              gestureHandling={'greedy'}
-              disableDefaultUI={true}>
-      </Map>
-    </APIProvider>
-  );
-};
+    <section className="location-add-edit-section">
+      <article className="location-add-edit-select">
+        <h3 className="med-font font-weight-lt">FIND LOCATION</h3>
+        <input className="input-new-location"
+              type="text"
+              value={inputLocation}
+              onChange={handleLocationChange}
+              placeholder="Enter city & state, zip, place..."/>
+      {autoCompleteResults?.length > 0 && (
+        <ul className="location-add-edit-select-list">
+          {autoCompleteResults?.map((result) => (
+            <li key={result.place_id}><span>{result.description}</span><button onClick={() => handleLocationSelect(result.place_id)}>+</button></li>
+          ))}
+        </ul>
+      )}
+      </article>
+      <article className="current-locations">
+        <ul className="current-locations-list">
+          <h3 className="med-font font-weight-lt">YOUR LOCATIONS</h3>
+          {locations.map((location => (
+            <li key={location.id}><span>{location.name}</span><button onClick={() => handleLocationRemove(location.id)}>🗑️</button></li>
+          )))}
+        </ul>
+      </article>
+    </section>
+    )
+}
 
 export default AddEditLocation;
 

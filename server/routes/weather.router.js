@@ -360,11 +360,6 @@ function arrayToCSV(array) {
   }).join(', ');
 }
 
-// Example usage:
-const mixedData = ['treats', 'fun', 123, null, 'tasty', undefined, 'lovely'];
-const csv = arrayToCSV(mixedData);
-console.log(`"${csv}"`); // Output: "treats, fun, 123, , tasty, lovely"
-
 /**
  * GET all preferred weather types for selection dropdown 
  */
@@ -412,7 +407,7 @@ router.get('/forecast/', rejectUnauthenticated, (req, res) => {
         //    https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/[location]/[date1]/[date2]?key=YOUR_API_KEY 
         axios({
           method: 'GET',
-          url: `${visualCrossUrl}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${utc_offset}&contentType=json`
+          url: `${visualCrossUrl}${latitude},${longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&contentType=json`
         })
         .then(apiResponse => {
           console.log('GET of data from visual crossing worked at /api/weather/forecast/!', apiResponse.data);
@@ -720,7 +715,7 @@ const getListData = async (listId, userId) => {
         //    https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/[location]/[date1]/[date2]?key=YOUR_API_KEY 
         const weatherApiResponse = await axios({
           method: 'GET',
-          url: `${visualCrossUrl}${location.latitude},${location.longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&timezone=${location.utc_offset}&contentType=json`
+          url: `${visualCrossUrl}${location.latitude},${location.longitude}/${today}/${seventhDay}?key=${VISUAL_CROSSING_API_KEY}&iconSet=${visualCrossIconSet}&contentType=json`
         })
         console.log('GET of data from visual crossing worked at /api/weather/forecast/!', weatherApiResponse.data);
         if (typeof weatherApiResponse === undefined ) {

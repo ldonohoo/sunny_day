@@ -9,14 +9,7 @@ const locations = (state = [], action) => {
     return state; 
 };
 
-const masterLocation = (state=0, action) => {
-  if (action.type === 'SET_MASTER_LOCATION') {
-    return action.payload;
-  }
-  return state;
-}
-
-const currentLocation= (state=0, action) => {
+const currentLocation= (state={}, action) => {
   if (action.type === 'SET_CURRENT_LIST_LOCATION') {
     return action.payload;
   }
@@ -30,11 +23,19 @@ const googleMapData = (state={}, action) => {
   return state;
 }
 
+const autoCompleteResults = (state=[], action) => {
+  if (action.type === 'SET_AUTOCOMPLETE_RESULTS') {
+    return action.payload;
+  }
+  return state;
+}
+
 // make one object that has keys loginMessage, registrationMessage
 // these will be on the redux state at:
 // state.errors.loginMessage and state.errors.registrationMessage
 export default combineReducers({
   locations,
   currentLocation,
-  googleMapData
+  googleMapData,
+  autoCompleteResults
 });
