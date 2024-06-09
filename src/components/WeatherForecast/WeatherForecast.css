@@ -26,7 +26,7 @@
 .forecast-box {
     border: .1rem solid black;
     border-radius: .3rem;
-    background-color: rgb(160, 223, 255);
+    background-color: var(--primary-semi-trans);
     margin: 0;
     padding: 0;
     font-size: 0.7rem;
@@ -65,6 +65,7 @@
 .forecast-current.title, 
 .forecast-daily.title {
    border-bottom: .05rem solid black;
+   padding-top: .3rem;
 }
 
 .weather-overview span {

@@ -5,7 +5,7 @@
   align-items: center;
 
   margin: 0;
-  background-color: var(--primary-darker);
+  background-image: linear-gradient(to right,  var(--primary), var(--primary-darkest));
   overflow: hidden;
   border: .01rem solid var(--border);
   padding-left: 5%;
@@ -13,23 +13,31 @@
 
 .nav a {
   text-decoration: none;
+  background-color: transparent;
+  z-index: 1;
 }
 
 .navLink {
   display: inline-block;
-  background-color: var(--primary-darker);
+  background-color: transparent;
   text-align: center;
   padding: 1rem 10px;
   text-decoration: none;
   font-size: 15px;
-
-  /* these last two make the logout button in
-  the nav bar look like another link */
   border: none;
   cursor: pointer;
   outline: 0;
+  z-index: 1;
 }
 
 .navLink:hover {
   background-color: var(--primary-darkest);
+}
+
+.username {
+  margin-right: 5%;
+}
+
+.username > span {
+  padding: var(--md-pad);
 }

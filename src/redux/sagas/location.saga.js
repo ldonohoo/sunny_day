@@ -16,6 +16,22 @@ function* getLocations() {
   }
 }
 
+function* deleteLocation(action) {
+  try {
+    console.log('action.payload:', action.payload);
+    const config = {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    };
+    console.log('whoa! in getlocations saga')
+    const response = yield axios.delete(`/api/locations/${action.payload.locationId}`, config);
+    yield put({ type: 'GET_LOCATIONS' });
+  }
+  catch (error) {
+    console.log('Get of all possible locations for user failed:', error);
+  }
+}
+
 function* getMasterLocation() {
   try {
     const config = {
@@ -87,12 +103,71 @@ function* getCurrentListLocation(action) {
       }
     }
 
+    function* getGoogleMapData(action) {
+      try {
+        response = yield axios({
+          method: 'GET',
+          url: `/api/locations/map/$lat=${action.payload.lat}&long=${action.payload.long}`
+        })
+        console.log('Get of google map data successful!', response.data);
+        yield put({
+          type: 'SET_GOOGLE_MAP_DATA',
+          payload: response.data
+        })
+      } catch(error) {
+        console.log('Error in get of google map data')
+      }
+    }
+
+    function* getGoogleLocationAutoComplete(action) {
+      try {
+        const response = yield axios({
+          method: 'GET',
+          url: `/api/locations/auto_complete/?q=${action.payload.locString}`,
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true
+        })
+        console.log('response from autocomplete:', response.data);
+        yield put({type: 'SET_AUTOCOMPLETE_RESULTS',
+                   payload: response.data.predictions
+        })
+        console.log('Get of location/place autocomplete data successful');
+      } 
+      catch(error) {
+        console.log('Error in GET of location/place autocomplete information', error);
+      }
+    }
+
+
+    function* getGoogleLocationDetails(action) {
+      try {
+        const response = yield axios({
+          method: 'GET',
+          url: `/api/locations/auto_complete/details/?q=${action.payload.placeId}`,
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true
+        })
+        console.log('response from place details:', response.data);
+        yield put({type: 'SET_LOCATIONS',
+                   payload: response.data
+        })
+        console.log('Get of location/place autocomplete data successful');
+      } 
+      catch(error) {
+        console.log('Error in GET of location/place autocomplete information', error);
+      }
+    }
+
 function* locationSagas() {
   yield takeLatest('GET_LOCATIONS', getLocations);
+  yield takeLatest('DELETE_LOCATION', deleteLocation);
   yield takeLatest('GET_MASTER_LOCATION', getMasterLocation);
   yield takeLatest('GET_CURRENT_LIST_LOCATION', getCurrentListLocation);
   yield takeLatest('UPDATE_MASTER_LOCATION', updateMasterLocation);
   yield takeLatest('UPDATE_CURRENT_LIST_LOCATION', updateCurrentListLocation);
+  yield takeLatest('GET_GOOGLE_MAP_DATA', getGoogleMapData);
+  yield takeLatest('GET_GOOGLE_LOCATION_AUTOCOMPLETE', getGoogleLocationAutoComplete);
+  yield takeLatest('GET_GOOGLE_LOCATION_DETAILS', getGoogleLocationDetails)
 }
 
 export default locationSagas;

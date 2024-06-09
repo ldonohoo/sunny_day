@@ -4,9 +4,7 @@
 .list-item-main-description {
     text-align: left;
     padding-bottom: .3rem;
-    border: 0.1rem solid var(--border);
-    border-radius: .3rem;
-    background-color: var(--primary-darker);
+    border-bottom: 0.2rem solid var(--primary-darker);
     padding: .5rem;
 }
 
@@ -232,7 +230,7 @@ select {
 }
 
 .list-item-main-description span {
-    margin-right: 1.8rem;
+    margin-left: 1.8rem;
 }
 
 .highlight-item {
@@ -258,6 +256,11 @@ select {
 .highlight.show-completed {
     background-color: var(--contrast);
 }
+
+.list-items {
+    padding-bottom: 100px;
+}
+
 @keyframes colorChange {
     0% {
         box-shadow: 0 0 4px 10px var(--background);

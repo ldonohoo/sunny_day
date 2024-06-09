@@ -21,7 +21,7 @@
     --sm-marg: 0.1rem;
     --md-marg: 0.5rem;
     --sm-pad: 0.5rem;
-    --md-pad: 0.9rem;
+    --md-pad: 1rem;
     --main-title-font: 3rem;
 
     /* colors */
@@ -29,12 +29,18 @@
     --background-alt: white;
     --highlight: rgb(253, 191, 191);
 
-    --primary: rgb(148, 210, 255);
-    --primary-lighter: rgb(222, 239, 252);
+    /* --primary: rgb(148, 210, 255); */
+    --primary: rgb(138, 172, 239);
+    --primary-lighter:   rgb(210, 226, 239);
+    --primary-darker: rgb(92, 141, 239);
+    --primary-darkest: rgb(67, 123, 235);
+    --primary-semi-trans: rgba(154, 206, 227, 0.239);
+    /* --primary-lighter: rgb(222, 239, 252);
     --primary-darker:  rgb(99, 189, 253);
-    --primary-darkest: rgb(41, 164, 251);
+    --primary-darkest: rgb(41, 164, 251); */
     --contrast:  rgb(252, 228, 151);
     --contrast-2: rgb(254, 195, 132);
+    --contrast-3: rgb(243, 206, 147);
 
     --border: black;
     --grayed-out: rgb(119, 118, 118);
@@ -113,6 +119,14 @@ a:active {
     font-weight: 100;
 }
 
+.font-weight-med-hvy {
+    font-weight: 500;
+}
+
 .italic {
     font-style: italic;
+}
+
+.error-msg {
+    color: rgb(215, 0, 0);
 }

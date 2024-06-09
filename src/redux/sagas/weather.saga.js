@@ -31,7 +31,7 @@ function* getWeatherForecast(action) {
     yield put({ type: 'SET_WEATHER_FORECAST', payload: response.data });
   } 
   catch (error) {
-    console.log('Error getting weather types:', error);
+    console.log('Error getting weather forecast:', error);
   }
 }
 
